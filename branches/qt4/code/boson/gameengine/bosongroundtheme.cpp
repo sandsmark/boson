@@ -26,7 +26,8 @@
 #include "../bo3dtools.h"
 #include "../bosonconfig.h"
 
-#include <ksimpleconfig.h>
+#include <KConfig>
+#include <KConfigGroup>
 
 BosonGroundType::BosonGroundType()
 {
@@ -35,7 +36,7 @@ BosonGroundType::BosonGroundType()
  bumpBias = 0.0f;
  textureSize = 0.0f;
  animationDelay = 1;
- color = Qt::black.rgb();
+ color = QColor(Qt::black).rgb();
 }
 
 BosonGroundType::~BosonGroundType()
@@ -114,14 +115,14 @@ bool BosonGroundTheme::loadGroundThemeConfig(const QString& file)
 	dir += QString::fromLatin1("/");
  }
 
- KSimpleConfig conf(file);
- conf.setGroup("Boson Ground");
- QString identifier = conf.readEntry("Identifier", QString::null);
+ KConfig conf_(file, KConfig::SimpleConfig);
+ KConfigGroup group = conf_.group("Boson Ground");
+ QString identifier = group.readEntry("Identifier", QString());
  if (identifier.isEmpty()) {
 	boError() << k_funcinfo << "No Identifier in " << file << endl;
 	return false;
  }
- unsigned int grounds = conf.readUnsignedNumEntry("Grounds", 0);
+ unsigned int grounds = group.readEntry("Grounds", (quint32)0);
  if (grounds == 0) {
 	boError() << k_funcinfo << "need at least one ground type!" << endl;
 	return false;
@@ -135,7 +136,7 @@ bool BosonGroundTheme::loadGroundThemeConfig(const QString& file)
 
  Q3PtrVector<BosonGroundType> types(grounds);
  for (unsigned int i = 0; i < grounds && ret; i++) {
-	BosonGroundType* ground = loadGroundType(conf, i);
+	BosonGroundType* ground = loadGroundType(conf_, i);
 	if (!ground) {
 		boError() << k_funcinfo << "unable to load groundtype " << i << " from file " << file << endl;
 		ret = false;
@@ -181,33 +182,33 @@ bool BosonGroundTheme::applyGroundThemeConfig(const QString& identifier, const Q
  return true;
 }
 
-BosonGroundType* BosonGroundTheme::loadGroundType(KSimpleConfig& conf, unsigned int index)
+BosonGroundType* BosonGroundTheme::loadGroundType(KConfig& conf_, unsigned int index)
 {
- QString group = QString::fromLatin1("Ground_%1").arg(index);
- if (!conf.hasGroup(group)) {
-	boError() << k_funcinfo << "no such group " << group << endl;
+ QString groupName = QString::fromLatin1("Ground_%1").arg(index);
+ KConfigGroup group = conf_.group(groupName);
+ if (!group.isValid()) {
+	boError() << k_funcinfo << "no such group " << groupName << endl;
 	return 0;
 }
- conf.setGroup(group);
 
  BosonGroundType* ground = new BosonGroundType;
  ground->index = index;
- ground->name = conf.readEntry("Name", group);
- ground->textureFile = conf.readEntry("Texture", QString::null);
+ ground->name = group.readEntry("Name", groupName);
+ ground->textureFile = group.readEntry("Texture", QString());
  if (ground->textureFile.isEmpty()) {
-	boError() << k_funcinfo << "Group=" << group << " has no or invalid Texture key" << endl;
+	boError() << k_funcinfo << "Group=" << groupName << " has no or invalid Texture key" << endl;
 	delete ground;
 	return 0;
  }
- ground->bumpTextureFile = conf.readEntry("BumpTexture", "bump-null");
- ground->bumpScale = (float)(conf.readDoubleNumEntry("BumpScale", 0.04f));
- ground->bumpBias = (float)(conf.readDoubleNumEntry("BumpBias", 0.5f)) * ground->bumpScale;
- ground->textureSize = (float)(conf.readDoubleNumEntry("TextureSize", 5.0f));
- ground->shaderFile = conf.readEntry("Shader", "ground-default");
- BoVector3Float color = BosonConfig::readBoVector3FloatEntry(&conf, "MiniMapColor");
+ ground->bumpTextureFile = group.readEntry("BumpTexture", "bump-null");
+ ground->bumpScale = (float)(group.readEntry("BumpScale", 0.04f));
+ ground->bumpBias = (float)(group.readEntry("BumpBias", 0.5f)) * ground->bumpScale;
+ ground->textureSize = (float)(group.readEntry("TextureSize", 5.0f));
+ ground->shaderFile = group.readEntry("Shader", "ground-default");
+ BoVector3Float color = BosonConfig::readBoVector3FloatEntry(&group, "MiniMapColor");
  ground->color = qRgb((int)color.x(), (int)color.y(), (int)color.z());
- ground->animationDelay = conf.readUnsignedNumEntry("AnimationDelay", 1);
- ground->iconFile = conf.readEntry("Pixmap", QString::null);
+ ground->animationDelay = group.readEntry("AnimationDelay", (quint32)1);
+ ground->iconFile = group.readEntry("Pixmap", QString());
 
  return ground;
 }

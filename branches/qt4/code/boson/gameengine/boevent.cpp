@@ -26,10 +26,8 @@
 #include <qdom.h>
 #include <q3ptrlist.h>
 #include <qmap.h>
-//Added by qt3to4:
-#include <Q3CString>
 
-BoEvent::BoEvent(const Q3CString& name, const QString& data1, const QString& data2)
+BoEvent::BoEvent(const QString& name, const QString& data1, const QString& data2)
 {
  init(name);
  mData1 = data1;
@@ -38,10 +36,10 @@ BoEvent::BoEvent(const Q3CString& name, const QString& data1, const QString& dat
 
 BoEvent::BoEvent()
 {
- init(Q3CString());
+ init(QString());
 }
 
-void BoEvent::init(const Q3CString& name)
+void BoEvent::init(const QString& name)
 {
  mName = name;
  mId = 0;

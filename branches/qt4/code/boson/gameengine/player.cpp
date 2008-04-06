@@ -50,6 +50,7 @@
 //Added by qt3to4:
 #include <Q3ValueList>
 #include <Q3PtrList>
+#include <Q3IntDict>
 
 #include "player.moc"
 
@@ -214,7 +215,7 @@ void Player::slotNetworkData(int msgid, const QByteArray& buffer, quint32 sender
  // there are only very few messages handled here. Only those that have
  // PolicyClean or PolicyDirty. All others are in slotUnitPropertiesChanged()
 
- QDataStream stream(buffer, QIODevice::ReadOnly);
+ QDataStream stream(buffer);
  bool issender = true;
  if (game()) {
 	issender = sender == game()->gameId();
@@ -578,7 +579,7 @@ void Player::explore(int x, int y)
 	return;
  }
  unsigned int index = x + d->mMap->width() * y;
- if (index >= d->mExplored.size()) {
+ if (index >= (unsigned int)d->mExplored.size()) {
 	boError() << k_funcinfo << "x=" << x << ",y=" << y << " out of range ("
 			<< d->mExplored.size() << ")" << endl;
 	return;
@@ -587,7 +588,7 @@ void Player::explore(int x, int y)
 //boDebug() << k_funcinfo << x << "," << y << endl;
  if (!isExplored) {
 	d->mExplored.setBit(index);
-	if (d->mExploredCount >= d->mExplored.size()) {
+	if (d->mExploredCount >= (unsigned int)d->mExplored.size()) {
 		boError() << k_funcinfo << "invalid explored count value " << d->mExploredCount << endl;
 	} else {
 		d->mExploredCount++;
@@ -606,7 +607,7 @@ void Player::unexplore(int x, int y)
  }
 //boDebug() << k_funcinfo << x << "," << y << endl;
  unsigned int index = x + d->mMap->width() * y;
- if (index >= d->mExplored.size()) {
+ if (index >= (unsigned int)d->mExplored.size()) {
 	boError() << k_funcinfo << "x=" << x << ",y=" << y << " out of range ("
 			<< d->mExplored.size() << ")" << endl;
 	return;
@@ -629,7 +630,7 @@ void Player::unexplore(int x, int y)
 bool Player::isExplored(int x, int y) const
 {
  unsigned int index = x + d->mMap->width() * y;
- if (index >= d->mExplored.size()) {
+ if (index >= (unsigned int)d->mExplored.size()) {
 	boError() << k_funcinfo << "x=" << x << ",y=" << y << " out of range ("
 			<< d->mExplored.size() << ")" << endl;
 	return true;
@@ -748,7 +749,7 @@ quint32 Player::requestAmmunition(const QString& type, quint32 requested)
  return ammo;
 }
 
-const QColor& Player::teamColor() const
+QColor Player::teamColor() const
 {
  if (!speciesTheme()) {
 	BO_NULL_ERROR(speciesTheme());
@@ -1224,13 +1225,13 @@ bool Player::loadFogOfWar(const QDomElement& root)
  }
  d->mExplored = BoBinCoder::toBinary(text);
  d->mExploredCount = 0;
- for (unsigned int i = 0; i < d->mExplored.size(); i++) {
+ for (int i = 0; i < d->mExplored.size(); i++) {
 	if (d->mExplored.at(i)) {
 		d->mExploredCount++;
 	}
  }
  if (d->mMap) {
-	if (d->mMap->width() * d->mMap->height() != d->mExplored.size()) {
+	if (d->mMap->width() * d->mMap->height() != (unsigned int)d->mExplored.size()) {
 		boError() << k_funcinfo << "exploration fog loaded: " << d->mExplored.size() << " map size: " << d->mMap->width() << "x" << d->mMap->height() << endl;
 		return false;
 	}
@@ -1271,7 +1272,7 @@ bool Player::saveAmmunition(QDomElement& root) const
 
  for (QMap<QString, quint32>::const_iterator it = d->mAmmunition.begin(); it != d->mAmmunition.end(); ++it) {
 	QString type = it.key();
-	quint32 value = it.data();
+	quint32 value = it.value();
 	QDomElement ammo = doc.createElement("Ammunition");
 	ammo.setAttribute("Type", type);
 	ammo.setAttribute("Value", value);

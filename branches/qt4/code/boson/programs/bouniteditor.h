@@ -89,7 +89,7 @@ public:
 private:
 	bool saveMobileProperties(KSimpleConfig* conf);
 	bool saveFacilityProperties(KSimpleConfig* conf);
-	bool saveAllPluginProperties(KSimpleConfig* conf);
+	bool saveAllPluginProperties(KConfig* conf);
 	bool saveTextureNames(KSimpleConfig* conf);
 	bool saveSoundNames(KSimpleConfig* conf);
 };

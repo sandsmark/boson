@@ -21,8 +21,6 @@
 #include "bosonplayerlistmanager.moc"
 
 #include "player.h"
-//Added by qt3to4:
-#include <Q3PtrList>
 
 BosonPlayerListManager::BosonPlayerListManager(QObject* parent)
 	: QObject(parent)
@@ -33,18 +31,18 @@ BosonPlayerListManager::~BosonPlayerListManager()
 {
 }
 
-const Q3PtrList<Player>& BosonPlayerListManager::allPlayerList() const
+const QList<Player*>& BosonPlayerListManager::allPlayerList() const
 {
  return mAllPlayerList;
 }
 
 
-const Q3PtrList<Player>& BosonPlayerListManager::gamePlayerList() const
+const QList<Player*>& BosonPlayerListManager::gamePlayerList() const
 {
  return mGamePlayerList;
 }
 
-const Q3PtrList<Player>& BosonPlayerListManager::activeGamePlayerList() const
+const QList<Player*>& BosonPlayerListManager::activeGamePlayerList() const
 {
  return mActiveGamePlayerList;
 }
@@ -64,21 +62,21 @@ unsigned int BosonPlayerListManager::activeGamePlayerCount() const
  return mActiveGamePlayerList.count();
 }
 
-void BosonPlayerListManager::recalculatePlayerLists(const Q3PtrList<KPlayer>& playerList)
+void BosonPlayerListManager::recalculatePlayerLists(const QList<KPlayer*>& playerList)
 {
  recalculatePlayerListsWithPlayerRemoved(playerList, 0);
 }
 
-void BosonPlayerListManager::recalculatePlayerListsWithPlayerRemoved(const Q3PtrList<KPlayer>& playerList, KPlayer* removedPlayer)
+void BosonPlayerListManager::recalculatePlayerListsWithPlayerRemoved(const QList<KPlayer*>& playerList, KPlayer* removedPlayer)
 {
  mAllPlayerList.clear();
  mGamePlayerList.clear();
  mActiveGamePlayerList.clear();
- for (Q3PtrListIterator<KPlayer> it(playerList); it.current(); ++it) {
-	if (it.current() == removedPlayer) {
+ foreach (KPlayer* kp, playerList) {
+	if (kp == removedPlayer) {
 		continue;
 	}
-	Player* p = (Player*)it.current();
+	Player* p = (Player*)kp;
 	mAllPlayerList.append(p);
 	if (p->isGamePlayer()) {
 		mGamePlayerList.append(p);
@@ -95,11 +93,10 @@ void BosonPlayerListManager::recalculatePlayerListsWithPlayerRemoved(const Q3Ptr
 // difference.
 Player* BosonPlayerListManager::findPlayerByUserId(int id) const
 {
- for (Q3PtrListIterator<Player> it(allPlayerList()); it.current(); ++it)
- {
-   if (it.current()->userId() == id)
+ foreach (Player* p, allPlayerList()) {
+   if (p->userId() == id)
    {
-     return it.current();
+     return p;
    }
  }
  return 0;

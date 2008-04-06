@@ -28,7 +28,7 @@
 class QImage;
 class QPixmap;
 class QStringList;
-class KSimpleConfig;
+class KConfig;
 
 class BosonMap;
 
@@ -145,7 +145,7 @@ public:
 	BosonGroundType* groundType(unsigned int i) const;
 
 protected:
-	BosonGroundType* loadGroundType(KSimpleConfig& conf, unsigned int i);
+	BosonGroundType* loadGroundType(KConfig& conf, unsigned int i);
 
 private:
 	BosonGroundThemePrivate* d;

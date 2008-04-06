@@ -113,7 +113,7 @@ public:
 	 **/
 	bool hasRtti(int rtti) const;
 	KGameIO* findRttiIO(int rtti) const;
-	Q3PtrList<KGameIO>* ioList();
+	QList<KGameIO*>* ioList();
 	bool removeGameIO(KGameIO* io = 0, bool deleteit = true);
 
 	/**
@@ -237,7 +237,7 @@ public:
 	/**
 	 * @return @ref Player::teamColor
 	 **/
-	const QColor& teamColor() const;
+	QColor teamColor() const;
 	/**
 	 * @return @ref Player::minerals
 	 **/

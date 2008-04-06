@@ -27,8 +27,8 @@
 #include "bpfdescription.h"
 #include "bosonplayfield.h"
 #include "defines.h"
-//Added by qt3to4:
 #include <Q3CString>
+#include <Q3Shared>
 
 // AB: we use explicitly sharing. TODO: Qt4: use QExplicitlySharedDataPointer
 class BPFPreviewPrivate : public Q3Shared
@@ -128,11 +128,11 @@ BPFPreview BPFPreview::loadFilePreviewFromFiles(const QMap<QString, QByteArray>&
  data->mMapPreviewPNGData = files["mappreview/map.png"];
 
  QByteArray identifierFile = files["identifier"];
- QDataStream identifierStream(identifierFile, QIODevice::ReadOnly);
+ QDataStream identifierStream(identifierFile);
  identifierStream >> data->mIdentifier;
 
  QByteArray fileNameFile = files["filename"];
- QDataStream fileNameStream(fileNameFile, QIODevice::ReadOnly);
+ QDataStream fileNameStream(fileNameFile);
  fileNameStream >> data->mFileName;
 
  data->mIsLoaded = true;
@@ -160,7 +160,7 @@ bool BPFPreview::loadFilePreviewPlayersInformation(BPFPreviewPrivate* data, cons
  // exists - exactly one for files created with boson >= 0.10)
  data->mMaxPlayers = 0;
  QDomNodeList list = root.elementsByTagName("Player");
- for (unsigned int i = 0; i < list.count(); i++) {
+ for (int i = 0; i < list.count(); i++) {
 	if (list.item(i).toElement().hasAttribute("IsNeutral")) {
 		continue;
 	}
@@ -299,7 +299,7 @@ bool BPFLoader::loadFilePreviewFromDiskToFiles(const QString& file, QMap<QString
  }
  QByteArray mapPreviewPNG = boFile.fileData("map.png", "mappreview");
  QByteArray fileNameBuffer;
- QDataStream fileNameStream(fileNameBuffer, QIODevice::WriteOnly);
+ QDataStream fileNameStream(&fileNameBuffer, QIODevice::WriteOnly);
  fileNameStream << file;
 
 
@@ -310,7 +310,7 @@ bool BPFLoader::loadFilePreviewFromDiskToFiles(const QString& file, QMap<QString
 	destFiles.insert("mappreview/map.png", mapPreviewPNG);
  }
  for (QMap<QString, QByteArray>::iterator it = descriptions.begin(); it != descriptions.end(); ++it) {
-	destFiles.insert(it.key(), it.data());
+	destFiles.insert(it.key(), it.value());
  }
 
  destFiles.insert("identifier", createIdentifier(boFile, destFiles));
@@ -370,23 +370,23 @@ bool BPFLoader::loadFromDiskToFiles(const QString& fileName, QMap<QString, QByte
 	return false;
  }
  for (QMap<QString, QByteArray>::iterator it = descriptions.begin(); it != descriptions.end(); ++it) {
-	destFiles.insert(it.key(), it.data());
+	destFiles.insert(it.key(), it.value());
  }
 
  QMap<QString, QByteArray> scripts = boFile.scriptsData();
  for (QMap<QString, QByteArray>::iterator it = scripts.begin(); it != scripts.end(); ++it) {
-	destFiles.insert(it.key(), it.data());
+	destFiles.insert(it.key(), it.value());
  }
 
  QMap<QString, QByteArray> eventListener = boFile.eventListenerData();
  for (QMap<QString, QByteArray>::iterator it = eventListener.begin(); it != eventListener.end(); ++it) {
-	destFiles.insert(it.key(), it.data());
+	destFiles.insert(it.key(), it.value());
  }
 
  QByteArray externalXML = boFile.externalData();
 
  QByteArray fileNameBuffer;
- QDataStream fileNameStream(fileNameBuffer, QIODevice::WriteOnly);
+ QDataStream fileNameStream(&fileNameBuffer, QIODevice::WriteOnly);
  fileNameStream << fileName;
 
  destFiles.insert("map/texmap", texMap);
@@ -439,7 +439,7 @@ QByteArray BPFLoader::streamFiles(const QMap<QString, QByteArray>& files)
 	boError() << k_funcinfo << "nothing to stream" << endl;
 	return buffer;
  }
- QDataStream stream(buffer, QIODevice::WriteOnly);
+ QDataStream stream(&buffer, QIODevice::WriteOnly);
  stream << Q3CString("boplayfield");
  stream << (quint32)0x00; // version tag. probably not needed AB: maybe use BO_ADMIN_STREAM_VERSION
  stream << files;
@@ -449,7 +449,7 @@ QByteArray BPFLoader::streamFiles(const QMap<QString, QByteArray>& files)
 
 bool BPFLoader::unstreamFiles(QMap<QString, QByteArray>& files, const QByteArray& buffer)
 {
- QDataStream stream(buffer, QIODevice::ReadOnly);
+ QDataStream stream(buffer);
  // magic cookie
  Q3CString magic;
  Q3CString magicEnd;
@@ -481,7 +481,7 @@ QByteArray BPFLoader::createIdentifier(const BPFFile& boFile, const QMap<QString
  //        be in subdirectories, this is NOT a unique identifier.
  //        maybe use MD5 of file?
  QByteArray buffer;
- QDataStream stream(buffer, QIODevice::WriteOnly);
+ QDataStream stream(&buffer, QIODevice::WriteOnly);
  stream << QString(boFile.identifier());
  return buffer;
 }

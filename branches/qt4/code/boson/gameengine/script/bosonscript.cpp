@@ -456,8 +456,8 @@ void BosonScript::moveUnit(int id, float x, float y)
   QByteArray b;
   QDataStream stream(b, QIODevice::WriteOnly);
 
-  Q3ValueList<Q_ULONG> moveUnits;
-  moveUnits.append((Q_ULONG)id);
+  Q3ValueList<quint32> moveUnits;
+  moveUnits.append((quint32)id);
   BosonMessageMoveMove message(false, BoVector2Fixed(x, y), moveUnits);
   if(!message.save(stream))
   {
@@ -474,8 +474,8 @@ void BosonScript::moveUnitWithAttacking(int id, float x, float y)
   QByteArray b;
   QDataStream stream(b, QIODevice::WriteOnly);
 
-  Q3ValueList<Q_ULONG> moveUnits;
-  moveUnits.append((Q_ULONG)id);
+  Q3ValueList<quint32> moveUnits;
+  moveUnits.append((quint32)id);
   BosonMessageMoveMove message(true, BoVector2Fixed(x, y), moveUnits);
   if(!message.save(stream))
   {
@@ -492,8 +492,8 @@ void BosonScript::attack(int attackerId, int targetId)
   QByteArray b;
   QDataStream stream(b, QIODevice::WriteOnly);
 
-  Q3ValueList<Q_ULONG> units;
-  units.append((Q_ULONG)attackerId);
+  Q3ValueList<quint32> units;
+  units.append((quint32)attackerId);
   BosonMessageMoveAttack message(targetId, units);
   if(!message.save(stream))
   {
@@ -510,8 +510,8 @@ void BosonScript::stopUnit(int id)
   QByteArray b;
   QDataStream stream(b, QIODevice::WriteOnly);
 
-  Q3ValueList<Q_ULONG> units;
-  units.append((Q_ULONG)id);
+  Q3ValueList<quint32> units;
+  units.append((quint32)id);
   BosonMessageMoveStop message(units);
   if(!message.save(stream))
   {
@@ -581,10 +581,10 @@ void BosonScript::dropBomb(int id, int weapon, float x, float y)
   QByteArray b;
   QDataStream stream(b, QIODevice::WriteOnly);
 
-  Q3ValueList<Q_ULONG> units;
-  Q3ValueList<Q_ULONG> weapons;
-  units.append((Q_ULONG)id);
-  weapons.append((Q_ULONG)weapon);
+  Q3ValueList<quint32> units;
+  Q3ValueList<quint32> weapons;
+  units.append((quint32)id);
+  weapons.append((quint32)weapon);
   BosonMessageMoveDropBomb message(BoVector2Fixed(x, y), units, weapons);
   if(!message.save(stream))
   {

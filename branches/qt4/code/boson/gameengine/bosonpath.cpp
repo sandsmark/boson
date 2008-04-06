@@ -1852,10 +1852,8 @@ void BosonPath::initMoveDatas(BosonCanvas* canvas, BosonPlayerListManager* playe
   canvas->clearMoveDatas();
 
   // Go through all units and create all possible movedatas
-  Q3PtrListIterator<Player> playerit(playerListManager->gamePlayerList());
-  while(playerit.current())
+  foreach (Player* p, playerListManager->gamePlayerList())
   {
-    Player* p = playerit.current();
     SpeciesTheme* theme = p->speciesTheme();
 
     Q3ValueList<quint32> unitpropids = theme->allMobiles();
@@ -1874,7 +1872,7 @@ void BosonPath::initMoveDatas(BosonCanvas* canvas, BosonPlayerListManager* playe
       // Other parameters aren't used yet
 
       BosonMoveData* data = 0;
-      for(unsigned int i = 0; i < mMoveDatas.count(); i++)
+      for(int i = 0; i < mMoveDatas.count(); i++)
       {
         BosonMoveData* d = mMoveDatas[i];
         if((d->type == type) && (d->size == size) && (d->crushDamage == prop->crushDamage()) &&
@@ -1905,8 +1903,6 @@ void BosonPath::initMoveDatas(BosonCanvas* canvas, BosonPlayerListManager* playe
       // Set unit's movedata to data
       canvas->insertMoveData(prop, data);
     }
-
-    ++playerit;
   }
 
   boDebug(500) << k_funcinfo << "Created " << mMoveDatas.count() << " movedatas" << endl;
@@ -1931,7 +1927,7 @@ void BosonPath::initCellPassabilityMaps()
 {
   PROFILE_METHOD;
 
-  for(unsigned int i = 0; i < mMoveDatas.count(); i++)
+  for(int i = 0; i < mMoveDatas.count(); i++)
   {
     BosonMoveData* movedata = mMoveDatas[i];
     // Create passable map for this movedata
@@ -1999,7 +1995,7 @@ void BosonPath::initBlocks()
   //  per movedata, so we need to reset them before starting to process another
   //  movedata
   // Find block centers
-  for(unsigned int i = 0; i < mMoveDatas.count(); i++)
+  for(int i = 0; i < mMoveDatas.count(); i++)
   {
     for(int j = 0; j < blockcount; j++)
     {
@@ -2014,7 +2010,7 @@ void BosonPath::initBlocks()
   mBlockConnectionsDirty = new bool[blockcount * 4];
   for(int i = 0; i < blockcount; i++)
   {
-    for(unsigned int j = 0; j < mMoveDatas.count(); j++)
+    for(int j = 0; j < mMoveDatas.count(); j++)
     {
       findBlockConnections(i, mMoveDatas[j]);
     }
@@ -2494,7 +2490,7 @@ void BosonPath::updateChangedBlocks()
       continue;
     }
 
-    for(unsigned int i = 0; i < mMoveDatas.count(); i++)
+    for(int i = 0; i < mMoveDatas.count(); i++)
     {
       findBlockCenter(pos, mMoveDatas[i]);
       resetDirtyCellStatuses();
@@ -2511,7 +2507,7 @@ void BosonPath::updateChangedBlocks()
     int blockpos = connectionpos / 4;
     int dir = connectionpos % 4;
 
-    for(unsigned int i = 0; i < mMoveDatas.count(); i++)
+    for(int i = 0; i < mMoveDatas.count(); i++)
     {
       calculateBlockConnection(blockpos, mMoveDatas[i], dir+1);
     }
@@ -2578,7 +2574,7 @@ QString BosonPath::debugText(bofixed x, bofixed y)
 
   info += QString("Block pos: (%1; %2)\n").arg(cellx / mBlockSize).arg(celly / mBlockSize);
   info += QString("Passability for movedatas:\n");
-  for(unsigned int i = 0; i < mMoveDatas.count(); i++)
+  for(int i = 0; i < mMoveDatas.count(); i++)
   {
     BosonMoveData* movedata = mMoveDatas[i];
     info += QString("  %1 (%2; size %3): %4\n").arg(i).arg(movedata->type == BosonMoveData::Land ? "land" : "water").arg(movedata->size).arg(movedata->cellPassable[pos]);
@@ -2588,7 +2584,7 @@ QString BosonPath::debugText(bofixed x, bofixed y)
   int blockpos = (celly / mBlockSize) * mBlocksCountX + (cellx / mBlockSize);
   const BlockInfo& block = mBlocks[blockpos];
   info += QString("B centers for movedatas:\n");
-  for(unsigned int i = 0; i < mMoveDatas.count(); i++)
+  for(int i = 0; i < mMoveDatas.count(); i++)
   {
     if(block.centerx[i] == -1)
     {
@@ -2602,7 +2598,7 @@ QString BosonPath::debugText(bofixed x, bofixed y)
 
 
   info += QString("B connections for movedatas:\n");
-  for(unsigned int i = 0; i < mMoveDatas.count(); i++)
+  for(int i = 0; i < mMoveDatas.count(); i++)
   {
     int connectionpos = i * mBlocksCountX * mBlocksCountY * 4 + blockpos * 4;
     info += QString("  %1:  %2; %3; %4; %5\n").arg(i).

@@ -59,7 +59,7 @@ bool BoFile::checkTar() const
 	return false;
  }
  // if we can't access the file it'll not be open.
- if (!mTar->isOpened()) {
+ if (!mTar->isOpen()) {
 	boWarning() << k_funcinfo << "Archive not open" << endl;
 	return false;
  }
@@ -130,7 +130,7 @@ QByteArray BoFile::fileData(const QString& fileName, const QString& subdir) cons
  } else {
 	// AB: a directory like "foo\/bar" is not allowed by us. I believe this
 	// is only a very minor restriction :)
-	QStringList dirs = QStringList::split('/', subdir);
+	QStringList dirs = subdir.split('/');
 	QStringList::iterator it;
 
 	const KArchiveDirectory* currentDir = topLevel;
@@ -206,10 +206,11 @@ bool BoFile::writeFile(const QString& fileName, const QByteArray& data, const QS
 
 bool BoFile::writeFile(const QString& fileName, const QString& data, const QString& subdir)
 {
- return writeFile(topDirName(), fileName, data.length(), data.data(), subdir);
+ QByteArray d = data.toUtf8();
+ return writeFile(topDirName(), fileName, data.length(), d.constData(), subdir);
 }
 
-bool BoFile::writeFile(const QString& topDir, const QString& fileName, int size, const char* data, const QString& subdir)
+bool BoFile::writeFile(const QString& topDir, const QString& fileName, qint64 size, const char* data, const QString& subdir)
 {
  if (!mTar) {
 	BO_NULL_ERROR(mTar);
@@ -238,7 +239,7 @@ bool BoFile::writeFile(const QString& topDir, const QString& fileName, int size,
  } else {
 	file = QString::fromLatin1("%1/%2/%3").arg(topDir).arg(subdir).arg(fileName);
  }
- return mTar->writeFile(file, user, group, size, data);
+ return mTar->writeFile(file, user, group, data, size);
 }
 
 QString BoFile::topDirName() const
@@ -249,8 +250,8 @@ QString BoFile::topDirName() const
 	// might be the case for debugging
 	top = top.left(top.length() - 7);
  }
- if (top.findRev('.') > 0) {
-	top.truncate(top.findRev('.'));
+ if (top.lastIndexOf('.') > 0) {
+	top.truncate(top.lastIndexOf('.'));
  }
  return top;
 }

@@ -145,7 +145,7 @@ public:
 	/**
 	 * @return @ref SpeciesTheme::teamColor
 	 **/
-	const QColor& teamColor() const;
+	QColor teamColor() const;
 
 	/**
 	 * Set SpeciesTheme and take ownership of the provided pointer (i.e.

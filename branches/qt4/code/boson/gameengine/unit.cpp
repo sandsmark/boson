@@ -1940,9 +1940,9 @@ bofixed Unit::distanceSquared(const BoVector3Fixed& pos) const
  return dx*dx + dy*dy + dz*dz;
 }
 
-const QColor* Unit::teamColor() const
+QColor Unit::teamColor() const
 {
- return &ownerIO()->teamColor();
+ return ownerIO()->teamColor();
 }
 
 BosonWeapon* Unit::weapon(quint32 id) const

@@ -50,8 +50,8 @@ static QString fixedApplicationDirPath(const Q3CString& argv0);
  **/
 static QString resolveSymlinks( const QString& path, int depth = 0 );
 
-BoApplication::BoApplication(const Q3CString& argv0, bool allowStyles, bool enableGUI)
-	: KApplication(allowStyles, enableGUI)
+BoApplication::BoApplication(const Q3CString& argv0, bool enableGUI)
+	: KApplication(enableGUI)
 {
  // this is for broken installations. people tend to install to /usr/local or
  // similar (which is 100% correct), but don't set $KDEDIRS (note that S)
@@ -66,7 +66,7 @@ BoApplication::BoApplication(const Q3CString& argv0, bool allowStyles, bool enab
  QStringList config = KGlobal::dirs()->resourceDirs("config");
  KGlobal::dirs()->addPrefix(BOSON_PREFIX);
  QStringList config2 = KGlobal::dirs()->resourceDirs("config");
- for (unsigned int i = 0; i < config.count(); i++) {
+ for (int i = 0; i < config.count(); i++) {
 	if (!config2.contains(config[i])) {
 		KGlobal::dirs()->addResourceDir("config", config[i]);
 	}
@@ -116,7 +116,7 @@ QString fixedApplicationDirPath(const Q3CString& _argv0)
 	  file path.
 	*/
 	absPath = argv0;
- } else if ( argv0.find('/') != -1 ) {
+ } else if ( argv0.indexOf('/') != -1 ) {
 	/*
 	  If argv0 contains one or more slashes, it is a file path
 	  relative to the current directory.
@@ -128,7 +128,7 @@ QString fixedApplicationDirPath(const Q3CString& _argv0)
 	  PATH environment variable.
 	*/
 	char *pEnv = getenv( "PATH" );
-	QStringList paths( QStringList::split(QChar(':'), pEnv) );
+	QStringList paths( QString::fromLatin1(pEnv).split(QChar(':')) );
 	QStringList::const_iterator p = paths.begin();
 	while ( p != paths.end() ) {
 		QString candidate = QDir::current().absoluteFilePath( *p + "/" + argv0 );
@@ -147,7 +147,7 @@ QString fixedApplicationDirPath(const Q3CString& _argv0)
 	applicationFilePath = QString::null;
  }
 
- return QFileInfo(applicationFilePath).dirPath();
+ return QFileInfo(applicationFilePath).absolutePath();
 }
 
 
@@ -170,7 +170,7 @@ QString resolveSymlinks( const QString& path, int depth )
 		linkTarget = fileInfo.readLink();
 		break;
 	}
- } while ( (slashPos = part.findRev('/')) != -1 );
+ } while ( (slashPos = part.lastIndexOf('/')) != -1 );
 
  if ( foundLink ) {
 	QString path2;
@@ -181,7 +181,7 @@ QString resolveSymlinks( const QString& path, int depth )
 		}
 	} else {
 		QString relPath;
-		relPath = part.left( part.findRev('/') + 1 ) + linkTarget;
+		relPath = part.left( part.lastIndexOf('/') + 1 ) + linkTarget;
 		if ( slashPos < (int) path.length() ) {
 			if ( !linkTarget.endsWith( "/" ) ) {
 				relPath += "/";

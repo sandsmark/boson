@@ -23,7 +23,7 @@
 
 #include <kgame/kgame.h>
 #include <sys/time.h>
-//Added by qt3to4:
+#include <QList>
 #include <Q3TextStream>
 #include <Q3ValueList>
 #include <Q3PtrList>
@@ -144,7 +144,7 @@ public:
 	/**
 	 * @return @ref BosonPlayerListManager::allPlayerList
 	 **/
-	const Q3PtrList<Player>& allPlayerList() const;
+	const QList<Player*>& allPlayerList() const;
 
 	/**
 	 * "game players" are players with ID >= 128 and <= 511. These are
@@ -154,7 +154,7 @@ public:
 	 *
 	 * @return @ref BosonPlayerListManager::gamePlayerList
 	 **/
-	const Q3PtrList<Player>& gamePlayerList() const;
+	const QList<Player*>& gamePlayerList() const;
 
 	/**
 	 * "active game players" are players with ID >= 128 and <= 255. These
@@ -165,7 +165,7 @@ public:
 	 *
 	 * @return @ref BosonPlayerListManager::activeGamePlayerList
 	 **/
-	const Q3PtrList<Player>& activeGamePlayerList() const;
+	const QList<Player*>& activeGamePlayerList() const;
 
 	/**
 	 * Initialize a @ref BosonSaveLoad object with the relevant data.

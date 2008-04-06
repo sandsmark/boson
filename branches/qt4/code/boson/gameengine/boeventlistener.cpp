@@ -157,7 +157,7 @@ bool BoEventListener::saveScriptData(QByteArray* scriptData) const
 	// this event listener doesn't use scripts.
 	return true;
  }
- QDataStream dataStream(*scriptData, QIODevice::WriteOnly);
+ QDataStream dataStream(scriptData, QIODevice::WriteOnly);
  if (!d->mScript->save(dataStream)) {
 	boError() << k_funcinfo << "saving script failed" << endl;
 	return false;
@@ -182,7 +182,7 @@ bool BoEventListener::loadScript(const QByteArray& script, const QByteArray& scr
  if (scriptData.size() != 0) {
 	d->mScript = createScriptParser();
 
-	QDataStream stream(scriptData, QIODevice::ReadOnly);
+	QDataStream stream(scriptData);
 	return d->mScript->load(stream);
  }
 
@@ -245,7 +245,7 @@ bool BoEventListener::loadConditions(const QDomElement& root)
  boDebug(360) << k_funcinfo << endl;
  d->mConditions.clear();
  QDomNodeList list = root.elementsByTagName("Condition");
- for (unsigned int i = 0; i < list.count(); i++) {
+ for (int i = 0; i < list.count(); i++) {
 	QDomElement e = list.item(i).toElement();
 	if (e.isNull()) {
 		boError(360) << k_funcinfo << "not a valid element" << endl;
@@ -275,7 +275,7 @@ bool BoEventListener::saveEventHandlers(QDomElement& root) const
  for( ; it.current(); ++it) {
 	BoEventHandlerInfo* info = it.current();
 	QDomElement e = doc.createElement("EventHandler");
-	e.setAttribute("id", it.currentKey());
+	e.setAttribute("id", (qint32)it.currentKey());
 	e.setAttribute("EventName", info->eventName);
 	e.setAttribute("FunctionName", info->function);
 	e.setAttribute("FunctionArgs", info->args);
@@ -307,7 +307,7 @@ bool BoEventListener::loadEventHandlers(const QDomElement& root)
 		return false;
 	}
  }
- for (unsigned int i = 0; i < list.count(); i++) {
+ for (int i = 0; i < list.count(); i++) {
 	QDomElement e = list.item(i).toElement();
 	if (e.isNull()) {
 		boError(360) << k_funcinfo << "not a valid element" << endl;
@@ -372,7 +372,7 @@ void BoEventListener::deliverToScript(const BoEvent* event)
  for( ; it.current(); ++it) {
 	BoEventHandlerInfo* info = it.current();
 
-	if (info->eventName.latin1() == event->name()) {
+	if (info->eventName == event->name()) {
 		d->mScript->callEventHandler(event, info->function, info->args);
 	}
  }
@@ -485,9 +485,7 @@ bool BoCanvasEventListener::checkGameOver(Q3PtrList<Player>* fullfilledWinningCo
  // AB: atm we use the winning condition "at most 1 player left in game"
  Q3PtrList<Player> fullfilled;
 
- Q3PtrList<Player> activeGamePlayerList = boGame->activeGamePlayerList();
- for (unsigned int i = 0; i < activeGamePlayerList.count(); i++) {
-	Player* p = activeGamePlayerList.at(i);
+ foreach (Player* p, boGame->activeGamePlayerList()) {
 	if (p->bosonId() <= 127 || p->bosonId() >= 256) {
 		boError() << k_funcinfo << "not an active game player: " << p->bosonId() << endl;
 		continue;
@@ -514,9 +512,7 @@ void BoCanvasEventListener::checkGameOverAndEndGame()
 {
  Q3PtrList<Player> fullfilledWinningConditions;
  if (checkGameOver(&fullfilledWinningConditions)) {
-	Q3PtrList<Player> activeGamePlayerList = boGame->activeGamePlayerList();
-	for (unsigned int i = 0; i < activeGamePlayerList.count(); i++) {
-		Player* p = activeGamePlayerList.at(i);
+	foreach (Player* p, boGame->activeGamePlayerList()) {
 		if (fullfilledWinningConditions.contains(p)) {
 			BoEvent* won = new BoEvent("PlayerWon");
 			won->setPlayerId(p->bosonId());

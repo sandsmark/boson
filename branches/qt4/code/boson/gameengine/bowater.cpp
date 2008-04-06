@@ -274,7 +274,7 @@ bool BoWaterManager::loadFromXML(const QDomElement& root)
   bool ret = true;
   QDomNodeList list = root.elementsByTagName(QString::fromLatin1("Lake"));
 
-  for (unsigned int i = 0; i < list.count(); i++)
+  for (int i = 0; i < list.count(); i++)
   {
     QDomElement lake = list.item(i).toElement();
     bool ok = false;

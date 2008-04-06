@@ -67,7 +67,7 @@ bool BosonFileConverter::loadXMLDoc(QDomDocument* doc, const QString& xml) const
 
 bool BosonFileConverter::convertMapFile_From_0_8_To_0_9(const QByteArray& map, QByteArray* newMap, QByteArray* texMap)
 {
- QDataStream readStream(map, QIODevice::ReadOnly);
+ QDataStream readStream(map);
 
  // read in the boson 0.8 map first.
  // read map geo
@@ -133,7 +133,7 @@ bool BosonFileConverter::convertMapFile_From_0_8_To_0_9(const QByteArray& map, Q
 bool BosonFileConverter::convertMapFile_From_0_8_128_To_0_9(const QByteArray& map, QByteArray* mapXML, int* mapWidth, int* mapHeight)
 {
  boDebug() << k_funcinfo << endl;
- QDataStream stream(map, QIODevice::ReadOnly);
+ QDataStream stream(map);
  QString magicCookie;
  quint32 mapVersion;
  qint32 width;
@@ -172,7 +172,7 @@ bool BosonFileConverter::convertMapFile_From_0_8_128_To_0_9(const QByteArray& ma
 	*mapWidth = width;
 	*mapHeight = height;
  }
- *mapXML = doc.toCString();
+ *mapXML = doc.toByteArray();
  return true;
 }
 
@@ -285,7 +285,7 @@ bool BosonFileConverter::convertScenario_From_0_8_To_0_9(const QByteArray& scena
  QDomNodeList list = players.elementsByTagName(QString::fromLatin1("Player"));
  PlayerNode* scenarioPlayers = new PlayerNode [list.count()];
  unsigned int scenarioPlayersCount = list.count();
- for (unsigned int i = 0; i < list.count(); i++) {
+ for (int i = 0; i < list.count(); i++) {
 	QDomElement e = list.item(i).toElement();
 	if (e.isNull()) {
 		continue;
@@ -319,7 +319,7 @@ bool BosonFileConverter::convertScenario_From_0_8_To_0_9(const QByteArray& scena
 	}
 	p->units = new UnitNode[units.count()];
 	p->unitCount = units.count();
-	for (unsigned int j = 0; j < units.count(); j++) {
+	for (int j = 0; j < units.count(); j++) {
 		QDomElement u = units.item(j).toElement();
 		UnitNode* unit = &p->units[j];
 		if (!u.hasAttribute("Type")) {
@@ -469,9 +469,9 @@ bool BosonFileConverter::convertScenario_From_0_8_To_0_9(const QByteArray& scena
  // AB: SAVEGAME is not really true..
  kgameRoot.setAttribute(QString::fromLatin1("Version"), (unsigned int)BOSON_SAVEGAME_FORMAT_VERSION_0_9);
 
- *playersXML = playersDoc.toCString();
- *canvasXML = canvasDoc.toCString();
- *kgameXML = kgameDoc.toCString();
+ *playersXML = playersDoc.toByteArray();
+ *canvasXML = canvasDoc.toByteArray();
+ *kgameXML = kgameDoc.toByteArray();
 
  return true;
 }
@@ -512,7 +512,7 @@ bool BosonFileConverter::convertPlayField_From_0_9_To_0_9_1(QMap<QString, QByteA
 
  QDomNodeList playerList = playersRoot.elementsByTagName("Player");
  QMap<int, int> playerId2Number;
- for (unsigned int i = 0; i < playerList.count(); i++) {
+ for (int i = 0; i < playerList.count(); i++) {
 	QDomElement p = playerList.item(i).toElement();
 	bool ok = false;
 	unsigned int id = p.attribute("Id").toUInt(&ok);
@@ -531,7 +531,7 @@ bool BosonFileConverter::convertPlayField_From_0_9_To_0_9_1(QMap<QString, QByteA
  }
  QDomElement canvasRoot = canvasDoc.documentElement();
  QDomNodeList itemsList = canvasRoot.elementsByTagName("Items");
- for (unsigned int i = 0; i < itemsList.count(); i++) {
+ for (int i = 0; i < itemsList.count(); i++) {
 	QDomElement e = itemsList.item(i).toElement();
 	if (!e.hasAttribute("Id")) {
 		// a .bpf file has both, Id and OwnerId (with OwnerId unused),
@@ -551,9 +551,9 @@ bool BosonFileConverter::convertPlayField_From_0_9_To_0_9_1(QMap<QString, QByteA
 	}
 	e.setAttribute("Id", playerId2Number[id]);
  }
- files.insert("kgame.xml", kgameDoc.toString().utf8());
- files.insert("players.xml", playersDoc.toString().utf8());
- files.insert("canvas.xml", canvasDoc.toString().utf8());
+ files.insert("kgame.xml", kgameDoc.toString().toUtf8());
+ files.insert("players.xml", playersDoc.toString().toUtf8());
+ files.insert("canvas.xml", canvasDoc.toString().toUtf8());
  return true;
 }
 
@@ -580,7 +580,7 @@ bool BosonFileConverter::convertPlayField_From_0_9_1_To_0_10(QMap<QString, QByte
  QDomElement playersRoot = playersDoc.documentElement();
 
  QDomNodeList playerList = playersRoot.elementsByTagName("Player");
- for (unsigned int i = 0; i < playerList.count(); i++) {
+ for (int i = 0; i < playerList.count(); i++) {
 	QDomElement p = playerList.item(i).toElement();
 	if (p.hasAttribute("IsNeutral")) {
 		boError() << k_funcinfo << "IsNeutral attribute already present! cannot convert!" << endl;
@@ -595,11 +595,11 @@ bool BosonFileConverter::convertPlayField_From_0_9_1_To_0_10(QMap<QString, QByte
  QDomElement canvasRoot = canvasDoc.documentElement();
  QDomNodeList itemsList = canvasRoot.elementsByTagName("Items");
  // remove Item Type==7 (oiltower), which doesnt exist anymore
- for (unsigned int i = 0; i < itemsList.count(); i++) {
+ for (int i = 0; i < itemsList.count(); i++) {
 	Q3ValueList<QDomElement> removeItems;
 	QDomElement itemsTag = itemsList.item(i).toElement();
 	QDomNodeList items = itemsTag.elementsByTagName(QString::fromLatin1("Item"));
-	for (unsigned int j = 0; j < items.count(); j++) {
+	for (int j = 0; j < items.count(); j++) {
 		QDomElement e = items.item(j).toElement();
 		if (e.attribute("Type").compare("7") == 0) {
 			removeItems.append(e);
@@ -651,9 +651,9 @@ bool BosonFileConverter::convertPlayField_From_0_9_1_To_0_10(QMap<QString, QByte
  neutralItems.setAttribute("Id", itemsList.count());
  canvasRoot.appendChild(neutralItems);
 
- files.insert("kgame.xml", kgameDoc.toString().utf8());
- files.insert("players.xml", playersDoc.toString().utf8());
- files.insert("canvas.xml", canvasDoc.toString().utf8());
+ files.insert("kgame.xml", kgameDoc.toString().toUtf8());
+ files.insert("players.xml", playersDoc.toString().toUtf8());
+ files.insert("canvas.xml", canvasDoc.toString().toUtf8());
  return true;
 }
 
@@ -690,7 +690,7 @@ bool BosonFileConverter::convertPlayField_From_0_10_To_0_10_80(QMap<QString, QBy
 	boError() << k_funcinfo << "less than 2 Player tags found in file. This is an invalid file." << endl;
 	return false;
  }
- for (unsigned int i = 0; i < playersList.count(); i++) {
+ for (int i = 0; i < playersList.count(); i++) {
 	QDomElement e = playersList.item(i).toElement();
 	if (e.isNull()) {
 		boError() << k_funcinfo << "invalid Player tag" << endl;
@@ -713,7 +713,7 @@ bool BosonFileConverter::convertPlayField_From_0_10_To_0_10_80(QMap<QString, QBy
 	}
  }
  QDomNodeList itemsList = canvasRoot.elementsByTagName("Items");
- for (unsigned int i = 0; i < itemsList.count(); i++) {
+ for (int i = 0; i < itemsList.count(); i++) {
 	QDomElement e = itemsList.item(i).toElement();
 	if (e.isNull()) {
 		boError() << k_funcinfo << "invalid Items tag" << endl;
@@ -791,9 +791,9 @@ bool BosonFileConverter::convertPlayField_From_0_10_To_0_10_80(QMap<QString, QBy
 	}
  }
 
- files.insert("kgame.xml", kgameDoc.toString().utf8());
- files.insert("canvas.xml", canvasDoc.toString().utf8());
- files.insert("players.xml", playersDoc.toString().utf8());
+ files.insert("kgame.xml", kgameDoc.toString().toUtf8());
+ files.insert("canvas.xml", canvasDoc.toString().toUtf8());
+ files.insert("players.xml", playersDoc.toString().toUtf8());
  return true;
 }
 
@@ -802,7 +802,7 @@ bool BosonFileConverter::addDummyWaterXML_From_0_10_To_0_10_80(QByteArray& water
  QDomDocument doc(QString::fromLatin1("Water"));
  QDomElement root = doc.createElement(QString::fromLatin1("Water"));
  doc.appendChild(root);
- waterXML = doc.toCString();
+ waterXML = doc.toByteArray();
  return true;
 }
 
@@ -828,7 +828,7 @@ bool BosonFileConverter::convertPlayField_From_0_10_80_To_0_10_81(QMap<QString, 
 #undef BO_VERSION
 
  QDomNodeList itemsList = canvasRoot.elementsByTagName("Items");
- for (unsigned int i = 0; i < itemsList.count(); i++) {
+ for (int i = 0; i < itemsList.count(); i++) {
 	QDomElement e = itemsList.item(i).toElement();
 	if (e.isNull()) {
 		boError() << k_funcinfo << "invalid Items tag" << endl;
@@ -837,7 +837,7 @@ bool BosonFileConverter::convertPlayField_From_0_10_80_To_0_10_81(QMap<QString, 
 
 	// BO_TILE_SIZE is no more
 	QDomNodeList items = e.elementsByTagName("Item");
-	for (unsigned int j = 0; j < items.count(); j++) {
+	for (int j = 0; j < items.count(); j++) {
 		QDomElement item = items.item(j).toElement();
 		if (item.isNull()) {
 			boError() << k_funcinfo << "invalid Item tag" << endl;
@@ -862,8 +862,8 @@ bool BosonFileConverter::convertPlayField_From_0_10_80_To_0_10_81(QMap<QString, 
 		item.setAttribute("y", y);
 	}
  }
- files.insert("kgame.xml", kgameDoc.toString().utf8());
- files.insert("canvas.xml", canvasDoc.toString().utf8());
+ files.insert("kgame.xml", kgameDoc.toString().toUtf8());
+ files.insert("canvas.xml", canvasDoc.toString().toUtf8());
  return true;
 }
 
@@ -959,8 +959,8 @@ bool BosonFileConverter::convertPlayField_From_0_10_81_To_0_10_82(QMap<QString, 
 	}
 
  }
- files.insert("kgame.xml", kgameDoc.toString().utf8());
- files.insert("canvas.xml", canvasDoc.toString().utf8());
+ files.insert("kgame.xml", kgameDoc.toString().toUtf8());
+ files.insert("canvas.xml", canvasDoc.toString().toUtf8());
  return true;
 }
 
@@ -1008,7 +1008,7 @@ bool BosonFileConverter::convertPlayField_From_0_10_82_To_0_10_83(QMap<QString, 
 	files.insert(QString("scripts/eventlistener/ai-player_%1.py").arg(i), aiPy);
  }
 
- files.insert("kgame.xml", kgameDoc.toString().utf8());
+ files.insert("kgame.xml", kgameDoc.toString().toUtf8());
  return true;
 }
 
@@ -1038,7 +1038,7 @@ bool BosonFileConverter::convertPlayField_From_0_10_83_To_0_10_84(QMap<QString, 
  // Find out which species (eithe human or neutral) players have
  QDomNodeList playerList = playersRoot.elementsByTagName("Player");
  bool isHuman[playerList.count()];
- for (unsigned int i = 0; i < playerList.count(); i++) {
+ for (int i = 0; i < playerList.count(); i++) {
 	QDomElement e = playerList.item(i).toElement();
 	int id = e.attribute("PlayerId").toInt();
 	int isneutral = e.attribute("IsNeutral").toInt();
@@ -1141,7 +1141,7 @@ bool BosonFileConverter::convertPlayField_From_0_10_83_To_0_10_84(QMap<QString, 
 			// Replace health of the unit
 			QDomElement dataHandler = item.namedItem(QString::fromLatin1("DataHandler")).toElement();
 			QDomNodeList properties = dataHandler.elementsByTagName(QString::fromLatin1("KGameProperty"));
-			for (unsigned int k = 0; k < properties.count(); k++) {
+			for (int k = 0; k < properties.count(); k++) {
 				QDomElement prop = properties.item(k).toElement();
 				int propertyid = prop.attribute("Id").toInt();
 				// Health property had id 512
@@ -1158,8 +1158,8 @@ bool BosonFileConverter::convertPlayField_From_0_10_83_To_0_10_84(QMap<QString, 
 	}
  }
 
- files.insert("kgame.xml", kgameDoc.toString().utf8());
- files.insert("canvas.xml", canvasDoc.toString().utf8());
+ files.insert("kgame.xml", kgameDoc.toString().toUtf8());
+ files.insert("canvas.xml", canvasDoc.toString().toUtf8());
  return true;
 }
 
@@ -1299,9 +1299,9 @@ bool BosonFileConverter::convertPlayField_From_0_10_84_To_0_10_85(QMap<QString, 
 		}
 	}
  }
- files.insert("kgame.xml", kgameDoc.toString().utf8());
- files.insert("players.xml", playersDoc.toString().utf8());
- files.insert("canvas.xml", canvasDoc.toString().utf8());
+ files.insert("kgame.xml", kgameDoc.toString().toUtf8());
+ files.insert("players.xml", playersDoc.toString().toUtf8());
+ files.insert("canvas.xml", canvasDoc.toString().toUtf8());
  return true;
 }
 
@@ -1337,11 +1337,11 @@ bool BosonFileConverter::convertPlayField_From_0_10_85_To_0_11(QMap<QString, QBy
 	}
 	canvasRoot.removeChild(effects);
 	externalRoot.appendChild(effects);
-	files.insert("canvas.xml", canvasDoc.toString().utf8());
-	files.insert("external.xml", externalDoc.toString().utf8());
+	files.insert("canvas.xml", canvasDoc.toString().toUtf8());
+	files.insert("external.xml", externalDoc.toString().toUtf8());
  }
 
- files.insert("kgame.xml", kgameDoc.toString().utf8());
+ files.insert("kgame.xml", kgameDoc.toString().toUtf8());
 
  files.insert("scripts/eventlistener/gamevieweventlistener.py", QByteArray());
 
@@ -1384,7 +1384,7 @@ bool BosonFileConverter::convertPlayField_From_0_11_To_0_11_80(QMap<QString, QBy
  }
 
  int* actualIds = new int[playersList.count()];
- for (unsigned int i = 0; i < playersList.count(); i++) {
+ for (int i = 0; i < playersList.count(); i++) {
 	if (i < playersList.count() - 1) {
 		// an actual player
 		// the player IDs start at 128 and go up sequentially.
@@ -1406,9 +1406,9 @@ bool BosonFileConverter::convertPlayField_From_0_11_To_0_11_80(QMap<QString, QBy
  actualIds = 0;
 
 
- files.insert("players.xml", playersDoc.toString().utf8());
- files.insert("canvas.xml", canvasDoc.toString().utf8());
- files.insert("kgame.xml", kgameDoc.toString().utf8());
+ files.insert("players.xml", playersDoc.toString().toUtf8());
+ files.insert("canvas.xml", canvasDoc.toString().toUtf8());
+ files.insert("kgame.xml", kgameDoc.toString().toUtf8());
 
  return true;
 }
@@ -1461,21 +1461,21 @@ bool BosonFileConverter::convertPlayField_From_0_11_80_To_0_11_81(QMap<QString, 
  QDomElement handlers = eventListenerDoc.createElement("EventHandlers");
  handlers.setAttribute("NextId", QString::number(1));
  eventListener.appendChild(handlers);
- QByteArray eventListenerXML = eventListenerDoc.toString().utf8();
+ QByteArray eventListenerXML = eventListenerDoc.toString().toUtf8();
 
  QDomNodeList playersList = playersRoot.elementsByTagName("Player");
  // AB: in files from Boson 0.11.80 we know that we have exactly
  // playersList.count()-1 players (+ neutral player). they all are in sequence.
- for (unsigned int i = 0; i < playersList.count() - 1; i++) {
+ for (int i = 0; i < playersList.count() - 1; i++) {
 	files.insert(QString("eventlistener/ai-player_%1.xml").arg(128 + i), eventListenerXML);
  }
  files.insert("eventlistener/gameview.xml", eventListenerXML);
  files.insert("eventlistener/commandframe.xml", eventListenerXML);
  files.insert("eventlistener/localplayer.xml", eventListenerXML);
- files.insert("eventlistener/canvas.xml", canvasEventListenerDoc.toString().utf8());
+ files.insert("eventlistener/canvas.xml", canvasEventListenerDoc.toString().toUtf8());
 
- files.insert("kgame.xml", kgameDoc.toString().utf8());
- files.insert("canvas.xml", canvasDoc.toString().utf8());
+ files.insert("kgame.xml", kgameDoc.toString().toUtf8());
+ files.insert("canvas.xml", canvasDoc.toString().toUtf8());
  return true;
 }
 
@@ -1499,7 +1499,7 @@ bool BosonFileConverter::convertPlayField_From_0_11_81_To_0_12(QMap<QString, QBy
 
  // retrieve all UnitPlugins, including all weapons
  QDomNodeList unitPlugins = canvasRoot.elementsByTagName("UnitPlugin");
- for (unsigned int i = 0; i < unitPlugins.count(); i++) {
+ for (int i = 0; i < unitPlugins.count(); i++) {
 	QDomElement e = unitPlugins.item(i).toElement();
 	bool ok;
 	int type = e.attribute("Type").toInt(&ok);
@@ -1525,8 +1525,8 @@ bool BosonFileConverter::convertPlayField_From_0_11_81_To_0_12(QMap<QString, QBy
 	e.appendChild(matrix);
  }
 
- files.insert("kgame.xml", kgameDoc.toString().utf8());
- files.insert("canvas.xml", canvasDoc.toString().utf8());
+ files.insert("kgame.xml", kgameDoc.toString().toUtf8());
+ files.insert("canvas.xml", canvasDoc.toString().toUtf8());
  return true;
 }
 
@@ -1557,18 +1557,18 @@ bool BosonFileConverter::convertPlayField_From_0_12_To_0_13(QMap<QString, QByteA
  ids.append(QString::number(1030)); // IdWantedRotation
  removePropertyIds_0_9_1(itemsList, ids);
 
- files.insert("kgame.xml", kgameDoc.toString().utf8());
- files.insert("canvas.xml", canvasDoc.toString().utf8());
+ files.insert("kgame.xml", kgameDoc.toString().toUtf8());
+ files.insert("canvas.xml", canvasDoc.toString().toUtf8());
 
  return true;
 }
 
 void BosonFileConverter::removePropertyIds_0_9_1(const QDomNodeList& itemsList, const QStringList& ids)
 {
- for (unsigned int i = 0; i < itemsList.count(); i++) {
+ for (int i = 0; i < itemsList.count(); i++) {
 	QDomElement items = itemsList.item(i).toElement();
 	QDomNodeList dataHandler = items.elementsByTagName(QString::fromLatin1("DataHandler"));
-	for (unsigned int j = 0; j < dataHandler.count(); j++) {
+	for (int j = 0; j < dataHandler.count(); j++) {
 		QDomElement handler = dataHandler.item(j).toElement();
 		QDomNodeList properties = handler.elementsByTagName(QString::fromLatin1("KGameProperty"));
 		for (int k = 0; k < (int)properties.count(); k++) {
@@ -1627,7 +1627,7 @@ bool BosonFileConverter::convertPlayerIndicesToIdsInFileNames_post_0_11(int* act
  QStringList removeFiles;
  QRegExp hasPlayerId("-player_([0-9]+)");
  for (QMap<QString, QByteArray>::iterator it = files.begin(); it != files.end(); ++it) {
-	int pos = hasPlayerId.search(it.key());
+	int pos = hasPlayerId.indexIn(it.key());
 	if (pos < 0) {
 		continue;
 	}
@@ -1645,7 +1645,7 @@ bool BosonFileConverter::convertPlayerIndicesToIdsInFileNames_post_0_11(int* act
 
 	if (actualIds[n] > 0) {
 		QString file = it.key();
-		QByteArray b = it.data();
+		QByteArray b = it.value();
 		file.replace(hasPlayerId, QString("-player_%1").arg(actualIds[n]));
 		addFiles.insert(file, b);
 	}
@@ -1655,7 +1655,7 @@ bool BosonFileConverter::convertPlayerIndicesToIdsInFileNames_post_0_11(int* act
 	files.remove(*it);
  }
  for (QMap<QString, QByteArray>::iterator it = addFiles.begin(); it != addFiles.end(); ++it) {
-	files.insert(it.key(), it.data());
+	files.insert(it.key(), it.value());
  }
  return true;
 }
@@ -1686,7 +1686,7 @@ bool BosonFileConverter::addLocalPlayerPyScript_From_0_10_82_To_0_10_83(QByteArr
     "def advance():\n"
     "  dayandnight.advance()\n"
     "  wind.advance()\n";
-  localplayerPy.duplicate(script.latin1(), script.length());
+  localplayerPy = script.toLatin1();
   return true;
 }
 
@@ -1703,7 +1703,7 @@ bool BosonFileConverter::addAIPyScript_From_0_10_82_To_0_10_83(QByteArray& aiPy,
     "\n"
     "def advance():\n"
     "  ai.advance()\n";
-  aiPy.duplicate(script.latin1(), script.length());
+  aiPy = script.toLatin1();
   return true;
 }
 
@@ -1711,8 +1711,8 @@ bool BosonFileConverter::addAIPyScript_From_0_10_82_To_0_10_83(QByteArray& aiPy,
 bool MapToTexMap_From_0_8_To_0_9::convert(int* groundTypes, QByteArray* newMap, QByteArray* texMap)
 {
  bool ret = true;
- QDataStream writeMapStream(*newMap, QIODevice::WriteOnly);
- QDataStream writeTexMapStream(*texMap, QIODevice::WriteOnly);
+ QDataStream writeMapStream(newMap, QIODevice::WriteOnly);
+ QDataStream writeTexMapStream(texMap, QIODevice::WriteOnly);
 
  writeMapStream << BOSONMAP_MAP_MAGIC_COOKIE;
  writeMapStream << (quint32)BOSONMAP_VERSION_0_9;

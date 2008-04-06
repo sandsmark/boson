@@ -32,6 +32,7 @@
 
 #include <q3ptrvector.h>
 #include <q3ptrlist.h>
+#include <QColor>
 //Added by qt3to4:
 #include <Q3ValueList>
 
@@ -173,7 +174,7 @@ Q3PtrList<Unit> PlayerIO::allEnemyUnits() const
  return list;
 }
 
-const QColor& PlayerIO::teamColor() const
+QColor PlayerIO::teamColor() const
 {
  return player()->teamColor();
 }
@@ -400,7 +401,7 @@ BoItemList* PlayerIO::unitsAtCells(const Q3PtrVector<const Cell>* cells) const
 		if (!(((Unit*)s)->visibleStatus(playerId()) & (UnitBase::VS_Visible | UnitBase::VS_Earlier))) {
 			continue;
 		}
-		if (collisions->findIndex(s) < 0) {
+		if (!collisions->containsBool(s)) {
 			collisions->append(s);
 		}
 	}
@@ -475,7 +476,7 @@ bool PlayerIO::disconnect(const char* signal, const QObject* receiver, const cha
  return QObject::disconnect(player(), signal, receiver, member);
 }
 
-Q3PtrList<KGameIO>* PlayerIO::ioList()
+QList<KGameIO*>* PlayerIO::ioList()
 {
  return player()->ioList();
 }

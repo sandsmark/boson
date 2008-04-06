@@ -37,7 +37,7 @@ public:
 	 * before KCmdLineArgs::init() is called in your main() function,
 	 * because that one modifies argv[0].
 	 **/
-	BoApplication(const Q3CString& argv0, bool allowStyles = true, bool enableGUI = true);
+	BoApplication(const Q3CString& argv0, bool enableGUI = true);
 	virtual ~BoApplication();
 };
 

@@ -399,9 +399,7 @@ void BoCanvasSightManager::removeSight(Unit* unit)
 
 void BoCanvasSightManager::updateVisibleStatus(Unit* unit)
 {
- Q3PtrList<Player> players = mPlayerListManager->activeGamePlayerList();
- for (Q3PtrListIterator<Player> pit(players); pit.current(); ++pit) {
-	Player* player = pit.current();
+ foreach (Player* player, mPlayerListManager->activeGamePlayerList()) {
 	if (unit->owner() == player) {
 		continue;
 	}
@@ -524,9 +522,7 @@ void BoCanvasSightManager::updateRadarSignal(Unit* unit, bofixed, bofixed)
  }
 
  // Then radar signal strength for all players
- Q3PtrList<Player> players = mPlayerListManager->activeGamePlayerList();
- for (Q3PtrListIterator<Player> it(players); it.current(); ++it) {
-	Player* player = it.current();
+ foreach (Player* player, mPlayerListManager->activeGamePlayerList()) {
 	bofixed signalstrength = 0;
 
 	const Q3ValueList<const Unit*>* radars = player->radarUnits();
@@ -603,7 +599,7 @@ bofixed BoCanvasSightManager::radarSignalStrength(const RadarPlugin* radar, bofi
 void BoCanvasSightManager::recalculateSpecialSignalStrengths()
 {
  PROFILE_METHOD;
- Q3PtrList<Player> players = mPlayerListManager->activeGamePlayerList();
+ QList<Player*> players = mPlayerListManager->activeGamePlayerList();
 
  // Calculate signal strengths for radars
  // Go through all radar units
@@ -612,8 +608,7 @@ void BoCanvasSightManager::recalculateSpecialSignalStrengths()
 	Unit* radarUnit = (Unit*)*it;
 	float radarUnitTransmittedPower = ((const RadarPlugin*)radarUnit->plugin(UnitPlugin::Radar))->transmittedPower();
 	// Go through all players
-	for (Q3PtrListIterator<Player> pit(players); pit.current(); ++pit) {
-		Player* player = pit.current();
+	foreach (Player* player, players) {
 		if (radarUnit->owner() == player) {
 			continue;
 		}
@@ -658,8 +653,7 @@ void BoCanvasSightManager::recalculateSpecialSignalStrengths()
 	Unit* jammerUnit = (Unit*)*it;
 	float jammerUnitTransmittedPower = ((const RadarJammerPlugin*)jammerUnit->plugin(UnitPlugin::RadarJammer))->transmittedPower();
 	// Go through all players
-	for (Q3PtrListIterator<Player> pit(players); pit.current(); ++pit) {
-		Player* player = pit.current();
+	foreach (Player* player, players) {
 		if (jammerUnit->owner() == player) {
 			continue;
 		}
@@ -830,8 +824,7 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, unsigned int advanceCa
  boProfiling->push(prof_funcinfo + " - Whole method");
 
  QMap<Player*, bool> player2HasMiniMap;
- for (Q3PtrListIterator<Player> it(mPlayerListManager->gamePlayerList()); it.current(); ++it) {
-	Player* p = it.current();
+ foreach (Player* p, mPlayerListManager->gamePlayerList()) {
 	player2HasMiniMap.insert(p, p->hasMiniMap());
  }
 
@@ -888,8 +881,7 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, unsigned int advanceCa
  // if this value is reached, "free" refill stops. only using ammunition center
  // (i.e. by producing new ammo), new ammo can be gained.
  const quint32 maxAmmo = 1000;
- for (Q3PtrListIterator<Player> it(mPlayerListManager->activeGamePlayerList()); it.current(); ++it) {
-	Player* p = it.current();
+ foreach (Player* p, mPlayerListManager->activeGamePlayerList()) {
 	QString type = "Generic";
 	if (p->ammunition(type) < maxAmmo) {
 		p->setAmmunition(type, p->ammunition(type) + amount);
@@ -910,7 +902,7 @@ void BoCanvasAdvance::advance(const BoItemList& allItems, unsigned int advanceCa
 
  for (QMap<Player*, bool>::const_iterator it = player2HasMiniMap.begin(); it != player2HasMiniMap.end(); ++it) {
 	Player* p = it.key();
-	bool had = it.data();
+	bool had = it.value();
 	bool has = p->hasMiniMap();
 	if (has == had) {
 		continue;
@@ -933,8 +925,7 @@ void BoCanvasAdvance::chargeUnits(unsigned int advanceCallsCount, bool advanceFl
 {
  Q_UNUSED(advanceCallsCount);
  Q_UNUSED(advanceFlag);
- for (Q3PtrListIterator<Player> it(mPlayerListManager->gamePlayerList()); it.current(); ++it) {
-	Player* p = it.current();
+ foreach (Player* p, mPlayerListManager->gamePlayerList()) {
 	p->updatePowerChargeForCurrentAdvanceCall();
  }
 }
@@ -943,8 +934,7 @@ void BoCanvasAdvance::unchargeUnits(unsigned int advanceCallsCount, bool advance
 {
  Q_UNUSED(advanceCallsCount);
  Q_UNUSED(advanceFlag);
- for (Q3PtrListIterator<Player> it(mPlayerListManager->gamePlayerList()); it.current(); ++it) {
-	Player* p = it.current();
+ foreach (Player* p, mPlayerListManager->gamePlayerList()) {
 	p->unchargeUnitsForAdvance();
  }
 }
@@ -1181,7 +1171,7 @@ void BoCanvasAdvance::notifyAboutDestroyedUnits(const Q3PtrList<Unit>& destroyed
 
 
 BosonCanvas::BosonCanvas(bool advanceFlag, QObject* parent, bool gameMode)
-		: QObject(parent, "BosonCanvas")
+		: QObject(parent)
 {
  d = new BosonCanvasPrivate;
  d->mAdvanceFlag = advanceFlag;
@@ -1469,7 +1459,7 @@ void BosonCanvas::explosion(const BoVector3Fixed& pos, qint32 damage, bofixed ra
  qint32 d;
  bofixed dist;
  Q3ValueList<Unit*> l = collisions()->unitCollisionsInSphere(pos, range);
- for (unsigned int i = 0; i < l.count(); i++) {
+ for (int i = 0; i < l.count(); i++) {
 	Unit* u = l[i];
 	// Calculate actual distance of unit from explosion's center (this takes
 	//  unit's size into account)
@@ -2110,7 +2100,7 @@ bool BosonCanvas::loadItemsFromXML(const QDomElement& root)
  QDomNodeList list = root.elementsByTagName(QString::fromLatin1("Items"));
  Q3ValueList<QDomElement> allItemElements;
  Q3ValueList<BosonItem*> allItems;
- for (unsigned int i = 0; i < list.count(); i++) {
+ for (int i = 0; i < list.count(); i++) {
 	QDomElement items = list.item(i).toElement();
 	if (items.isNull()) {
 		boError(260) << k_funcinfo << "Items tag is not an element" << endl;
@@ -2131,7 +2121,7 @@ bool BosonCanvas::loadItemsFromXML(const QDomElement& root)
 	}
 
 	QDomNodeList itemList = items.elementsByTagName(QString::fromLatin1("Item"));
-	for (unsigned int j = 0; j < itemList.count(); j++) {
+	for (int j = 0; j < itemList.count(); j++) {
 		QDomElement item = itemList.item(j).toElement();
 		if (item.isNull()) {
 			continue;
@@ -2152,7 +2142,7 @@ bool BosonCanvas::loadItemsFromXML(const QDomElement& root)
  boDebug(260) << k_funcinfo << "created " << allItems.count() << " items" << endl;
 
  unsigned int itemCount = 0;
- for (unsigned int i = 0; i < allItems.count(); i++) {
+ for (int i = 0; i < allItems.count(); i++) {
 	QDomElement e = allItemElements[i];
 	BosonItem* item = allItems[i];
 	if (!loadItemFromXML(e, item)) {
@@ -2357,7 +2347,7 @@ bool BosonCanvas::loadItemFromXML(const QDomElement& element, BosonItem* item)
  return true;
 }
 
-Q3CString BosonCanvas::saveCanvas() const
+QByteArray BosonCanvas::saveCanvas() const
 {
  QDomDocument doc(QString::fromLatin1("Canvas"));
  QDomElement root = doc.createElement(QString::fromLatin1("Canvas"));
@@ -2365,7 +2355,7 @@ Q3CString BosonCanvas::saveCanvas() const
  if (!saveAsXML(root)) {
 	return Q3CString();
  }
- return doc.toCString();
+ return doc.toByteArray();
 }
 
 bool BosonCanvas::saveAsXML(QDomElement& root) const
@@ -2400,8 +2390,7 @@ bool BosonCanvas::saveItemsAsXML(QDomElement& root) const
 {
  QDomDocument doc = root.ownerDocument();
  QMap<unsigned int, QDomElement> owner2Items;
- Q3PtrList<Player> gamePlayerList = d->mPlayerListManager->gamePlayerList();
- for (KPlayer* p = gamePlayerList.first(); p; p = gamePlayerList.next()) {
+ foreach (Player* p, d->mPlayerListManager->gamePlayerList()) {
 	QDomElement items = doc.createElement(QString::fromLatin1("Items"));
 
 	// note: we need to store the index in the list here, not the p->kgameId() !
@@ -2439,7 +2428,7 @@ bool BosonCanvas::saveItemsAsXML(QDomElement& root) const
  return true;
 }
 
-Q3CString BosonCanvas::emptyCanvasFile(unsigned int playerCount)
+QByteArray BosonCanvas::emptyCanvasFile(unsigned int playerCount)
 {
  QDomDocument doc(QString::fromLatin1("Canvas"));
  QDomElement root = doc.createElement(QString::fromLatin1("Canvas"));
@@ -2461,7 +2450,7 @@ Q3CString BosonCanvas::emptyCanvasFile(unsigned int playerCount)
 		items.setAttribute(QString::fromLatin1("PlayerId"), 256);
 	}
  }
- return doc.toCString();
+ return doc.toByteArray();
 }
 
 void BosonCanvas::changeAdvanceList(BosonItem* item)

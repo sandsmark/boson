@@ -18,8 +18,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
-#ifndef BOSONMAPDOM_H
-#define BOSONMAPDOM_H
+#ifndef BOSONMAP_H
+#define BOSONMAP_H
 
 #include <qobject.h>
 #include <qrect.h>
@@ -40,6 +40,7 @@ class BosonGroundType;
 class BosonMap;
 class BoGroundQuadTreeNode;
 class BoLake;
+class QImage;
 template<class T> class Q3Dict;
 template<class T> class Q3ValueList;
 template<class T> class Q3PtrList;

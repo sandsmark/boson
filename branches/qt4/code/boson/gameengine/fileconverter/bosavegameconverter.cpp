@@ -295,15 +295,15 @@ void BoSaveGameConverter::initVersionNames(QMap<int, BoSaveGameConverter*>& conv
 #endif
 
 
- Q3ValueList<int> releasedVersions = saveGameVersion2ReleaseName.keys();
+ QList<int> releasedVersions = saveGameVersion2ReleaseName.keys();
  qSort(releasedVersions);
 
- Q3ValueList<int> converterVersions = converters.keys();
+ QList<int> converterVersions = converters.keys();
  qSort(converterVersions);
 
- Q3ValueList<int>::iterator releaseVersionIt = releasedVersions.begin();
- for (Q3ValueList<int>::iterator it = converterVersions.begin(); it != converterVersions.end(); ++it) {
-	Q3ValueList<int>::iterator it2 = releaseVersionIt;
+ QList<int>::iterator releaseVersionIt = releasedVersions.begin();
+ for (QList<int>::iterator it = converterVersions.begin(); it != converterVersions.end(); ++it) {
+	QList<int>::iterator it2 = releaseVersionIt;
 	while (it2 != releasedVersions.end() && *it2 <= *it) {
 		releaseVersionIt = it2;
 		++it2;

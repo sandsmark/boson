@@ -198,7 +198,8 @@ class BosonWeaponProperties : public PluginProperties
 
     virtual QString name() const;
     virtual bool loadPlugin(const KConfigGroup& config);
-    virtual bool savePlugin(KConfig* config);
+    virtual bool savePlugin(KConfig* config); // dummy implementation, do not use!
+    virtual bool savePlugin(KConfig* config, const QString& groupName);
     virtual int pluginType() const  { return Weapon; }
 
     const QMap<int, QString>* actionStrings() const  { return &mActionStrings; }

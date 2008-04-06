@@ -100,7 +100,7 @@ protected:
 	 * name of the archive. The toplevel dir is the dir where all data would
 	 * get extracted to if you did a "tar xzvf" on the archive.
 	 **/
-	bool writeFile(const QString& topLevelDir, const QString& fileName, int size, const char* data, const QString& subdir = QString::null);
+	bool writeFile(const QString& topLevelDir, const QString& fileName, qint64 size, const char* data, const QString& subdir = QString::null);
 
 	/**
 	 * @return The desired (!) name of the top dir, as it should get used

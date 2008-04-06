@@ -47,13 +47,13 @@ bool BosonMessage::copyTo(BosonMessage& copy) const
  }
 
  QByteArray buffer;
- QDataStream write(buffer, QIODevice::WriteOnly);
+ QDataStream write(&buffer, QIODevice::WriteOnly);
  if (!save(write)) {
 	boError() << k_funcinfo << "could not save this message" << endl;
 	return false;
  }
 
- QDataStream read(buffer, QIODevice::ReadOnly);
+ QDataStream read(buffer);
 
  if (!readMessageId(read)) {
 	boError() << k_funcinfo << "could not read messageId from saved message" << endl;
@@ -193,11 +193,11 @@ bool BosonMessageEditorMovePlaceUnit::load(QDataStream& stream)
  return true;
 }
 
-BosonMessageEditorMoveUndoPlaceUnit::BosonMessageEditorMoveUndoPlaceUnit(Q_ULONG unit, const BosonMessageEditorMovePlaceUnit& message)
+BosonMessageEditorMoveUndoPlaceUnit::BosonMessageEditorMoveUndoPlaceUnit(quint32 unit, const BosonMessageEditorMovePlaceUnit& message)
 	: BosonMessageEditorMove()
 {
  setUndo();
- Q3ValueList<Q_ULONG> items;
+ Q3ValueList<quint32> items;
  items.append(unit);
  BosonMessageEditorMoveDeleteItems del(items);
  if (!del.copyTo(mDeleteUnit)) {
@@ -294,12 +294,12 @@ bool BosonMessageEditorMoveChangeTexMap::save(QDataStream& stream) const
 	return false;
  }
  stream << (quint32)mCellCornersX.count();
- for (unsigned int i = 0; i < mCellCornersX.count(); i++) {
+ for (int i = 0; i < mCellCornersX.count(); i++) {
 	stream << (quint32)mCellCornersX[i];
 	stream << (quint32)mCellCornersY[i];
 	stream << (quint32)mCellCornersTextureCount[i];
 
-	if (mCellCornersTextureCount[i] != mCellCornerTextures[i].count()) {
+	if (mCellCornersTextureCount[i] != (unsigned int)mCellCornerTextures[i].count()) {
 		boError() << k_funcinfo << "invalid number of cellcorner textures" << endl;
 		return false;
 	}
@@ -400,7 +400,7 @@ bool BosonMessageEditorMoveChangeHeight::save(QDataStream& stream) const
 	return false;
  }
  stream << (quint32) mCellCornersX.count();
- for (unsigned int i = 0; i < mCellCornersX.count(); i++) {
+ for (int i = 0; i < mCellCornersX.count(); i++) {
 	stream << (quint32)mCellCornersX[i];
 	stream << (quint32)mCellCornersY[i];
 	stream << mCellCornersHeight[i];
@@ -442,7 +442,7 @@ BosonMessageEditorMoveDeleteItems::BosonMessageEditorMoveDeleteItems()
 {
 }
 
-BosonMessageEditorMoveDeleteItems::BosonMessageEditorMoveDeleteItems(const Q3ValueList<Q_ULONG>& items)
+BosonMessageEditorMoveDeleteItems::BosonMessageEditorMoveDeleteItems(const Q3ValueList<quint32>& items)
 	: BosonMessageEditorMove(),
 	mItems(items)
 {
@@ -456,9 +456,9 @@ bool BosonMessageEditorMoveDeleteItems::save(QDataStream& stream) const
 	return false;
  }
  stream << (quint32)mItems.count();
- Q3ValueList<Q_ULONG>::const_iterator it;
+ Q3ValueList<quint32>::const_iterator it;
  for (it = mItems.begin(); it != mItems.end(); ++it) {
-	stream << (Q_ULONG)(*it);
+	stream << (quint32)(*it);
  }
  return true;
 }
@@ -473,7 +473,7 @@ bool BosonMessageEditorMoveDeleteItems::load(QDataStream& stream)
  stream >> count;
  mItems.clear();
  for (quint32 i = 0; i < count; i++) {
-	Q_ULONG item;
+	quint32 item;
 	stream >> item;
 	mItems.append(item);
  }
@@ -511,7 +511,7 @@ BosonMessageEditorMoveUndoDeleteItems::~BosonMessageEditorMoveUndoDeleteItems()
 
 void BosonMessageEditorMoveUndoDeleteItems::clearUnits()
 {
- for (unsigned int i = 0; i < mUnits.count(); i++) {
+ for (int i = 0; i < mUnits.count(); i++) {
 	delete mUnits[i];
  }
  mUnits.clear();
@@ -527,7 +527,7 @@ bool BosonMessageEditorMoveUndoDeleteItems::save(QDataStream& stream) const
  }
 
  stream << (quint32)mUnits.count();
- for (unsigned int i = 0; i < mUnits.count(); i++) {
+ for (int i = 0; i < mUnits.count(); i++) {
 	if (!mUnits[i]->save(stream)) {
 		boError() << k_funcinfo << "could not save PlaceUnit message to stream" << endl;
 		return false;
@@ -651,7 +651,7 @@ BosonMessageMoveMove::BosonMessageMoveMove()
 {
 }
 
-BosonMessageMoveMove::BosonMessageMoveMove(bool isAttack, const BoVector2Fixed& pos, const Q3ValueList<Q_ULONG>& items)
+BosonMessageMoveMove::BosonMessageMoveMove(bool isAttack, const BoVector2Fixed& pos, const Q3ValueList<quint32>& items)
 	: BosonMessage(),
 	mIsAttack(isAttack),
 	mPos(pos),
@@ -665,9 +665,9 @@ bool BosonMessageMoveMove::save(QDataStream& stream) const
  stream << (qint8)mIsAttack;
  stream << mPos;
  stream << (quint32)mItems.count();
- Q3ValueList<Q_ULONG>::const_iterator it;
+ Q3ValueList<quint32>::const_iterator it;
  for (it = mItems.begin(); it != mItems.end(); ++it) {
-	stream << (Q_ULONG)(*it);
+	stream << (quint32)(*it);
  }
  return true;
 }
@@ -681,7 +681,7 @@ bool BosonMessageMoveMove::load(QDataStream& stream)
  stream >> count;
  mItems.clear();
  for (quint32 i = 0; i < count; i++) {
-	Q_ULONG item;
+	quint32 item;
 	stream >> item;
 	mItems.append(item);
  }
@@ -691,9 +691,9 @@ bool BosonMessageMoveMove::load(QDataStream& stream)
 bool BosonMessageMoveAttack::save(QDataStream& stream) const
 {
  stream << (quint32)messageId();
- stream << (Q_ULONG)mAttackedUnitId;
+ stream << (quint32)mAttackedUnitId;
  stream << (quint32)mItems.count();
- Q3ValueList<Q_ULONG>::const_iterator it;
+ Q3ValueList<quint32>::const_iterator it;
  for (it = mItems.begin(); it != mItems.end(); ++it) {
 	stream << (*it);
  }
@@ -708,7 +708,7 @@ bool BosonMessageMoveAttack::load(QDataStream& stream)
  stream >> count;
  mItems.clear();
  for (quint32 i = 0; i < count; i++) {
-	Q_ULONG item;
+	quint32 item;
 	stream >> item;
 	mItems.append(item);
  }
@@ -719,7 +719,7 @@ bool BosonMessageMoveStop::save(QDataStream& stream) const
 {
  stream << (quint32)messageId();
  stream << (quint32)mItems.count();
- Q3ValueList<Q_ULONG>::const_iterator it;
+ Q3ValueList<quint32>::const_iterator it;
  for (it = mItems.begin(); it != mItems.end(); ++it) {
 	stream << (*it);
  }
@@ -733,7 +733,7 @@ bool BosonMessageMoveStop::load(QDataStream& stream)
  stream >> count;
  mItems.clear();
  for (quint32 i = 0; i < count; i++) {
-	Q_ULONG item;
+	quint32 item;
 	stream >> item;
 	mItems.append(item);
  }
@@ -743,8 +743,8 @@ bool BosonMessageMoveStop::load(QDataStream& stream)
 bool BosonMessageMoveMine::save(QDataStream& stream) const
 {
  stream << (quint32)messageId();
- stream << (Q_ULONG)mHarvesterId;
- stream << (Q_ULONG)mResourceMineId;
+ stream << (quint32)mHarvesterId;
+ stream << (quint32)mResourceMineId;
  return true;
 }
 
@@ -760,9 +760,9 @@ bool BosonMessageMoveRefine::save(QDataStream& stream) const
 {
  stream << (quint32)messageId();
  stream << (quint32)mRefineryOwner;
- stream << (Q_ULONG)mRefineryId;
+ stream << (quint32)mRefineryId;
  stream << (quint32)mItems.count();
- Q3ValueList<Q_ULONG>::const_iterator it;
+ Q3ValueList<quint32>::const_iterator it;
  for (it = mItems.begin(); it != mItems.end(); ++it) {
 	stream << (*it);
  }
@@ -778,7 +778,7 @@ bool BosonMessageMoveRefine::load(QDataStream& stream)
  stream >> count;
  mItems.clear();
  for (quint32 i = 0; i < count; i++) {
-	Q_ULONG item;
+	quint32 item;
 	stream >> item;
 	mItems.append(item);
  }
@@ -802,7 +802,7 @@ bool BosonMessageMoveProduce::save(QDataStream& stream) const
  stream << (quint32)messageId();
  stream << (quint32)mProduceType;
  stream << (quint32)mOwner;
- stream << (Q_ULONG)mFactoryId;
+ stream << (quint32)mFactoryId;
  stream << (quint32)mType;
  return true;
 }
@@ -822,7 +822,7 @@ bool BosonMessageMoveProduceStop::save(QDataStream& stream) const
  stream << (quint32)messageId();
  stream << (quint32)mProduceType;
  stream << (quint32)mOwner;
- stream << (Q_ULONG)mFactoryId;
+ stream << (quint32)mFactoryId;
  stream << (quint32)mType;
  return true;
 }
@@ -842,7 +842,7 @@ bool BosonMessageMoveBuild::save(QDataStream& stream) const
  stream << (quint32)messageId();
  stream << (quint32)mProduceType;
  stream << (quint32)mOwner;
- stream << (Q_ULONG)mFactoryId;
+ stream << (quint32)mFactoryId;
  stream << mPos;
  return true;
 }
@@ -862,7 +862,7 @@ bool BosonMessageMoveFollow::save(QDataStream& stream) const
  stream << (quint32)messageId();
  stream << (quint32)mFollowUnitId;
  stream << (quint32)mItems.count();
- Q3ValueList<Q_ULONG>::const_iterator it;
+ Q3ValueList<quint32>::const_iterator it;
  for (it = mItems.begin(); it != mItems.end(); ++it) {
 	stream << (*it);
  }
@@ -877,7 +877,7 @@ bool BosonMessageMoveFollow::load(QDataStream& stream)
  stream >> count;
  mItems.clear();
  for (quint32 i = 0; i < count; i++) {
-	Q_ULONG item;
+	quint32 item;
 	stream >> item;
 	mItems.append(item);
  }
@@ -889,7 +889,7 @@ bool BosonMessageMoveEnterUnit::save(QDataStream& stream) const
  stream << (quint32)messageId();
  stream << (quint32)mEnterUnitId;
  stream << (quint32)mItems.count();
- Q3ValueList<Q_ULONG>::const_iterator it;
+ Q3ValueList<quint32>::const_iterator it;
  for (it = mItems.begin(); it != mItems.end(); ++it) {
 	stream << (*it);
  }
@@ -904,7 +904,7 @@ bool BosonMessageMoveEnterUnit::load(QDataStream& stream)
  stream >> count;
  mItems.clear();
  for (quint32 i = 0; i < count; i++) {
-	Q_ULONG item;
+	quint32 item;
 	stream >> item;
 	mItems.append(item);
  }
@@ -919,9 +919,9 @@ bool BosonMessageMoveLayMine::save(QDataStream& stream) const
  }
  stream << (quint32)messageId();
  stream << (quint32)mUnits.count();
- for (unsigned int i = 0; i < mUnits.count(); i++) {
-	stream << (Q_ULONG)mUnits[i];
-	stream << (Q_ULONG)mWeapons[i];
+ for (int i = 0; i < mUnits.count(); i++) {
+	stream << (quint32)mUnits[i];
+	stream << (quint32)mWeapons[i];
  }
  return true;
 }
@@ -934,8 +934,8 @@ bool BosonMessageMoveLayMine::load(QDataStream& stream)
  quint32 count;
  stream >> count;
  for (quint32 i = 0; i < count; i++) {
-	Q_ULONG unit;
-	Q_ULONG weapon;
+	quint32 unit;
+	quint32 weapon;
 	stream >> unit;
 	stream >> weapon;
 	mUnits.append(unit);
@@ -953,9 +953,9 @@ bool BosonMessageMoveDropBomb::save(QDataStream& stream) const
  stream << (quint32)messageId();
  stream << mPos;
  stream << (quint32)mUnits.count();
- for (unsigned int i = 0; i < mUnits.count(); i++) {
-	stream << (Q_ULONG)mUnits[i];
-	stream << (Q_ULONG)mWeapons[i];
+ for (int i = 0; i < mUnits.count(); i++) {
+	stream << (quint32)mUnits[i];
+	stream << (quint32)mWeapons[i];
  }
  return true;
 }
@@ -969,8 +969,8 @@ bool BosonMessageMoveDropBomb::load(QDataStream& stream)
  quint32 count;
  stream >> count;
  for (quint32 i = 0; i < count; i++) {
-	Q_ULONG unit;
-	Q_ULONG weapon;
+	quint32 unit;
+	quint32 weapon;
 	stream >> unit;
 	stream >> weapon;
 	mUnits.append(unit);
@@ -982,7 +982,7 @@ bool BosonMessageMoveDropBomb::load(QDataStream& stream)
 bool BosonMessageMoveTeleport::save(QDataStream& stream) const
 {
  stream << (quint32)messageId();
- stream << (Q_ULONG)mUnitId;
+ stream << (quint32)mUnitId;
  stream << (quint32)mOwner;
  stream << mPos;
  return true;
@@ -1000,7 +1000,7 @@ bool BosonMessageMoveTeleport::load(QDataStream& stream)
 bool BosonMessageMoveRotate::save(QDataStream& stream) const
 {
  stream << (quint32)messageId();
- stream << (Q_ULONG)mUnitId;
+ stream << (quint32)mUnitId;
  stream << (quint32)mOwner;
  stream << mRotate;
  return true;

@@ -97,9 +97,7 @@ bool BosonGameEngineStarting::createTasks(Q3PtrList<BosonStartingTask>* tasks)
  {
 	Q3ValueList<int> players;
 	Q3ValueList<int> watchPlayers;
-	Q3PtrList<Player> allPlayerList = boGame->allPlayerList();
-	for (unsigned i = 0; i < allPlayerList.count(); i++) {
-		Player* p = allPlayerList.at(i);
+	foreach (Player* p, boGame->allPlayerList()) {
 		int id = p->bosonId();
 		if (id <= 0) {
 			// IDs <= 0 are invalid.
@@ -163,8 +161,7 @@ bool BosonGameEngineStarting::createTasks(Q3PtrList<BosonStartingTask>* tasks)
 
 
  int index = 0;
- for (Q3PtrListIterator<Player> it(boGame->gamePlayerList()); it.current(); ++it) {
-	Player* p = (Player*)it.current();
+ foreach (Player* p, boGame->gamePlayerList()) {
 	QString text;
 	if (p->isActiveGamePlayer()) {
 		text = i18n("Load player game data of player %1 (of %2)").arg(index + 1).arg(boGame->activeGamePlayerCount());
@@ -271,13 +268,13 @@ bool BosonStartingInitPlayerMap::startTask()
 	return false;
  }
  bool mapExplored = boConfig->boolValue("ExploreMapOnStartup");
- Q3PtrList<Player> allPlayerList = boGame->allPlayerList();
- for (unsigned int i = 0; i < allPlayerList.count(); i++) {
+ int i = 0;
+ foreach (Player* p, boGame->allPlayerList()) {
 	boDebug(270) << "init map for player " << i << endl;
-	Player* p = allPlayerList.at(i);
 	if (p) {
 		p->initMap(playField()->map(), boGame->gameMode() && !mapExplored, boGame->gameMode());
 	}
+	i++;
  }
  return true;
 }

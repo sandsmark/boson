@@ -467,7 +467,7 @@ public:
 	 * also @ref QDomDocument::toCString() and @ref saveAsXML. This string
 	 * can be used to load the canvas again using @ref loadCanvas.
 	 **/
-	Q3CString saveCanvas() const;
+	QByteArray saveCanvas() const;
 
 	/**
 	 * This method is meant for use in the editor or in test programs, it is
@@ -478,7 +478,7 @@ public:
 	 * QDomDocument::toCString) describing an empty canvas. This can be used
 	 * with @ref loadCanvas.
 	 **/
-	static Q3CString emptyCanvasFile(unsigned int playerCount);
+	static QByteArray emptyCanvasFile(unsigned int playerCount);
 
 	bool loadFromXML(const QDomElement& root);
 	bool saveAsXML(QDomElement& root) const;

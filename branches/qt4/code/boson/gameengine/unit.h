@@ -619,7 +619,7 @@ protected:
 	void pathPointDone();
 
 
-	virtual const QColor* teamColor() const;
+	virtual QColor teamColor() const;
 
 	void recalculateMaxWeaponRange();
 

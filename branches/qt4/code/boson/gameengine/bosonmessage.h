@@ -177,7 +177,7 @@ class BosonMessageEditorMoveDeleteItems : public BosonMessageEditorMove
 {
 public:
 	BosonMessageEditorMoveDeleteItems();
-	BosonMessageEditorMoveDeleteItems(const Q3ValueList<Q_ULONG>& items);
+	BosonMessageEditorMoveDeleteItems(const Q3ValueList<quint32>& items);
 
 	virtual bool save(QDataStream& stream) const;
 	virtual bool load(QDataStream& stream);
@@ -187,7 +187,7 @@ public:
 	}
 
 public:
-	Q3ValueList<Q_ULONG> mItems;
+	Q3ValueList<quint32> mItems;
 };
 
 class BosonMessageEditorMoveUndoPlaceUnit : public BosonMessageEditorMove
@@ -197,7 +197,7 @@ public:
 	{
 		setUndo();
 	}
-	BosonMessageEditorMoveUndoPlaceUnit(Q_ULONG unit, const BosonMessageEditorMovePlaceUnit& message);
+	BosonMessageEditorMoveUndoPlaceUnit(quint32 unit, const BosonMessageEditorMovePlaceUnit& message);
 
 	virtual bool save(QDataStream& stream) const;
 	virtual bool load(QDataStream& stream);
@@ -274,7 +274,7 @@ class BosonMessageMoveMove : public BosonMessage
 {
 public:
 	BosonMessageMoveMove();
-	BosonMessageMoveMove(bool isAttack, const BoVector2Fixed& pos, const Q3ValueList<Q_ULONG>& items);
+	BosonMessageMoveMove(bool isAttack, const BoVector2Fixed& pos, const Q3ValueList<quint32>& items);
 
 	virtual bool save(QDataStream& stream) const;
 	virtual bool load(QDataStream& stream);
@@ -286,14 +286,14 @@ public:
 public:
 	qint8 mIsAttack;
 	BoVector2Fixed mPos;
-	Q3ValueList<Q_ULONG> mItems;
+	Q3ValueList<quint32> mItems;
 };
 
 class BosonMessageMoveAttack : public BosonMessage
 {
 public:
 	BosonMessageMoveAttack() : BosonMessage() {}
-	BosonMessageMoveAttack(Q_ULONG attackedUnitId, const Q3ValueList<Q_ULONG>& items)
+	BosonMessageMoveAttack(quint32 attackedUnitId, const Q3ValueList<quint32>& items)
 		: BosonMessage(),
 		mAttackedUnitId(attackedUnitId),
 		mItems(items)
@@ -308,15 +308,15 @@ public:
 	}
 
 public:
-	Q_ULONG mAttackedUnitId;
-	Q3ValueList<Q_ULONG> mItems;
+	quint32 mAttackedUnitId;
+	Q3ValueList<quint32> mItems;
 };
 
 class BosonMessageMoveStop : public BosonMessage
 {
 public:
 	BosonMessageMoveStop() : BosonMessage() {}
-	BosonMessageMoveStop(const Q3ValueList<Q_ULONG>& items)
+	BosonMessageMoveStop(const Q3ValueList<quint32>& items)
 		: BosonMessage(),
 		mItems(items)
 	{
@@ -330,14 +330,14 @@ public:
 	}
 
 public:
-	Q3ValueList<Q_ULONG> mItems;
+	Q3ValueList<quint32> mItems;
 };
 
 class BosonMessageMoveMine : public BosonMessage
 {
 public:
 	BosonMessageMoveMine() : BosonMessage() {}
-	BosonMessageMoveMine(Q_ULONG harvester, Q_ULONG resourceMine)
+	BosonMessageMoveMine(quint32 harvester, quint32 resourceMine)
 		: BosonMessage(),
 		mHarvesterId(harvester),
 		mResourceMineId(resourceMine)
@@ -352,15 +352,15 @@ public:
 	}
 
 public:
-	Q_ULONG mHarvesterId;
-	Q_ULONG mResourceMineId;
+	quint32 mHarvesterId;
+	quint32 mResourceMineId;
 };
 
 class BosonMessageMoveRefine: public BosonMessage
 {
 public:
 	BosonMessageMoveRefine() : BosonMessage() {}
-	BosonMessageMoveRefine(quint32 refineryOwner, Q_ULONG refineryId, const Q3ValueList<Q_ULONG> items)
+	BosonMessageMoveRefine(quint32 refineryOwner, quint32 refineryId, const Q3ValueList<quint32> items)
 		: BosonMessage(),
 		mRefineryOwner(refineryOwner),
 		mRefineryId(refineryId),
@@ -377,8 +377,8 @@ public:
 
 public:
 	quint32 mRefineryOwner;
-	Q_ULONG mRefineryId;
-	Q3ValueList<Q_ULONG> mItems;
+	quint32 mRefineryId;
+	Q3ValueList<quint32> mItems;
 };
 
 // is a TODO
@@ -386,7 +386,7 @@ class BosonMessageMoveRepair : public BosonMessage
 {
 public:
 	BosonMessageMoveRepair() : BosonMessage() {}
-	BosonMessageMoveRepair(Q_ULONG unit)
+	BosonMessageMoveRepair(quint32 unit)
 		: BosonMessage(),
 		mUnit(unit)
 	{
@@ -400,14 +400,14 @@ public:
 	}
 
 public:
-	Q_ULONG mUnit;
+	quint32 mUnit;
 };
 
 class BosonMessageMoveProduce : public BosonMessage
 {
 public:
 	BosonMessageMoveProduce() : BosonMessage() {}
-	BosonMessageMoveProduce(quint32 produceType, quint32 owner, Q_ULONG factoryId, quint32 type)
+	BosonMessageMoveProduce(quint32 produceType, quint32 owner, quint32 factoryId, quint32 type)
 		: BosonMessage(),
 		mProduceType(produceType),
 		mOwner(owner),
@@ -426,7 +426,7 @@ public:
 public:
 	quint32 mProduceType;
 	quint32 mOwner;
-	Q_ULONG mFactoryId;
+	quint32 mFactoryId;
 	quint32 mType;
 };
 
@@ -434,7 +434,7 @@ class BosonMessageMoveProduceStop : public BosonMessage
 {
 public:
 	BosonMessageMoveProduceStop() : BosonMessage() {}
-	BosonMessageMoveProduceStop(quint32 produceType, quint32 owner, Q_ULONG factoryId, quint32 type)
+	BosonMessageMoveProduceStop(quint32 produceType, quint32 owner, quint32 factoryId, quint32 type)
 		: BosonMessage(),
 		mProduceType(produceType),
 		mOwner(owner),
@@ -453,7 +453,7 @@ public:
 public:
 	quint32 mProduceType;
 	quint32 mOwner;
-	Q_ULONG mFactoryId;
+	quint32 mFactoryId;
 	quint32 mType;
 };
 
@@ -461,7 +461,7 @@ class BosonMessageMoveBuild : public BosonMessage
 {
 public:
 	BosonMessageMoveBuild() : BosonMessage() {}
-	BosonMessageMoveBuild(quint32 produceType, quint32 owner, Q_ULONG factoryId, const BoVector2Fixed& pos)
+	BosonMessageMoveBuild(quint32 produceType, quint32 owner, quint32 factoryId, const BoVector2Fixed& pos)
 		: BosonMessage(),
 		mProduceType(produceType),
 		mOwner(owner),
@@ -480,7 +480,7 @@ public:
 public:
 	quint32 mProduceType;
 	quint32 mOwner;
-	Q_ULONG mFactoryId;
+	quint32 mFactoryId;
 	BoVector2Fixed mPos;
 };
 
@@ -488,7 +488,7 @@ class BosonMessageMoveFollow : public BosonMessage
 {
 public:
 	BosonMessageMoveFollow() : BosonMessage() {}
-	BosonMessageMoveFollow(quint32 followUnitId, const Q3ValueList<Q_ULONG>& items)
+	BosonMessageMoveFollow(quint32 followUnitId, const Q3ValueList<quint32>& items)
 		: BosonMessage(),
 		mFollowUnitId(followUnitId),
 		mItems(items)
@@ -504,14 +504,14 @@ public:
 
 public:
 	quint32 mFollowUnitId;
-	Q3ValueList<Q_ULONG> mItems;
+	Q3ValueList<quint32> mItems;
 };
 
 class BosonMessageMoveEnterUnit : public BosonMessage
 {
 public:
 	BosonMessageMoveEnterUnit() : BosonMessage() {}
-	BosonMessageMoveEnterUnit(quint32 enterUnitId, const Q3ValueList<Q_ULONG>& items)
+	BosonMessageMoveEnterUnit(quint32 enterUnitId, const Q3ValueList<quint32>& items)
 		: BosonMessage(),
 		mEnterUnitId(enterUnitId),
 		mItems(items)
@@ -527,14 +527,14 @@ public:
 
 public:
 	quint32 mEnterUnitId;
-	Q3ValueList<Q_ULONG> mItems;
+	Q3ValueList<quint32> mItems;
 };
 
 class BosonMessageMoveLayMine : public BosonMessage
 {
 public:
 	BosonMessageMoveLayMine() : BosonMessage() {}
-	BosonMessageMoveLayMine(const Q3ValueList<Q_ULONG>& units, const Q3ValueList<Q_ULONG>& weapons)
+	BosonMessageMoveLayMine(const Q3ValueList<quint32>& units, const Q3ValueList<quint32>& weapons)
 		: BosonMessage(),
 		mUnits(units),
 		mWeapons(weapons)
@@ -549,15 +549,15 @@ public:
 	}
 
 public:
-	Q3ValueList<Q_ULONG> mUnits;
-	Q3ValueList<Q_ULONG> mWeapons;
+	Q3ValueList<quint32> mUnits;
+	Q3ValueList<quint32> mWeapons;
 };
 
 class BosonMessageMoveDropBomb : public BosonMessage
 {
 public:
 	BosonMessageMoveDropBomb() : BosonMessage() {}
-	BosonMessageMoveDropBomb(const BoVector2Fixed& pos, const Q3ValueList<Q_ULONG>& units, const Q3ValueList<Q_ULONG>& weapons)
+	BosonMessageMoveDropBomb(const BoVector2Fixed& pos, const Q3ValueList<quint32>& units, const Q3ValueList<quint32>& weapons)
 		: BosonMessage(),
 		mPos(pos),
 		mUnits(units),
@@ -574,15 +574,15 @@ public:
 
 public:
 	BoVector2Fixed mPos;
-	Q3ValueList<Q_ULONG> mUnits;
-	Q3ValueList<Q_ULONG> mWeapons;
+	Q3ValueList<quint32> mUnits;
+	Q3ValueList<quint32> mWeapons;
 };
 
 class BosonMessageMoveTeleport : public BosonMessage
 {
 public:
 	BosonMessageMoveTeleport() : BosonMessage() {}
-	BosonMessageMoveTeleport(Q_ULONG unitId, quint32 owner, const BoVector2Fixed& pos)
+	BosonMessageMoveTeleport(quint32 unitId, quint32 owner, const BoVector2Fixed& pos)
 		: BosonMessage(),
 		mUnitId(unitId),
 		mOwner(owner),
@@ -598,7 +598,7 @@ public:
 	}
 
 public:
-	Q_ULONG mUnitId;
+	quint32 mUnitId;
 	quint32 mOwner;
 	BoVector2Fixed mPos;
 };
@@ -607,7 +607,7 @@ class BosonMessageMoveRotate : public BosonMessage
 {
 public:
 	BosonMessageMoveRotate() : BosonMessage() {}
-	BosonMessageMoveRotate(Q_ULONG unitId, quint32 owner, const bofixed& rotate)
+	BosonMessageMoveRotate(quint32 unitId, quint32 owner, const bofixed& rotate)
 		: BosonMessage(),
 		mUnitId(unitId),
 		mOwner(owner),
@@ -623,7 +623,7 @@ public:
 	}
 
 public:
-	Q_ULONG mUnitId;
+	quint32 mUnitId;
 	quint32 mOwner;
 	bofixed mRotate;
 };
