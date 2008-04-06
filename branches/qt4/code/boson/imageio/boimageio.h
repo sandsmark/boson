@@ -19,11 +19,13 @@
 #ifndef BOIMAGEIO_H
 #define BOIMAGEIO_H
 
+#if 0
 class BoImageIO
 {
 public:
 	static void init();
 };
+#endif
 
 #endif
 
