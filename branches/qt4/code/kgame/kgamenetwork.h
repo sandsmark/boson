@@ -369,6 +369,40 @@ Q_SIGNALS:
      **/
     void signalAdminStatusChanged(bool isAdmin);
 
+    /**
+     * Emitted right before @p bytes are sent through the network.
+     *
+     * @param bytes The size of the message that is being sent. This includes
+     * the KGame headers, however does @em NOT include KMessage headers and does NOT
+     * include TCP/IP headers. Also note that this signal is emitted whenever
+     * @ref sendSystemMessage is called (e.g. using @ref KGame::sendMessage),
+     * even if the message is sent to the local client only.
+     * @param msgid The message ID of the message, as it is used by KGame.
+     * @param userMsgid -1 if the message is an internal KGame message
+     * (i.e. @p msgid is < @ref KGameMessage::IdUser), otherwise the message ID
+     * of the message as provided by the user (i.e. @p msgid - KGameMessage::IdUser)
+     **/
+    void signalSendBytes(quint32 bytes, int msgid, int userMsgid, quint32 sender, quint32 receiver);
+
+    /**
+     * Emitted whenever a message was received by this object. The signal is
+     * emitted right before the message is processed (see @ref
+     * networkTransmission).
+     *
+     * @param bytes The size of the received message. This includes KGame
+     * headers, however does @em NOT include KMessage headers and does NOT
+     * include TCP/IP headers. This signal is the counterpart to @ref
+     * signalSendBytes and consequently it is emitted for @em all messages
+     * received, even thos that the local client sent to itself ("loopback").
+     * @param msgid The message ID of the received message, as it is used by
+     * KGame.
+     * @param userMsgid -1 if the received message is an internal KGame message
+     * (i.e. @p msgid is < @ref KGameMessage::IdUser), otherwise the message ID
+     * of the message as provided by the user (i.e. @p msgid - KGameMessage::IdUser)
+     **/
+    void signalReceiveBytes(quint32 bytes, int msgid, int userMsgid, quint32 sender, quint32 receiver);
+
+
 protected:
     /**
      * @internal

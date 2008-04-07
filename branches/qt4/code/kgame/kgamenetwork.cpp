@@ -421,6 +421,13 @@ bool KGameNetwork::sendSystemMessage(const QByteArray& data, int msgid, quint32 
    return false;
  }
 
+ int userMsgid = -1;
+ if (msgid >= KGameMessage::IdUser)
+ {
+   userMsgid = msgid - KGameMessage::IdUser;
+ }
+ emit signalSendBytes(buffer.size(), msgid, userMsgid, sender, receiver);
+
  if (receiverClient == 0 || receiverPlayer != 0)
  {
    // if receiverClient == 0 this is a broadcast message. if it is != 0 but
@@ -466,6 +473,13 @@ void KGameNetwork::receiveNetworkTransmission(const QByteArray& receiveBuffer, q
  quint32 receiver; // the id of the KGame/KPlayer the message is for 
  KGameMessage::extractHeader(stream, sender, receiver, msgid);
 // kDebug(11001) << "id=" << msgid << "sender=" << sender << "recv=" << receiver;
+
+ int userMsgid = -1;
+ if (msgid >= KGameMessage::IdUser)
+ {
+   userMsgid = msgid - KGameMessage::IdUser;
+ }
+ emit signalReceiveBytes(receiveBuffer.size(), msgid, userMsgid, sender, receiver);
 
  // No broadcast : receiver==0
  // No player isPlayer(receiver)
