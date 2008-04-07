@@ -43,4 +43,7 @@ set(libkdegames_sources
 )
 
 boson_add_library(kgame STATIC ${libkdegames_sources})
-
+target_link_libraries(kgame
+	${KDE4_KDE3SUPPORT_LIBS}
+	${KDE4_KDNSSD_LIBS}
+)
