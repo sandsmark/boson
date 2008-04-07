@@ -1,4 +1,5 @@
-set(scripts_install_dir ${KDE3_DATA_INSTALL_DIR}/boson/themes/scripts)
+set(scripts_install_dir ${KDE4_DATA_INSTALL_DIR}/boson/themes/scripts)
 
-install_files(${scripts_install_dir} .*\\.py)
+FILE(GLOB py_files "*.py")
+install(FILES ${py_files} DESTINATION ${scripts_install_dir})
 

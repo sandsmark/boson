@@ -1,4 +1,3 @@
-#set(themes_install_dir ${KDE3_DATA_INSTALL_DIR}/boson/themes)
 
 add_subdirectory(species)
 add_subdirectory(grounds)
