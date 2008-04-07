@@ -55,11 +55,11 @@
 #define boError kError
 #define boBacktrace kBacktrace
 
-#warning TODO: BoDebugLog support
+//#warning TODO: BoDebugLog support
 
 
 // TODO: must be ported to Qt4, if we want to use signals. do we?
-#warning TODO: port BoDebug for signals?
+//#warning TODO: port BoDebug for signals?
 #include <qobject.h>
 class BoDebug : public QObject
 {
