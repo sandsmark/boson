@@ -27,6 +27,8 @@
 
 #include <bodebug.h>
 
+#include <QColor>
+
 
 
 BoMeshRendererVertexArray::BoMeshRendererVertexArray() : BoMeshRenderer()
@@ -105,7 +107,7 @@ unsigned int BoMeshRendererVertexArray::render(const QColor& teamColor, BoMesh* 
 
  if (!(flags & DepthOnly)) {
 	BoMaterial::activate(mesh->material());
-	if (mesh->isTeamColor() && !teamColor.isNull()) {
+	if (mesh->isTeamColor() && !teamColor.isValid()) {
 		glPushAttrib(GL_CURRENT_BIT);
 		glColor3ub(teamColor.red(), teamColor.green(), teamColor.blue());
 		resetColor = true;

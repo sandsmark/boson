@@ -17,10 +17,14 @@ set(groundrenderer_SRCS
 	bocolormaprenderer.cpp
 )
 if(BOSON_USE_DEBUG_PLUGINS)
-  boson_add_library(bogroundrendererplugin MODULE ${groundrenderer_SRCS})
-  install_targets(${BOSON_PLUGIN_INSTALL_DIR} bogroundrendererplugin)
+  kde4_add_plugin(bogroundrendererplugin ${groundrenderer_SRCS})
+  #boson_add_library(bogroundrendererplugin MODULE ${groundrenderer_SRCS})
+  install(TARGETS bogroundrendererplugin DESTINATION ${BOSON_PLUGIN_INSTALL_DIR})
 else(BOSON_USE_DEBUG_PLUGINS)
   boson_add_library(bogroundrendererplugin STATIC ${groundrenderer_SRCS})
 endif(BOSON_USE_DEBUG_PLUGINS)
 
-
+target_link_libraries(bogroundrendererplugin
+	bogl
+	bosongamelib
+)

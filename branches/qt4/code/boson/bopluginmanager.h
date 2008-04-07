@@ -41,7 +41,7 @@ class KPluginFactory;
 	KPluginFactory* className::initWithoutLibrary() { return 0; }
 #else
 #define BOPLUGIN_MANAGER_INITWITHOUTLIBRARY(className, libName) \
-	extern "C" { void* init_##libName(); }  \
+	extern "C" { Q_DECL_EXPORT void* init_##libName(); }  \
 	KPluginFactory* className::initWithoutLibrary() \
 		{ \
 			return (KPluginFactory*)init_##libName(); \
@@ -57,7 +57,7 @@ class KPluginFactory;
  * @param className The class name of the plugin manager (for example @ref
  *        BoMeshRendererManager)
  * @param libName The name of the library (without .so suffix) that provides the
- *        plugin. For example libbomeshrendererplugin
+ *        plugin. For example bomeshrendererplugin
  **/
 #define BOPLUGIN_MANAGER(className, libName) \
 		BOPLUGIN_MANAGER_LIBNAME(className, libName) \
@@ -81,8 +81,8 @@ class KPluginFactory;
 // AB: probably add a #include <boversion.h> to the file defining this macro
 #define BO_EXPORT_PLUGIN_FACTORY( libname, factory ) \
 	extern "C" { \
-		void* init_##libname() { return new factory; } \
-		int version_##libname() { return BOSON_VERSION; } \
+		Q_DECL_EXPORT void* init_##libname() { return new factory; } \
+		Q_DECL_EXPORT int version_##libname() { return BOSON_VERSION; } \
 	}
 
 
@@ -217,7 +217,7 @@ private:
  *
  * Note that the name of your derived class MUST be
  * BoPluginInformation_plugin, where "plugin" is the name of your library
- * file (e.g. "libbomeshrendererplugin")
+ * file (e.g. "bomeshrendererplugin")
  **/
 class BoPluginInformation : public QObject
 {
@@ -231,5 +231,7 @@ public:
 	}
 	virtual QStringList plugins() const = 0;
 };
+
+Q_DECLARE_INTERFACE(BoPluginInformation, "BoPluginInformation")
 
 #endif

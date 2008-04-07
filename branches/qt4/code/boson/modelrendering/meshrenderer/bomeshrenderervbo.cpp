@@ -30,6 +30,8 @@
 
 #include <bodebug.h>
 
+#include <QColor>
+
 
 class BoMeshRendererModelDataVBO : public BoMeshRendererModelData
 {

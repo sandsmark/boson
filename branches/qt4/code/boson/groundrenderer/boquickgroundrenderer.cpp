@@ -95,6 +95,11 @@ bool BoQuickGroundRenderer::initGroundRenderer()
 
 bool BoQuickGroundRenderer::usable() const
 {
+  boDebug() << boTextureManager;
+  if (!boTextureManager)
+  {
+    return false;
+  }
   if(boTextureManager->textureUnits() < 2)
   {
     return false;
@@ -211,8 +216,8 @@ void BoQuickGroundRenderer::generateCellList(const BosonMap* map)
 
   mCellListDirty = false;
 
-  statistics()->setMinDistance(qMax(0, mindist));
-  statistics()->setMaxDistance(qMax(0, maxdist));
+  statistics()->setMinDistance(qMax(0.0f, mindist));
+  statistics()->setMaxDistance(qMax(0.0f, maxdist));
 }
 
 void BoQuickGroundRenderer::renderVisibleCells(int*, unsigned int, const BosonMap* map, RenderFlags flags)

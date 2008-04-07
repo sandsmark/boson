@@ -40,7 +40,7 @@
 #include <stdlib.h>
 #include <dlfcn.h>
 
-BOPLUGIN_MANAGER(BoMeshRendererManager, libbomeshrendererplugin)
+BOPLUGIN_MANAGER(BoMeshRendererManager, bomeshrendererplugin)
 
 BoMeshRendererManager* BoMeshRendererManager::mManager = 0;
 

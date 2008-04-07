@@ -34,19 +34,18 @@ public:
 	~BosonGameViewPluginFactory();
 
 protected:
-	virtual QObject* createObject(QObject* parent, const char* className,
-			const QStringList &args);
+	virtual QObject* create(const char* iface, QWidget* parentWidget, QObject* parent, const QVariantList& args, const QString& keyWord);
 
 };
 
-class BoPluginInformation_libbosongameviewplugin : public BoPluginInformation
+class BoPluginInformation_bosongameviewplugin : public BoPluginInformation
 {
 	Q_OBJECT
 public:
-	BoPluginInformation_libbosongameviewplugin() : BoPluginInformation()
+	BoPluginInformation_bosongameviewplugin() : BoPluginInformation()
 	{
 	}
-	~BoPluginInformation_libbosongameviewplugin()
+	~BoPluginInformation_bosongameviewplugin()
 	{
 	}
 

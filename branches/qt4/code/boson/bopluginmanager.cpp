@@ -120,7 +120,7 @@ QStringList BoPluginManager::availablePlugins()
 	return d->mLibraryPlugins;
  }
 
- BoPluginInformation* info = (BoPluginInformation*)d->mLibraryFactory->create<BoPluginInformation>();
+ BoPluginInformation* info = (BoPluginInformation*)d->mLibraryFactory->create<BoPluginInformation>("BoPluginInformation");
  if (!info) {
 	// should never happen, as we check for it at loading
 	boError(800) << k_funcinfo << "no information object?!" << endl;
@@ -175,7 +175,7 @@ bool BoPluginManager::loadLibrary()
 #if USE_BO_PLUGINS
  init_function init_func = 0;
  version_function version_func = 0;
- file = KGlobal::dirs()->findResource("lib", QString("kde3/plugins/boson/%1.so").arg(lib));
+ file = KGlobal::dirs()->findResource("lib", QString("kde4/plugins/boson/%1.so").arg(lib));
  if (file.isEmpty()) {
 	error = i18n("Unable to find a file for this plugin");
 	boError(800) << k_funcinfo << error << endl;
@@ -187,9 +187,8 @@ bool BoPluginManager::loadLibrary()
 	ret = d->mLibrary->load();
 	if (!ret) {
 		error = i18n("Library loading failed");
-		const char* e = dlerror();
-		if (e) {
-			error = QString("%1 - reported error:\n%2").arg(error).arg(e);
+		if (!d->mLibrary->errorString().isEmpty()) {
+			error = i18n("%1 - reported error:%2\n", error, d->mLibrary->errorString());
 		}
 	}
  }
@@ -202,7 +201,7 @@ bool BoPluginManager::loadLibrary()
 		init_func = (init_function)d->mLibrary->resolve(init_name.toLatin1());
 		if (!init_func) {
 			ret = false;
-			error = i18n("Could not resolve %1").arg(init_name);
+			error = i18n("Could not resolve %1", init_name);
 			boError(800) << k_funcinfo << error << endl;
 		}
 	}
@@ -212,7 +211,7 @@ bool BoPluginManager::loadLibrary()
 		version_func = (version_function)d->mLibrary->resolve(version_name.toLatin1());
 		if (!version_func) {
 			ret = false;
-			error = i18n("Could not resolve %1").arg(version_name);
+			error = i18n("Could not resolve %1", version_name);
 			boError(800) << k_funcinfo << error << endl;
 		}
 	}
@@ -222,10 +221,11 @@ bool BoPluginManager::loadLibrary()
 	boDebug(800) << k_funcinfo << "symbols resolved. checking version" << endl;
 	int version = version_func();
 	if (version != BOSON_VERSION) {
-		error = i18n("Version mismatch: plugin compiled for %1, you are running %2").arg(version).arg(BOSON_VERSION);
+		error = i18n("Version mismatch: plugin compiled for %1, you are running %2", version, BOSON_VERSION);
 		boError(800) << k_funcinfo << error << endl;
 		ret = false;
 	}
+	boDebug(800) << k_funcinfo << "version ok." << endl;
  }
 #else
  file = "(no plugin)";
@@ -245,7 +245,7 @@ bool BoPluginManager::loadLibrary()
  }
  if (ret) {
 	boDebug(800) << k_funcinfo << "searching for information object" << endl;
-	QObject* info = d->mLibraryFactory->create<BoPluginInformation>();
+	BoPluginInformation* info = d->mLibraryFactory->create<BoPluginInformation>("BoPluginInformation");
 	if (!info) {
 		error = i18n("Could not find the BoPluginInformation object.");
 		boError(800) << k_funcinfo << error << endl;
@@ -257,8 +257,8 @@ bool BoPluginManager::loadLibrary()
  if (ret) {
 	boDebug(800) << k_funcinfo << "library should be ready to use now" << endl;
  } else {
-	boError(800) << k_funcinfo << "library loading failed. fatal error." << endl;
-	KMessageBox::sorry(0, i18n("Plugin could not be loaded - check your installation!\nFailed plugin: %1\nTried file: %2\nError: %3").arg(lib).arg(file).arg(error));
+	boError(800) << k_funcinfo << "library loading failed. fatal error. error message: " << error << endl;
+	KMessageBox::sorry(0, i18n("Plugin could not be loaded - check your installation!\nFailed plugin: %1\nTried file: %2\nError: %3", lib, file, error));
 	unloadLibrary();
 	exit(1);
  }

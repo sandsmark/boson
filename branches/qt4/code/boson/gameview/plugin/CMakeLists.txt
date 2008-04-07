@@ -18,8 +18,8 @@ set(gameviewplugin_SRCS
 )
 
 if(BOSON_USE_DEBUG_PLUGINS)
-  boson_add_library(bosongameviewplugin MODULE ${gameviewplugin_SRCS})
-  install_targets(${BOSON_PLUGIN_INSTALL_DIR} bosongameviewplugin)
+  kde4_add_plugin(bosongameviewplugin ${gameviewplugin_SRCS})
+  install(TARGETS bosongameviewplugin DESTINATION ${BOSON_PLUGIN_INSTALL_DIR})
 else(BOSON_USE_DEBUG_PLUGINS)
   boson_add_library(bosongameviewplugin STATIC ${gameviewplugin_SRCS})
 endif(BOSON_USE_DEBUG_PLUGINS)
@@ -29,7 +29,7 @@ target_link_libraries(bosongameviewplugin
 	boufo
 	bogl
 	kgame
-	${QT_QT3SUPPORT_LIBRARY}
+	bosongamelib
 	${KDE4_KDEUI_LIBS}
 )
 

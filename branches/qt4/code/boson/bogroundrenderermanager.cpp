@@ -39,7 +39,7 @@
 #include <stdlib.h>
 #include <dlfcn.h>
 
-BOPLUGIN_MANAGER(BoGroundRendererManager, libbogroundrendererplugin)
+BOPLUGIN_MANAGER(BoGroundRendererManager, bogroundrendererplugin)
 
 BoGroundRendererManager* BoGroundRendererManager::mManager = 0;
 

@@ -29,33 +29,32 @@
 
 #include <bodebug.h>
 
-KInstance* BoGroundRendererFactory::mInstance = 0;
-
-BoGroundRendererFactory::BoGroundRendererFactory(QObject* parent, const char* name)
-	: KLibFactory(parent, name)
+BoGroundRendererFactory::BoGroundRendererFactory(QObject* parent)
+	: KLibFactory(parent)
 {
- mInstance = new KInstance("BoGroundRendererFactory");
 }
 
 BoGroundRendererFactory::~BoGroundRendererFactory()
 {
- delete mInstance;
- mInstance = 0;
 }
 
-QObject* BoGroundRendererFactory::createObject(QObject* parent, const char* name,
-		const char* className, const QStringList &args)
+QObject* BoGroundRendererFactory::create(const char* iface,
+		QWidget* parentWidget,
+		QObject* parent,
+		const QVariantList& args,
+		const QString& keyWord)
 {
- Q_UNUSED(name);
- Q_UNUSED(args);
+ Q_UNUSED(iface);
+ Q_UNUSED(parentWidget);
  Q_UNUSED(parent);
+ Q_UNUSED(args);
  QObject* o = 0;
  bool initrenderer = true;
 
- if (qstrcmp(className, "BoPluginInformation") == 0) {
-	// note: the _libbomeshrendererplugin is NOT part of the string
-	o = new BoPluginInformation_libbogroundrendererplugin;
-	BoPluginInformation_libbogroundrendererplugin* info = (BoPluginInformation_libbogroundrendererplugin*)o;
+ if (keyWord == "BoPluginInformation") {
+	// note: the _bogroundrendererplugin is NOT part of the string
+	o = new BoPluginInformation_bogroundrendererplugin;
+	BoPluginInformation_bogroundrendererplugin* info = (BoPluginInformation_bogroundrendererplugin*)o;
 	// Check which renderers are usable
 	bool usable;
 	usable = rendererUsable(new BoFastGroundRenderer);
@@ -64,16 +63,16 @@ QObject* BoGroundRendererFactory::createObject(QObject* parent, const char* name
 	info->mRenderers["BoQuickGroundRenderer"] = rendererUsable(new BoQuickGroundRenderer);
 	info->mRenderers["BoDefaultGroundRenderer"] = rendererUsable(new BoDefaultGroundRenderer);
 	initrenderer = false;
- } else if (qstrcmp(className, "BoDefaultGroundRenderer") == 0) {
+ } else if (keyWord == "BoDefaultGroundRenderer") {
 	o = new BoDefaultGroundRenderer();
- } else if (qstrcmp(className, "BoFastGroundRenderer") == 0) {
+ } else if (keyWord == "BoFastGroundRenderer") {
 	o = new BoFastGroundRenderer();
- } else if (qstrcmp(className, "BoVeryFastGroundRenderer") == 0) {
+ } else if (keyWord == "BoVeryFastGroundRenderer") {
 	o = new BoVeryFastGroundRenderer();
- } else if (qstrcmp(className, "BoQuickGroundRenderer") == 0) {
+ } else if (keyWord == "BoQuickGroundRenderer") {
 	o = new BoQuickGroundRenderer();
  } else {
-	boError() << k_funcinfo << "no such class available: " << className << endl;
+	boError() << k_funcinfo << "no such class available: " << keyWord << endl;
 	return 0;
  }
 
@@ -92,27 +91,27 @@ bool BoGroundRendererFactory::rendererUsable(BoGroundRenderer* r) const
 }
 
 
-QStringList BoPluginInformation_libbogroundrendererplugin::plugins() const
+QStringList BoPluginInformation_bogroundrendererplugin::plugins() const
 {
  QStringList list;
  QMap<QString, bool>::const_iterator it;
  for (it = mRenderers.begin(); it != mRenderers.end(); ++it) {
-	if (it.data()) {
+	if (it.value()) {
 		list.append(it.key());
 	}
  }
  return list;
 }
 
-bool BoPluginInformation_libbogroundrendererplugin::rendererUsable(const QString& className) const
+bool BoPluginInformation_bogroundrendererplugin::rendererUsable(const QString& className) const
 {
  QMap<QString, bool>::const_iterator it = mRenderers.find(className);
  if (it == mRenderers.end()) {
 	return false;
  } else {
-	return it.data();
+	return it.value();
  }
 }
 
-BO_EXPORT_PLUGIN_FACTORY( libbogroundrendererplugin, BoGroundRendererFactory )
+BO_EXPORT_PLUGIN_FACTORY( bogroundrendererplugin, BoGroundRendererFactory )
 

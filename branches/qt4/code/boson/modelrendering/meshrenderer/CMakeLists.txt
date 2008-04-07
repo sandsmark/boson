@@ -15,9 +15,18 @@ set(meshrenderer_SRCS
 	bomeshrenderervbo.cpp
 )
 if(BOSON_USE_DEBUG_PLUGINS)
-  boson_add_library(bomeshrendererplugin MODULE ${meshrenderer_SRCS})
-  install_targets(${BOSON_PLUGIN_INSTALL_DIR} bomeshrendererplugin)
+  kde4_add_plugin(bomeshrendererplugin ${meshrenderer_SRCS})
+  install(TARGETS bomeshrendererplugin DESTINATION ${BOSON_PLUGIN_INSTALL_DIR})
 else(BOSON_USE_DEBUG_PLUGINS)
   boson_add_library(bomeshrendererplugin STATIC ${meshrenderer_SRCS})
 endif(BOSON_USE_DEBUG_PLUGINS)
+
+
+# AB: FIXME: KDE4 port: do we really need to link the plugin against
+# _everything_?
+target_link_libraries(bomeshrendererplugin
+	bogl
+	bosonmainlib
+	${KDE4_KDEUI_LIBS}
+)
 

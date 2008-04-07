@@ -35,16 +35,21 @@ BosonGameViewPluginFactory::~BosonGameViewPluginFactory()
 {
 }
 
-QObject* BosonGameViewPluginFactory::createObject(QObject* parent,
-		const char* className, const QStringList &args)
+QObject* BosonGameViewPluginFactory::create(const char* iface,
+		QWidget* parentWidget,
+		QObject* parent,
+		const QVariantList& args,
+		const QString& keyWord)
 {
- Q_UNUSED(args);
+ Q_UNUSED(iface);
+ Q_UNUSED(parentWidget);
  Q_UNUSED(parent);
+ Q_UNUSED(args);
  QObject* o = 0;
- if (qstrcmp(className, "BoPluginInformation") == 0) {
-	// note: the _libbosongameviewplugin is NOT part of the string
-	o = new BoPluginInformation_libbosongameviewplugin;
- } else if (qstrcmp(className, "BosonGameViewPluginDefault") == 0) {
+ if (keyWord == "BoPluginInformation") {
+	// note: the _bosongameviewplugin is NOT part of the string
+	o = new BoPluginInformation_bosongameviewplugin;
+ } else if (keyWord == "BosonGameViewPluginDefault") {
 
 	// AB: note that the gamew view plugin is intended to consist of only a
 	// single class!
@@ -54,7 +59,7 @@ QObject* BosonGameViewPluginFactory::createObject(QObject* parent,
 
 	o = new BosonGameViewPluginDefault;
  } else {
-	boError() << k_funcinfo << "no such class available: " << className << endl;
+	boError() << k_funcinfo << "no such class available: " << keyWord << endl;
 	return 0;
  }
  emit objectCreated(o);
@@ -62,12 +67,12 @@ QObject* BosonGameViewPluginFactory::createObject(QObject* parent,
 }
 
 
-QStringList BoPluginInformation_libbosongameviewplugin::plugins() const
+QStringList BoPluginInformation_bosongameviewplugin::plugins() const
 {
  QStringList list;
  list.append("BosonGameViewPluginDefault");
  return list;
 }
 
-BO_EXPORT_PLUGIN_FACTORY( libbosongameviewplugin, BosonGameViewPluginFactory )
+BO_EXPORT_PLUGIN_FACTORY( bosongameviewplugin, BosonGameViewPluginFactory )
 

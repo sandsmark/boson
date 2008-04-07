@@ -26,6 +26,8 @@
 
 #include <bodebug.h>
 
+#include <QColor>
+
 BoMeshRendererSemiImmediate::BoMeshRendererSemiImmediate() : BoMeshRenderer()
 {
 }
@@ -96,7 +98,7 @@ unsigned int BoMeshRendererSemiImmediate::render(const QColor& teamColor, BoMesh
 
  if (!(flags & DepthOnly)) {
 	BoMaterial::activate(mesh->material());
-	if (mesh->isTeamColor() && !teamColor.isNull()) {
+	if (mesh->isTeamColor() && !teamColor.isValid()) {
 		glPushAttrib(GL_CURRENT_BIT);
 		glColor3ub(teamColor.red(), teamColor.green(), teamColor.blue());
 		resetColor = true;

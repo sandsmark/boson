@@ -83,4 +83,6 @@ private:
 	BoSelection* mSelection;
 };
 
+Q_DECLARE_INTERFACE(BosonGameViewPluginBase, "BosonGameViewPluginBase")
+
 #endif
