@@ -32,6 +32,7 @@
 #include <qwidget.h>
 #include <qregexp.h>
 #include <qstringlist.h>
+#include <QX11Info>
 
 #include <X11/Xlib.h>
 
@@ -61,7 +62,7 @@ void BoInfo::updateOpenGLInfo(QWidget* widget)
  }
 
  int glxmajor, glxminor;
- glXQueryVersion(widget->x11Display(), &glxmajor, &glxminor);
+ glXQueryVersion(widget->x11Info().display(), &glxmajor, &glxminor);
  insert(BoInfo::GLXVersionMajor, (int)glxmajor);
  insert(BoInfo::GLXVersionMinor, (int)glxminor);
  insert(BoInfo::GLXClientVersionString, (const char*)glXGetClientString(widget->x11Display(), GLX_VERSION));
@@ -80,7 +81,7 @@ void BoInfo::updateOpenGLInfo(QWidget* widget)
  glStates.init();
  QStringList implementationValueList = glStates.implementationValueList();
  QString implementationValues;
- for (unsigned int i = 0; i < implementationValueList.count(); i++) {
+ for (int i = 0; i < implementationValueList.count(); i++) {
 	implementationValues += implementationValueList[i] + "\n";
  }
  insert(BoInfo::OpenGLValuesString, implementationValues);

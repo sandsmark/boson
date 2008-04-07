@@ -128,7 +128,7 @@ void BoUfoStartEditorWidget::initPlayFields()
  boDebug() << k_funcinfo << endl;
  QStringList list = boData->availablePlayFields();
  boDebug() << k_funcinfo << list.count() << endl;
- for (unsigned int i = 0; i < list.count(); i++) {
+ for (int i = 0; i < list.count(); i++) {
 	if (!boData->playFieldPreview(list[i])) {
 		boWarning() << k_funcinfo << "NULL playFieldpreview " << list[i] << endl;
 		continue;
@@ -370,7 +370,7 @@ void BoUfoStartEditorWidget::slotGroundThemeChanged(int)
  mFilling->clear();
  QStringList groundThemes = BosonData::bosonData()->availableGroundThemes();
  int themeIndex = mGroundTheme->currentItem();
- if (themeIndex < 0 || (unsigned int)themeIndex >= groundThemes.count()) {
+ if (themeIndex < 0 || themeIndex >= groundThemes.count()) {
 	KMessageBox::sorry(0, i18n("Invalid groundTheme index %1").arg(themeIndex));
 	return;
  }
@@ -501,7 +501,7 @@ QByteArray BoUfoStartEditorWidget::createNewMap()
 
  QStringList groundThemes = BosonData::bosonData()->availableGroundThemes();
  int themeIndex = mGroundTheme->currentItem();
- if (themeIndex < 0 || (unsigned int)themeIndex >= groundThemes.count()) {
+ if (themeIndex < 0 || themeIndex >= groundThemes.count()) {
 	boError() << k_funcinfo << "invalid theme index " << themeIndex << endl;
 	if (themeIndex < 0) {
 		KMessageBox::sorry(0, i18n("Please select a ground theme first"));

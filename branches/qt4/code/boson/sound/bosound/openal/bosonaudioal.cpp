@@ -184,7 +184,7 @@ bool BosonAudioAL::loadFileToBuffer(ALuint buffer, const QString& file)
 	boDebug(200) << k_funcinfo << "loading mp3 file " << file << endl;
 	if (alutLoadMP3_LOKI) {
 		char* data = new char[f.size()];
-		int l = f.readBlock(data, f.size());
+		int l = f.read(data, f.size());
 
 		// AB: OpenAL requires MP3 files to be encoded with a frequency
 		// of 44100 hz. we check for this first and discard any files
@@ -231,7 +231,7 @@ bool BosonAudioAL::loadFileToBuffer(ALuint buffer, const QString& file)
 	boDebug(200) << k_funcinfo << "loading ogg vorbis file " << file << endl;
 	if (alutLoadVorbis_LOKI) {
 		char* data = new char[f.size()];
-		int l = f.readBlock(data, f.size());
+		int l = f.read(data, f.size());
 		if (l != (int)f.size()) {
 			boError() << k_funcinfo << "did not read everything. read: " << l << " have: " << f.size() << endl;
 			delete[] data;

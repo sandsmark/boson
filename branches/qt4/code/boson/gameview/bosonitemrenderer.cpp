@@ -30,6 +30,8 @@
 #include "bosonitem.h"
 #include "bodebug.h"
 
+#include <QColor>
+
 
 BosonItemRenderer::BosonItemRenderer(BosonItem* item)
 {
@@ -67,7 +69,7 @@ void BosonItemRenderer::stopItemRendering()
  }
 }
 
-const QColor* BosonItemRenderer::teamColor() const
+QColor BosonItemRenderer::teamColor() const
 {
  return mItem->teamColor();
 }
@@ -351,8 +353,8 @@ void BosonItemModelRenderer::renderItem(unsigned int lod, bool transparentmeshes
  BoLOD* l = mModel->lod(lod);
  BO_CHECK_NULL_RET(l);
 
- unsigned int frameIndex = mMaxFramesInModel * lod + (unsigned int)mCurrentFrame;
- BoFrame* frame = l->frame((unsigned int)mCurrentFrame);
+ int frameIndex = mMaxFramesInModel * lod + (unsigned int)mCurrentFrame;
+ BoFrame* frame = l->frame((int)mCurrentFrame);
  BO_CHECK_NULL_RET(frame);
 
  if (frameIndex >= mItemMatrices.count()) {

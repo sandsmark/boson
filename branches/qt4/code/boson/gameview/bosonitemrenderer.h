@@ -114,7 +114,7 @@ protected:
 	int mAnimationMode;
 
 protected:
-	const QColor* teamColor() const;
+	QColor teamColor() const;
 
 	void setBoundingSphereRadius(float r) { mBoundingSphereRadius = r; }
 

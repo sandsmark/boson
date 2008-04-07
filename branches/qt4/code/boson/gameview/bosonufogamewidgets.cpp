@@ -380,7 +380,7 @@ void BosonUfoPlacementPreviewWidget::renderPlacementPreview()
 	BosonModel::startModelRendering();
 	d->mPlacementPreview.model()->prepareRendering();
 	Q3ValueVector<const BoMatrix*> itemMatrices(f->nodeCount());
-	f->renderFrame(itemMatrices, &localPlayerIO()->teamColor());
+	f->renderFrame(itemMatrices, localPlayerIO()->teamColor());
 	BosonModel::stopModelRendering();
  } else if (groundPreview) {
 #warning TODO: cell placement preview

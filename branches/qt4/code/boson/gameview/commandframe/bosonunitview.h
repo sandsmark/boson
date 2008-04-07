@@ -55,7 +55,8 @@ protected:
 	void hideAll();
 	void showGeneral();
 
-	virtual void displayUnitPixmap(unsigned long int unitType, const Player* owner);
+	virtual void displayUnitPixmap(quint32 unitType, const Player* owner);
+	using BosonOrderButton::displayUnitPixmap;
 
 private:
 	BosonUnitViewPrivate* d;

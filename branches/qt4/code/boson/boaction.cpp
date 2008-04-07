@@ -24,23 +24,25 @@
 #include "speciesdata.h"
 #include "bodebug.h"
 
-#include <ksimpleconfig.h>
+#include <KConfig>
+#include <KConfigGroup>
+
 #include <qstring.h>
 #include <q3ptrlist.h>
 
 
 /***  BoAction  ***/
 
-BoAction::BoAction(KSimpleConfig* cfg, const QString& name, SpeciesData* theme)
+BoAction::BoAction(KConfig* cfg, const QString& name, SpeciesData* theme)
 {
-  cfg->setGroup(name);
+  KConfigGroup group = cfg->group(name);
   mId = name;  // is that needed?
-  mImage = theme->image(cfg->readEntry("Pixmap", ""));
+  mImage = theme->image(group.readEntry("Pixmap", ""));
   if(!mImage)
   {
     boWarning() << k_funcinfo << "NULL pixmap" << endl;
   }
-  mText = cfg->readEntry("Text", "");
+  mText = group.readEntry("Text", "");
   // TODO: load shortcut aka hotkey
 }
 

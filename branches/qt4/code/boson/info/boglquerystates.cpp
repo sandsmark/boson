@@ -152,7 +152,7 @@ public:
     {
         QStringList list;
         Q3ValueList<int> keys = mNameDict.keys();
-        for (unsigned int i = 0; i < keys.count(); i++) {
+        for (int i = 0; i < keys.count(); i++) {
             list.append(QString("%1 = %2").arg(mNameDict[keys[i]]).arg(value(keys[i])));
         }
         return list;
@@ -722,7 +722,7 @@ public:
         ADD(GL_INDEX_CLEAR_VALUE, "GL_INDEX_CLEAR_VALUE");
         ADD(GL_INDEX_LOGIC_OP, "GL_INDEX_LOGIC_OP");
         ADD(GL_INDEX_OFFSET, "GL_INDEX_OFFSET");
-        ADD(GL_INDEX_Qt::SHIFT, "GL_INDEX_Qt::SHIFT");
+        ADD(GL_INDEX_SHIFT, "GL_INDEX_SHIFT");
         ADD(GL_INDEX_WRITEMASK, "GL_INDEX_WRITEMASK");
 
         ADD(GL_LIGHTING, "GL_LIGHTING");
@@ -979,7 +979,7 @@ public:
         BO_UPDATE(GL_INDEX_ARRAY_TYPE);
         BO_UPDATE(GL_INDEX_CLEAR_VALUE);
         BO_UPDATE(GL_INDEX_LOGIC_OP);
-        BO_UPDATE(GL_INDEX_Qt::SHIFT);
+        BO_UPDATE(GL_INDEX_SHIFT);
         BO_UPDATE(GL_INDEX_OFFSET);
         BO_UPDATE(GL_INDEX_WRITEMASK);
 
@@ -1323,7 +1323,7 @@ public:
     BO_VAR(GLfloat,   GL_INDEX_CLEAR_VALUE, 1)
     BO_VAR(BOboolean, GL_INDEX_LOGIC_OP, 1)
     BO_VAR(GLint,     GL_INDEX_OFFSET, 1)
-    BO_VAR(GLint,     GL_INDEX_Qt::SHIFT, 1)
+    BO_VAR(GLint,     GL_INDEX_SHIFT, 1)
     BO_VAR(GLint,     GL_INDEX_WRITEMASK, 1)
 
     BO_VAR(BOboolean, GL_LIGHTING, 1)

@@ -26,20 +26,17 @@
  * This allows creation of a gameview plugin. The gameview plugin is intended to
  * provide a single plugin class only (unlike mesh and ground renderers).
  **/
-class BosonGameViewPluginFactory : public KLibFactory
+class BosonGameViewPluginFactory : public KPluginFactory
 {
 	Q_OBJECT
 public:
-	BosonGameViewPluginFactory(QObject* parent = 0, const char* name = 0);
+	BosonGameViewPluginFactory(QObject* parent = 0);
 	~BosonGameViewPluginFactory();
 
 protected:
-	virtual QObject* createObject(QObject* parent = 0, const char* name = 0,
-			const char* className = "QObject",
-			const QStringList &args = QStringList());
+	virtual QObject* createObject(QObject* parent, const char* className,
+			const QStringList &args);
 
-private:
-	static KInstance* mInstance;
 };
 
 class BoPluginInformation_libbosongameviewplugin : public BoPluginInformation

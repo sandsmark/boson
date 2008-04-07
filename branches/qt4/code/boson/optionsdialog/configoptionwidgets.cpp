@@ -86,12 +86,12 @@ void ConfigOptionWidgetInt::setRange(int min, int max, int step)
 
 int ConfigOptionWidgetInt::minValue() const
 {
- return mNumInput->minValue();
+ return mNumInput->minimum();
 }
 
 int ConfigOptionWidgetInt::maxValue() const
 {
- return mNumInput->maxValue();
+ return mNumInput->maximum();
 }
 
 void ConfigOptionWidgetInt::loadFromConfigScript(const BosonConfigScript* script)
@@ -169,12 +169,12 @@ void ConfigOptionWidgetUInt::setRange(unsigned int min, unsigned int max, int st
 
 int ConfigOptionWidgetUInt::minValue() const
 {
- return mNumInput->minValue();
+ return mNumInput->minimum();
 }
 
 int ConfigOptionWidgetUInt::maxValue() const
 {
- return mNumInput->maxValue();
+ return mNumInput->maximum();
 }
 
 void ConfigOptionWidgetUInt::loadFromConfigScript(const BosonConfigScript* script)
@@ -249,12 +249,12 @@ void ConfigOptionWidgetDouble::setRange(double min, double max, double step)
 
 double ConfigOptionWidgetDouble::minValue() const
 {
- return mNumInput->minValue();
+ return mNumInput->minimum();
 }
 
 double ConfigOptionWidgetDouble::maxValue() const
 {
- return mNumInput->maxValue();
+ return mNumInput->maximum();
 }
 
 void ConfigOptionWidgetDouble::loadFromConfigScript(const BosonConfigScript* script)

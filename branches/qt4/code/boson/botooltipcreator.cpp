@@ -30,6 +30,7 @@
 #include "gameengine/upgradeproperties.h"
 #include "gameengine/cell.h"
 #include "bo3dtools.h"
+#include "bosonpropertylist.h"
 
 #include <qstring.h>
 #include <q3ptrvector.h>
@@ -140,11 +141,11 @@ QString BoToolTipCreatorDebug::createToolTip(const BosonItem* item) const
  tip += i18n("\nHealth: %1").arg(u->health()); // AB: could be left out for debugging tooltips
  tip += i18n("\nAdvance Work: %1").arg(u->advanceWork());
 
- Q3ValueList<BoVector2Fixed> pathpoints = u->pathPointList();
+ QList<BoVector2Fixed> pathpoints = u->pathPointList();
  if (pathpoints.count() == 0) {
 	tip += i18n("\nNo pathpoints");
  } else {
-	Q3ValueList<BoVector2Fixed>::Iterator it;
+	QList<BoVector2Fixed>::Iterator it;
 	tip += i18n("\nPathpoints: ");
 	for (it = pathpoints.begin(); it != pathpoints.end(); ++it) {
 		if (it != pathpoints.begin()) {

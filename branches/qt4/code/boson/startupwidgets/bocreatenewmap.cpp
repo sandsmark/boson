@@ -154,7 +154,7 @@ QByteArray BoCreateNewMap::createNewMap()
 		p.setAttribute("IsNeutral", 1);
 	}
  }
- files.insert("players.xml", playersDoc.toCString());
+ files.insert("players.xml", playersDoc.toByteArray());
  files.insert("canvas.xml", BosonCanvas::emptyCanvasFile(mPlayerCount));
 
  BPFDescription desc;

@@ -295,7 +295,7 @@ BosonOrderButton::BosonOrderButton() : BoUfoWidget()
  mHealth = new BoUfoProgress();
  mHealth->setRange(0.0, 1.0);
  display->addWidget(mHealth);
- mHealth->setOrientation(Vertical);
+ mHealth->setOrientation(Qt::Vertical);
 #if 0
  mHealth->setTextEnabled(false);
  mHealth->setFixedWidth(BAR_WIDTH);
@@ -399,7 +399,7 @@ void BosonOrderButton::displayUnitPixmap(Unit* unit)
  displayUnitPixmap(unit->type(), unit->owner());
 }
 
-void BosonOrderButton::displayUnitPixmap(unsigned long int unitType, const Player* owner)
+void BosonOrderButton::displayUnitPixmap(quint32 unitType, const Player* owner)
 {
  if (!owner) {
 	boError(220) << k_funcinfo << "NULL owner" << endl;
@@ -541,7 +541,7 @@ void BosonOrderButton::setProductionCount(int count)
  mPixmapButton->setProductionCount(count);
 }
 
-unsigned long int BosonOrderButton::productionId() const
+quint32 BosonOrderButton::productionId() const
 {
  return (type() == ShowAction) ? mAction.productionId() : 0;
 }

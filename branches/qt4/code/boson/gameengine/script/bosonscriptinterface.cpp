@@ -25,7 +25,7 @@
 
 #include "bosonscriptinterface.moc"
 
-BosonScriptInterface::BosonScriptInterface(QObject* parent, const char* name) : QObject(parent, name)
+BosonScriptInterface::BosonScriptInterface(QObject* parent) : QObject(parent)
 {
 }
 

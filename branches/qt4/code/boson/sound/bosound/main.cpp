@@ -77,10 +77,10 @@ int main(int argc, char **argv)
 
  // and now the communication with the other process.
  QFile readFile;
- readFile.open(QIODevice::ReadOnly | QIODevice::Unbuffered, stdin);
+ readFile.open(stdin, QIODevice::ReadOnly | QIODevice::Unbuffered);
  // we may want to write to stdout to let boson know about errors!
  QFile writeFile;
- writeFile.open(QIODevice::ReadOnly | QIODevice::Unbuffered, stdout);
+ writeFile.open(stdout, QIODevice::ReadOnly | QIODevice::Unbuffered);
 
  QSocketNotifier notifier(readFile.handle(), QSocketNotifier::Read);
  QObject::connect(&notifier, SIGNAL(activated(int)), t, SLOT(slotReceiveStdin(int)));

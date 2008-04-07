@@ -62,4 +62,15 @@ private:
 	BosonProfilingDialogPrivate* d;
 };
 
+#include "ui_bosonprofilingdialoggui.h"
+class BosonProfilingDialogGUI : public QWidget, public Ui::BosonProfilingDialogGUI
+{
+	Q_OBJECT
+public:
+	BosonProfilingDialogGUI(QWidget* parent)
+		: QWidget(parent)
+	{
+	}
+};
+
 #endif

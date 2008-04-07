@@ -21,11 +21,11 @@
 
 #include "../bomemory/bodummymemory.h"
 #include "botexture.h"
-#include "bosonglwidget.h"
 #include <bodebug.h>
 
 #include <qpixmap.h>
 #include <q3valuelist.h>
+#include <QGLWidget>
 
 class BoPixmapRendererPrivate
 {
@@ -47,7 +47,7 @@ BoPixmapRenderer::BoPixmapRenderer()
  mGLWidget = 0;
 }
 
-void BoPixmapRenderer::setWidget(BosonGLWidget* w, int width, int height)
+void BoPixmapRenderer::setWidget(QGLWidget* w, int width, int height)
 {
  if (mGLWidget) {
 	boError() << k_funcinfo << "already a widget set" << endl;

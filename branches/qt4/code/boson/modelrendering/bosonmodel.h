@@ -145,7 +145,7 @@ public:
 	/**
 	 * @param lod See @ref BoMesh::renderMesh
 	 **/
-	void renderFrame(const Q3ValueVector<const BoMatrix*>& itemMatrices, const QColor* teamColor, bool transparentmeshes = false, RenderFlags flags = Default, int mode = GL_RENDER);
+	void renderFrame(const Q3ValueVector<const BoMatrix*>& itemMatrices, const QColor& teamColor, bool transparentmeshes = false, RenderFlags flags = Default, int mode = GL_RENDER);
 
 private:
 	void init();

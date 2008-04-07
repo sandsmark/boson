@@ -181,7 +181,7 @@ bool BosonEffectManager::loadWeaponType(const BosonWeaponProperties* prop)
 
 Q3PtrList<BosonEffect> BosonEffectManager::newEffects(unsigned int id, const BoVector3Fixed& pos, bofixed zrot) const
 {
- Q3ValueList<unsigned long int> ids;
+ Q3ValueList<quint32> ids;
  ids.append(id);
  Q3PtrList<BosonEffectProperties> effectProperties = BosonEffectProperties::loadEffectProperties(ids);
  return BosonEffectProperties::newEffects(&effectProperties, pos, BoVector3Fixed(0, 0, zrot));

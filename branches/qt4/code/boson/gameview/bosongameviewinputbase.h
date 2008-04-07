@@ -182,7 +182,7 @@ public:
 	/**
 	 * See @ref EditorViewInput::placeUnit
 	 **/
-	virtual void placeUnit(unsigned long int unitType, Player* owner) { Q_UNUSED(unitType); Q_UNUSED(owner); }
+	virtual void placeUnit(quint32 unitType, Player* owner) { Q_UNUSED(unitType); Q_UNUSED(owner); }
 
 	/**
 	 * See @ref EditorViewInput::placeGround

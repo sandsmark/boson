@@ -32,7 +32,7 @@ class BoGLStateWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	BoGLStateWidget(QWidget* parent = 0, const char* name = 0, Qt::WFlags f = 0);
+	BoGLStateWidget(QWidget* parent = 0);
 	virtual ~BoGLStateWidget();
 
 #if 0

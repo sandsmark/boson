@@ -259,7 +259,7 @@ bool PythonScript::loadScript(QString file)
     boError(700) << k_funcinfo << "No such file: '" << fi.absoluteFilePath() << "'. Aborting." << endl;
     return false;
   }
-  QString filePath = fi.dirPath(true);
+  QString filePath = fi.absolutePath();
 
   QFile f(file);
   if(!f.open(QIODevice::ReadOnly))
@@ -286,7 +286,8 @@ bool PythonScript::loadScriptFromString(const QString& string)
   code += "sys.path.insert(0, '')\n";
   code += string;
 
-  PyObject* obj = PyRun_String(code.ascii(), Py_file_input, mDict, mDict);
+  QByteArray tmp = code.toAscii();
+  PyObject* obj = PyRun_String(tmp.data(), Py_file_input, mDict, mDict);
   if(!obj)
   {
     PyErr_Print();
@@ -323,7 +324,8 @@ void PythonScript::callFunction(const QString& function, PyObject* args)
   getPythonLock();
   CHECK_PYTHON_ERROR;
 
-  PyObject* func = PyDict_GetItemString(mDict, (char*)function.ascii());
+  QByteArray tmp = function.toAscii();
+  PyObject* func = PyDict_GetItemString(mDict, tmp.data());
   if(!func)
   {
     PyErr_Print();
@@ -383,7 +385,8 @@ int PythonScript::callFunctionWithReturn(const QString& function, PyObject* args
   getPythonLock();
   CHECK_PYTHON_ERROR;
 
-  PyObject* func = PyDict_GetItemString(mDict, (char*)function.ascii());
+  QByteArray tmp = function.toAscii();
+  PyObject* func = PyDict_GetItemString(mDict, tmp.data());
   if(!func)
   {
     PyErr_Print();
@@ -433,7 +436,8 @@ void PythonScript::execLine(const QString& line)
   getPythonLock();
   CHECK_PYTHON_ERROR;
 
-  PyRun_SimpleString((char*)line.ascii());
+  QByteArray tmp = line.toAscii();
+  PyRun_SimpleString(tmp.data());
 
   CHECK_PYTHON_ERROR;
   freePythonLock();
@@ -456,7 +460,7 @@ void PythonScript::callEventHandler(const BoEvent* e, const QString& function, c
   PyObject* dict = 0;
   QString funcname = function;
   // If it contains module name, it must contain dot.
-  if(function.find('.') == -1)
+  if(function.indexOf('.') == -1)
   {
     // Function is in __main__ module
     dict = mDict;
@@ -464,7 +468,7 @@ void PythonScript::callEventHandler(const BoEvent* e, const QString& function, c
   else
   {
     // Find the module
-    QStringList modulelist = QStringList::split('.', function);
+    QStringList modulelist = function.split('.');
     PyObject* lastdict = mDict;
     // There should be this many modules in the modulelist, the last string is
     //  name of the function.
@@ -475,7 +479,8 @@ void PythonScript::callEventHandler(const BoEvent* e, const QString& function, c
     for(QStringList::Iterator it = modulelist.begin(); (it != modulelist.end()) && (i < modulecount); ++it, i++)
     {
       // Find object with given name in lastmodule
-      PyObject* o = PyDict_GetItemString(lastdict, (char*)(*it).latin1());
+      QByteArray tmp = (*it).toLatin1();
+      PyObject* o = PyDict_GetItemString(lastdict, tmp.data());
       if(!o)
       {
         boError(700) << k_funcinfo << "Couldn't find object '" << *it << "'! Full function name was '" << function << "'" << endl;
@@ -508,7 +513,7 @@ void PythonScript::callEventHandler(const BoEvent* e, const QString& function, c
   // Create the argument list for the function call
   PyObject* funcargs = PyTuple_New(args.length());
 
-  for(unsigned int i = 0; i < args.length(); i++)
+  for(int i = 0; i < args.length(); i++)
   {
     PyObject* o = 0;
     if(args.at(i) == 'p')
@@ -529,15 +534,18 @@ void PythonScript::callEventHandler(const BoEvent* e, const QString& function, c
     }
     else if(args.at(i) == 'n')
     {
-      o = PyString_FromString(e->name());
+      QByteArray tmp = e->name().toLatin1();
+      o = PyString_FromString(tmp.data());
     }
     else if(args.at(i) == 'a')
     {
-      o = PyString_FromString(e->data1().latin1());
+      QByteArray tmp = e->data1().toLatin1();
+      o = PyString_FromString(tmp.data());
     }
     else if(args.at(i) == 'b')
     {
-      o = PyString_FromString(e->data2().latin1());
+      QByteArray tmp = e->data1().toLatin1();
+      o = PyString_FromString(tmp.data());
     }
     else
     {
@@ -555,7 +563,8 @@ void PythonScript::callEventHandler(const BoEvent* e, const QString& function, c
   getPythonLock();
   CHECK_PYTHON_ERROR;
 
-  PyObject* func = PyDict_GetItemString(dict, (char*)funcname.ascii());
+  QByteArray tmp = funcname.toAscii();
+  PyObject* func = PyDict_GetItemString(dict, tmp.data());
   if(!func)
   {
     PyErr_Print();

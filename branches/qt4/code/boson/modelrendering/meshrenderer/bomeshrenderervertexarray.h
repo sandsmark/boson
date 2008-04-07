@@ -36,7 +36,7 @@ public:
 protected:
 	virtual void initFrame();
 	virtual void deinitFrame();
-	virtual unsigned int render(const QColor* teamColor, BoMesh* mesh, RenderFlags flags);
+	virtual unsigned int render(const QColor& teamColor, BoMesh* mesh, RenderFlags flags);
 
 private:
 	const BosonModel* mPreviousModel;

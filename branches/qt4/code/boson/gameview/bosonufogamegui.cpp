@@ -519,7 +519,7 @@ void BosonUfoGameGUI::updateUfoLabels()
  d->mOilLabel->setText(oil);
  d->mGenericAmmoLabel->setText(genericAmmo);
  d->mResourcesBox->setVisible(boConfig->boolValue("show_resources"));
- unsigned long int powerGenerated, powerConsumed;
+ quint32 powerGenerated, powerConsumed;
  localPlayerIO()->calculatePower(&powerGenerated, &powerConsumed);
  d->mPowerGeneratedLabel->setText(QString::number(powerGenerated));
  d->mPowerConsumedLabel->setText(QString::number(powerConsumed));

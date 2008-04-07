@@ -125,7 +125,7 @@ public:
 
 		mProgress = new BoUfoProgress();
 		mProgress->setRange(0.0, 100.0);
-		mProgress->setOrientation(Horizontal);
+		mProgress->setOrientation(Qt::Horizontal);
 		mProgress->setFrameColor(QColor(128, 128, 128));
 		addWidget(mProgress);
 	}
@@ -168,7 +168,7 @@ protected:
 		mProgress->setValue(p);
 	}
 
-	virtual bool useUpdateTimer()
+	virtual bool useUpdateTimer() const
 	{
 		Unit* u = 0;
 		if (!u) {
@@ -292,7 +292,7 @@ protected:
 		}
 	}
 
-	virtual bool useUpdateTimer()
+	virtual bool useUpdateTimer() const
 	{
 		Unit* u = 0;
 		if (!u) {
@@ -395,8 +395,8 @@ void BosonInfoWidget::showUnit(const PlayerIO* player, const UnitProperties* pro
 			.arg(prop->mineralCost()).arg(prop->oilCost());
 	// Check if the unit can be built
 	QString missingRequirements;
-	Q3ValueList<unsigned long int> requirements = prop->requirements();
-	for (Q3ValueList<unsigned long int>::Iterator it = requirements.begin(); it != requirements.end(); ++it) {
+	Q3ValueList<quint32> requirements = prop->requirements();
+	for (Q3ValueList<quint32>::Iterator it = requirements.begin(); it != requirements.end(); ++it) {
 		if (!player->hasUnitWithType(*it)) {
 			missingRequirements.append("  " + player->unitProperties(*it)->name() + "\n");
 		}
@@ -651,12 +651,12 @@ void BosonCommandFrame::setLocalPlayerIO(PlayerIO* io)
 			this, SLOT(slotUpdateSelection()));
 	connect(d->mEventListener, SIGNAL(signalUpdateProductionOptions()),
 			this, SLOT(slotUpdateProductionOptions()));
-	connect(d->mEventListener, SIGNAL(signalUpdateProduction(unsigned long int)),
-			this, SLOT(slotUpdateProduction(unsigned long int)));
-	connect(d->mEventListener, SIGNAL(signalFacilityConstructed(unsigned long int)),
-			this, SLOT(slotConstructionCompleted(unsigned long int)));
-	connect(d->mEventListener, SIGNAL(signalUnitDestroyed(unsigned long int)),
-			this, SLOT(slotUnitDestroyed(unsigned long int)));
+	connect(d->mEventListener, SIGNAL(signalUpdateProduction(quint32)),
+			this, SLOT(slotUpdateProduction(quint32)));
+	connect(d->mEventListener, SIGNAL(signalFacilityConstructed(quint32)),
+			this, SLOT(slotConstructionCompleted(quint32)));
+	connect(d->mEventListener, SIGNAL(signalUnitDestroyed(quint32)),
+			this, SLOT(slotUnitDestroyed(quint32)));
  }
 }
 
@@ -711,7 +711,7 @@ void BosonCommandFrame::slotSelectionChanged(BoSelection* selection)
  }
 }
 
-void BosonCommandFrame::slotConstructionCompleted(unsigned long int facilityId)
+void BosonCommandFrame::slotConstructionCompleted(quint32 facilityId)
 {
  if (!selection() || selection()->count() == 0) {
 	return;
@@ -724,7 +724,7 @@ void BosonCommandFrame::slotConstructionCompleted(unsigned long int facilityId)
  }
 }
 
-void BosonCommandFrame::slotUnitDestroyed(unsigned long int id)
+void BosonCommandFrame::slotUnitDestroyed(quint32 id)
 {
  if (!selection() || selection()->count() == 0) {
 	return;
@@ -876,9 +876,9 @@ void BosonCommandFrame::setProduction(Unit* unit)
 
  Q3ValueList<int> grayOutActions;
 
- Q3ValueList<unsigned long int> grayedOutUnits;
- Q3ValueList<unsigned long int> unitsList = production->allUnitProductions(0, &grayedOutUnits);
- for (Q3ValueList<unsigned long int>::iterator it = unitsList.begin(); it != unitsList.end(); ++it) {
+ Q3ValueList<quint32> grayedOutUnits;
+ Q3ValueList<quint32> unitsList = production->allUnitProductions(0, &grayedOutUnits);
+ for (Q3ValueList<quint32>::iterator it = unitsList.begin(); it != unitsList.end(); ++it) {
 	BoSpecificAction a(d->mProduceActions->produceActionFor(speciesTheme->unitProperties(*it)));
 	a.setType(ActionProduceUnit);
 	a.setProductionId(*it);
@@ -889,9 +889,9 @@ void BosonCommandFrame::setProduction(Unit* unit)
 	}
  }
 
- Q3ValueList<unsigned long int> grayedOutTechs;
- Q3ValueList<unsigned long int> techList = production->allTechnologyProductions(0, &grayedOutTechs);
- for (Q3ValueList<unsigned long int>::iterator it = techList.begin(); it != techList.end(); it++) {
+ Q3ValueList<quint32> grayedOutTechs;
+ Q3ValueList<quint32> techList = production->allTechnologyProductions(0, &grayedOutTechs);
+ for (Q3ValueList<quint32>::iterator it = techList.begin(); it != techList.end(); it++) {
 	BoSpecificAction a(d->mProduceActions->produceActionFor(speciesTheme->technology(*it), production->speciesTheme()));
 	a.setType(ActionProduceTech);
 	a.setProductionId(*it);
@@ -1023,7 +1023,7 @@ void BosonCommandFrame::slotUpdate()
  }
 }
 
-void BosonCommandFrame::slotUpdateProduction(unsigned long int id)
+void BosonCommandFrame::slotUpdateProduction(quint32 id)
 {
  if (!selectedUnit()) {
 	return;
@@ -1103,8 +1103,8 @@ void BosonCommandFrame::placeMobiles(PlayerIO* io)
 	boError(220) << k_funcinfo << "NULL speciestheme" << endl;
 	return;
  }
- Q3ValueList<long unsigned int> units = theme->allMobiles();
- Q3ValueList<long unsigned int>::iterator it;
+ Q3ValueList<quint32> units = theme->allMobiles();
+ Q3ValueList<quint32>::iterator it;
  Q3ValueList<BoSpecificAction> actions;
  for (it = units.begin(); it != units.end(); ++it) {
 	BoSpecificAction a(d->mProduceActions->produceActionFor(theme->unitProperties(*it)));
@@ -1128,8 +1128,8 @@ void BosonCommandFrame::placeFacilities(PlayerIO* io)
 	boError(220) << k_funcinfo << "NULL speciestheme" << endl;
 	return;
  }
- Q3ValueList<long unsigned int> units = theme->allFacilities();
- Q3ValueList<long unsigned int>::iterator it;
+ Q3ValueList<quint32> units = theme->allFacilities();
+ Q3ValueList<quint32>::iterator it;
  Q3ValueList<BoSpecificAction> actions;
  for (it = units.begin(); it != units.end(); ++it) {
 	BoSpecificAction a(d->mProduceActions->produceActionFor(theme->unitProperties(*it)));

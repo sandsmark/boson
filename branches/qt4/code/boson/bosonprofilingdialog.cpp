@@ -28,7 +28,6 @@
 #include <Q3ValueList>
 #include <Q3PtrList>
 #include <Q3VBoxLayout>
-#include "bosonprofilingdialoggui.h"
 
 #include <klocale.h>
 #include <k3listview.h>
@@ -278,9 +277,9 @@ BosonProfilingDialog::BosonProfilingDialog(QWidget* parent, bool modal)
  setDefaultButton(KDialog::Ok);
  d = new BosonProfilingDialogPrivate;
 
- d->mGUI = new BosonProfilingDialogGUI(plainPage());
+ d->mGUI = new BosonProfilingDialogGUI(mainWidget());
 
- Q3VBoxLayout* layout = new Q3VBoxLayout(plainPage());
+ Q3VBoxLayout* layout = new Q3VBoxLayout(mainWidget());
  layout->addWidget(d->mGUI);
 
  d->mGUI->mEvents->setColumnWidthMode(0, Q3ListView::Manual);

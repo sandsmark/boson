@@ -61,7 +61,7 @@ void BoMeshRendererImmediate::deinitFrame()
  glPopAttrib();
 }
 
-unsigned int BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* mesh, RenderFlags flags)
+unsigned int BoMeshRendererImmediate::render(const QColor& teamColor, BoMesh* mesh, RenderFlags flags)
 {
  if (!model()) {
 	BO_NULL_ERROR(model());
@@ -90,9 +90,9 @@ unsigned int BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* me
 
  if (!(flags & DepthOnly)) {
 	BoMaterial::activate(mesh->material());
-	if (mesh->isTeamColor() && teamColor) {
+	if (mesh->isTeamColor() && !teamColor.isNull()) {
 		glPushAttrib(GL_CURRENT_BIT);
-		glColor3ub(teamColor->red(), teamColor->green(), teamColor->blue());
+		glColor3ub(teamColor.red(), teamColor.green(), teamColor.blue());
 		resetColor = true;
 	}
 	if (mesh->material()->twoSided()) {

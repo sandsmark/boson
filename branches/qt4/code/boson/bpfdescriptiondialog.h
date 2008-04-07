@@ -19,7 +19,7 @@
 #ifndef BPFDESCRIPTIONDIALOG_H
 #define BPFDESCRIPTIONDIALOG_H
 
-#include <kdialogbase.h>
+#include <KDialog>
 
 class BPFDescription;
 
@@ -29,11 +29,11 @@ class BPFDescriptionDialogPrivate;
  * @author Andreas Beckermann <b_mann@gmx.de
  * @short Configuration widget for the description.xml file of maps.
  **/
-class BPFDescriptionDialog : public KDialogBase
+class BPFDescriptionDialog : public KDialog
 {
 	Q_OBJECT
 public:
-	BPFDescriptionDialog(QWidget* parent, bool modal);
+	BPFDescriptionDialog(QWidget* parent);
 	~BPFDescriptionDialog();
 
 	/**

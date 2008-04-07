@@ -49,7 +49,7 @@ public:
 		mRotation = 0;
 	}
 
-	unsigned long int mUnitId; // used to check whether we actually have values for the selected unit in updateUnit()
+	quint32 mUnitId; // used to check whether we actually have values for the selected unit in updateUnit()
 	BoUfoLabel* mName;
 	BoUfoLabel* mId;
 	BoUfoNumInput* mHealth;
@@ -164,7 +164,7 @@ bool EditorUnitConfigWidget::display(Unit* unit)
  //
  // we do so by setting a minimum value >= 2.
  // here we use 10 for cosmetic reasons.
- d->mHealth->setRange(qMin(10, unit->maxHealth()), unit->maxHealth());
+ d->mHealth->setRange(qMin((quint32)10, unit->maxHealth()), unit->maxHealth());
 
  d->mHealth->setValue(unit->health());
  if (!facility || (facility && facility->construction()->constructionSteps() == 0)) {
@@ -259,8 +259,8 @@ void EditorUnitConfigWidget::updateUnit(Unit* unit)
 	boError(220) << k_funcinfo << "Data are for not for the correct unit! data id=" << d->mUnitId << " selected unit: " << unit->id() << endl;
 	return;
  }
- unit->setHealth((unsigned long int)d->mHealth->value());
- unit->setShields((unsigned long int)d->mShields->value());
+ unit->setHealth((quint32)d->mHealth->value());
+ unit->setShields((quint32)d->mShields->value());
  if (unit->isFacility()) {
 	if (unit->construction()->constructionSteps() != 0) {
 		unit->construction()->setConstructionStep((unsigned int)d->mConstructionStep->value());

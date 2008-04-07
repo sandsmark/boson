@@ -64,8 +64,8 @@ public:
 	BoGLQueryStates mStates;
 };
 
-BoGLStateWidget::BoGLStateWidget(QWidget* parent, const char* name, Qt::WFlags f)
-	: QWidget(parent, name, f)
+BoGLStateWidget::BoGLStateWidget(QWidget* parent)
+	: QWidget(parent)
 {
  d = new BoGLStateWidgetPrivate;
  Q3VBoxLayout* layout = new Q3VBoxLayout(this);

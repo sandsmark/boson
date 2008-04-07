@@ -77,21 +77,23 @@ public:
 
 };
 
-BoTexMapImportDialog::BoTexMapImportDialog(QWidget* parent, bool modal)
-		: KDialogBase(Plain, i18n("Texmap import"), Ok|Apply, Cancel,
-		parent, "botexmapimportdialog", modal, true)
+BoTexMapImportDialog::BoTexMapImportDialog(QWidget* parent)
+		: KDialog(parent)
 {
  d = new BoTexMapImportDialogPrivate();
+ setWindowTitle(KDialog::makeStandardCaption(i18n("Texmap import")));
+ setButtons(KDialog::Ok | KDialog::Apply | KDialog::Cancel);
+ setDefaultButton(KDialog::Cancel);
 
- Q3HBoxLayout* layout = new Q3HBoxLayout(plainPage());
+ Q3HBoxLayout* layout = new Q3HBoxLayout(mainWidget());
 
- Q3VBox* texMapImage = new Q3VBox(plainPage(), "texmapimage");
+ Q3VBox* texMapImage = new Q3VBox(mainWidget(), "texmapimage");
  d->mTexMapLabel = new QLabel(texMapImage, "texmaplabel");
  QPushButton* selectTexMapImage = new QPushButton(i18n("Select &texmap..."), texMapImage, "selecttexmapimage");
  connect(selectTexMapImage, SIGNAL(clicked()), this, SLOT(slotSelectTexMapImage()));
  layout->addWidget(texMapImage);
 
- Q3VGroupBox* colors = new Q3VGroupBox(i18n("Colors"), plainPage(), "colors");
+ Q3VGroupBox* colors = new Q3VGroupBox(i18n("Colors"), mainWidget(), "colors");
  layout->addWidget(colors);
 
  Q3HBox* hbox = new Q3HBox(colors, "hbox_red");
@@ -120,7 +122,7 @@ BoTexMapImportDialog::BoTexMapImportDialog(QWidget* parent, bool modal)
  d->mBlue->setEnabled(false);
  d->mAlpha->setEnabled(false);
 
- d->mTexturesGroupBox = new Q3VGroupBox(i18n("Additional manipulation"), plainPage(), "texturesgroupbox");
+ d->mTexturesGroupBox = new Q3VGroupBox(i18n("Additional manipulation"), mainWidget(), "texturesgroupbox");
  layout->addWidget(d->mTexturesGroupBox);
  (void)new QLabel(i18n("Reset textures on entire map to (-1 does not touch at all)"), d->mTexturesGroupBox);
  d->mTextures.setAutoDelete(true);

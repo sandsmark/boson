@@ -33,7 +33,6 @@
 #include <q3hbox.h>
 #include <qlabel.h>
 #include <q3textedit.h>
-//Added by qt3to4:
 #include <Q3VBoxLayout>
 
 class BPFDescriptionDialogPrivate
@@ -53,10 +52,12 @@ public:
 	Q3TextEdit* mComment;
 };
 
-BPFDescriptionDialog::BPFDescriptionDialog(QWidget* parent, bool modal)
-		: KDialogBase(Plain, i18n("Map Description"), Ok|Apply|Cancel, Ok, parent,
-		"bpfdescriptiondialog", modal, true)
+BPFDescriptionDialog::BPFDescriptionDialog(QWidget* parent)
+	: KDialog(parent)
 {
+ setWindowTitle(KDialog::makeStandardCaption(i18n("Map Description")));
+ setButtons(KDialog::Ok | KDialog::Apply | KDialog::Cancel);
+ setDefaultButton(KDialog::Ok);
  init();
 }
 
@@ -68,15 +69,15 @@ BPFDescriptionDialog::~BPFDescriptionDialog()
 void BPFDescriptionDialog::init()
 {
  d = new BPFDescriptionDialogPrivate;
- Q3VBoxLayout* topLayout = new Q3VBoxLayout(plainPage(), KDialog::marginHint(), KDialog::spacingHint(), "toplayout");
+ Q3VBoxLayout* topLayout = new Q3VBoxLayout(mainWidget(), KDialog::marginHint(), KDialog::spacingHint(), "toplayout");
 
- Q3HBox* hbox = new Q3HBox(plainPage(), "hbox");
+ Q3HBox* hbox = new Q3HBox(mainWidget(), "hbox");
  (void)new QLabel(i18n("Language: "), hbox);
- d->mLanguage = new KComboBox(hbox, "language");
+ d->mLanguage = new KComboBox(hbox);
  d->mLanguage->insertItem(i18n("C"));
  topLayout->addWidget(hbox);
 
- Q3VGroupBox* groupBox = new Q3VGroupBox(i18n("Map Description"), plainPage(), "groupbox");
+ Q3VGroupBox* groupBox = new Q3VGroupBox(i18n("Map Description"), mainWidget(), "groupbox");
  topLayout->addWidget(groupBox);
 
  // i don't like QGroupBox's autolayout stuff and I'm too lazy for the clean

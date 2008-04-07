@@ -143,12 +143,13 @@ bool BoInfo::save(QDomElement& root) const
  root.setAttribute(QString::fromLatin1("Version"), QString::number((quint32)BOINFO_VERSION));
  QMap<int, QVariant>::Iterator it;
  for (it = d->mInfos.begin(); it != d->mInfos.end(); ++it) {
-	if (!it.data().canCast(QVariant::String)) {
-		boError() << k_funcinfo << "Invalid variant type " << it.data().type() << endl;
+	if (!it.value().canConvert(QVariant::String)) {
+		boError() << k_funcinfo << "Invalid variant type " << it.value().type() << endl;
+		continue;
 	}
 	QDomElement e = doc.createElement(QString::fromLatin1("BoInfo"));
 	e.setAttribute(QString::fromLatin1("Key"), it.key());
-	e.appendChild(doc.createTextNode(it.data().toString()));
+	e.appendChild(doc.createTextNode(it.value().toString()));
 	root.appendChild(e);
  }
  return true;
@@ -165,7 +166,7 @@ bool BoInfo::load(QDomElement& root)
  }
  reset();
  QDomNodeList list = root.elementsByTagName(QString::fromLatin1("BoInfo"));
- for (unsigned int i = 0; i < list.count(); i++) {
+ for (int i = 0; i < list.count(); i++) {
 	QDomElement e = list.item(i).toElement();
 	if (e.isNull()) {
 		boError() << k_funcinfo << "Could not convert to QDomElement" << endl;
@@ -203,7 +204,7 @@ bool BoInfo::saveToFile(const QString& fileName) const
  doc.appendChild(root);
  bool ret = save(root);
  QString string = doc.toString();
- file.writeBlock(string.ascii(), string.length());
+ file.write(string.toAscii());
  file.close();
  return ret;
 }
@@ -234,9 +235,9 @@ void BoInfo::copyFrom(const BoInfo& b)
 {
  reset();
  QByteArray buffer;
- QDataStream wstream(buffer, QIODevice::WriteOnly);
+ QDataStream wstream(&buffer, QIODevice::WriteOnly);
  b.save(wstream);
- QDataStream rstream(buffer, QIODevice::WriteOnly);
+ QDataStream rstream(buffer);
  load(rstream);
 }
 
@@ -599,12 +600,10 @@ QString BoInfo::valueToString(int key) const
 	case QVariant::Bitmap:
 	case QVariant::Brush:
 	case QVariant::Color:
-	case QVariant::ColorGroup:
 	case QVariant::Cursor:
 	case QVariant::Date:
 	case QVariant::DateTime:
 	case QVariant::Font:
-	case QVariant::IconSet:
 	case QVariant::Image:
 	case QVariant::KeySequence:
 	case QVariant::List:
@@ -615,7 +614,6 @@ QString BoInfo::valueToString(int key) const
 #endif
 	case QVariant::Pixmap:
 	case QVariant::Point:
-	case QVariant::PointArray:
 	case QVariant::Rect:
 	case QVariant::Region:
 	case QVariant::Size:
@@ -641,9 +639,6 @@ QString BoInfo::valueToString(int key) const
 		break;
 	case QVariant::String:
 		string = v.toString();
-		break;
-	case QVariant::CString:
-		string = v.toCString();
 		break;
 #if QT_VERSION >= 0x030200
 	case QVariant::LongLong:
@@ -705,7 +700,7 @@ bool BoInfo::libraryDependsOn(const QString& lib, const QString& dependsOn) cons
  int lines = 0; // fallback
  QString line;
  while (proc.readln(line, true) > 0 && lines < 200) {
-	if (line.find(exp) >= 0) {
+	if (line.indexOf(exp) >= 0) {
 		return true;
 	}
 	lines++;
@@ -834,7 +829,7 @@ QMap<int, QVariant> BoInfo::completeData() const
 
 QStringList BoInfo::openGLValues() const
 {
- return QStringList::split('\n', getString(OpenGLValuesString));
+ return getString(OpenGLValuesString).split('\n');
 }
 
 QString BoInfo::osType() const

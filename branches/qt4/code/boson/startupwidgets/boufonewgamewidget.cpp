@@ -42,8 +42,9 @@
 #include <klocale.h>
 #include <kgame/kgameproperty.h>
 #include <kgame/kgamemessage.h>
-#include <ksimpleconfig.h>
 #include <kmessagebox.h>
+#include <KConfig>
+#include <KConfigGroup>
 
 #include <qpointer.h>
 #include <qtimer.h>
@@ -118,7 +119,7 @@ public:
       boError() << k_funcinfo << "invalid index " << index << endl;
       return;
     }
-    if ((unsigned int)index >= mIndex2Campaign.count()) {
+    if (index >= mIndex2Campaign.count()) {
       boError() << k_funcinfo << "index " << index << " exceeds count " << mIndex2Campaign.count() << endl;
       return;
     }
@@ -153,7 +154,7 @@ public:
     mSelectPlayField->clear();
     QStringList list = campaign->playFields();
     QStringList items;
-    for (unsigned int i = 0; i < list.count(); i++) {
+    for (int i = 0; i < list.count(); i++) {
       BPFPreview* preview = boData->playFieldPreview(list[i]);
       if (!preview) {
         BO_NULL_ERROR(preview);
@@ -179,7 +180,7 @@ public:
       boError() << k_funcinfo << "invalid index " << index << endl;
       return;
     }
-    if ((unsigned int)index >= mIndex2PlayFieldIdentifier.count()) {
+    if (index >= mIndex2PlayFieldIdentifier.count()) {
       boError() << k_funcinfo << "index " << index << " exceeds count " << mIndex2PlayFieldIdentifier.count() << endl;
       return;
     }
@@ -431,7 +432,7 @@ void BoUfoNewGameWidget::initPlayFields()
  d->mPlayFieldSelection->addCampaign(defaultCampaign);
 
  // Add other campaigns
- for (unsigned int i = 0; i < list.count(); i++) {
+ for (int i = 0; i < list.count(); i++) {
     BosonCampaign* campaign = boData->campaign(list[i]);
     if (!campaign) {
         BO_NULL_ERROR(campaign);
@@ -451,18 +452,18 @@ void BoUfoNewGameWidget::initSpecies()
  int defaultIndex = 0;
  QStringList list = SpeciesTheme::availableSpecies();
  int index = 0;
- for (unsigned int i = 0; i < list.count(); i++) {
-    KSimpleConfig cfg(list[i]);
-    cfg.setGroup("Boson Species");
-    QString identifier = cfg.readEntry("Identifier", "Unknown");
+ for (int i = 0; i < list.count(); i++) {
+    KConfig cfg(list[i], KConfig::SimpleConfig);
+    KConfigGroup group = cfg.group("Boson Species");
+    QString identifier = group.readEntry("Identifier", "Unknown");
     if (identifier == QString::fromLatin1("Neutral")) {
         continue;
     }
     QStringList playerSpeciesItems = mPlayerSpecies->items();
-    playerSpeciesItems.insert(playerSpeciesItems.at(index), cfg.readEntry("Name", i18n("Unknown")));
+    playerSpeciesItems.insert(index, group.readEntry("Name", i18n("Unknown")));
     mPlayerSpecies->setItems(playerSpeciesItems);
     // comments aren't used. Maybe remove this dict?
-    d->mSpeciesIndex2Comment.insert(index, cfg.readEntry("Comment", i18n("None")));
+    d->mSpeciesIndex2Comment.insert(index, group.readEntry("Comment", i18n("None")));
     d->mSpeciesIndex2Identifier.insert(index, identifier);
     if (identifier == SpeciesTheme::defaultSpecies()) {
         defaultIndex = index;
@@ -495,7 +496,7 @@ void BoUfoNewGameWidget::updateColors()
 
  // first set all taken, then make those available, that are still available
  d->mPlayerColor->setAllTaken(true);
- for(unsigned int i = 0; i < availableColors.count(); i++) {
+ for(int i = 0; i < availableColors.count(); i++) {
     d->mPlayerColor->setTaken(availableColors[i], false);
  }
 
@@ -541,14 +542,14 @@ void BoUfoNewGameWidget::slotNetStart()
     // All good
     //slotPlayerNameChanged();
     // Check if each player has unique team color
-    Q3PtrList<Player> gamePlayerList = boGame->gamePlayerList();
-    for (unsigned int i = 0; i < gamePlayerList.count() - 1; i++) {
+    QList<Player*> gamePlayerList = boGame->gamePlayerList();
+    for (int i = 0; i < gamePlayerList.count() - 1; i++) {
         Player* p = gamePlayerList.at(i);
         if (!p) {
             BO_NULL_ERROR(p);
             continue;
         }
-        for (unsigned int j = i + 1; j < gamePlayerList.count(); j++) {
+        for (int j = i + 1; j < gamePlayerList.count(); j++) {
             Player* p2 = gamePlayerList.at(j);
             if (!p2) {
                 BO_NULL_ERROR(p2);
@@ -640,9 +641,7 @@ void BoUfoNewGameWidget::slotNetPlayerJoinedGame(KPlayer* p)
             boGame->slotAddChatSystemMessage("Boson", i18n("%1 added AI player %2 to the game").arg(mainPlayer->name()).arg(p->name()));
         }
     }
-    Q3PtrList<Player> gamePlayerList = boGame->gamePlayerList();
-    for (int i = 0; i < (int)gamePlayerList.count() - 1; i++) {
-        Player* p2 = gamePlayerList.at(i);
+    foreach (Player* p2, boGame->gamePlayerList()) {
         if (p2 == (Player*)p) {
             continue;
         }
@@ -680,7 +679,7 @@ void BoUfoNewGameWidget::slotNetPlayerLeftGame(KPlayer* p)
     // Localplayer was removed and w have a net game.
     // Either player was kicked by ADMIN or we're connecting to net game
     // If we're connecting, players are still stored in inactive list
-    if (!boGame->inactivePlayerList()->containsRef(p)) {
+    if (!boGame->inactivePlayerList()->contains(p)) {
         boDebug() << k_funcinfo << "We were kicked out!" << endl;
         boGame->slotAddChatSystemMessage("Boson", i18n("You were kicked from the game by ADMIN"));
 
@@ -848,7 +847,7 @@ void BoUfoNewGameWidget::slotPlayerNameChanged()
 
 void BoUfoNewGameWidget::slotPlayerColorChanged(int index)
 {
- if (index < 0 || (unsigned int)index >= SpeciesTheme::defaultColors().count()) {
+ if (index < 0 || index >= SpeciesTheme::defaultColors().count()) {
     boWarning() << k_funcinfo << "Invalid index: " << index << endl;
     return;
  }
@@ -1103,9 +1102,7 @@ void BoUfoNewGameWidget::possibleSidesChanged()
    watchId = 1;
    do {
      isTaken = false;
-     Q3PtrListIterator<Player> it(boGame->allPlayerList());
-     for (; it.current(); ++it) {
-       Player* p = it.current();
+     foreach (Player* p, boGame->allPlayerList()) {
        if (p->bosonId() == watchId && p != mSelectedPlayer) {
          isTaken = true;
        }

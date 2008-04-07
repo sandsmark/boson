@@ -58,7 +58,7 @@ public:
 signals:
 	void signalUpdateSelection();
 	void signalUpdateProductionOptions();
-	void signalUpdateProduction(unsigned long int unitId);
+	void signalUpdateProduction(quint32 unitId);
 
 	/**
 	 * Emitted when a the construction of a facility has been completed.
@@ -67,9 +67,9 @@ signals:
 	 * consider re-displaying it, so that e.g. production options will be
 	 * shown.
 	 **/
-	void signalFacilityConstructed(unsigned long int unitId);
+	void signalFacilityConstructed(quint32 unitId);
 
-	void signalUnitDestroyed(unsigned long int unitId);
+	void signalUnitDestroyed(quint32 unitId);
 
 protected:
 	virtual void processEvent(const BoEvent* event);

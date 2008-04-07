@@ -54,7 +54,7 @@ class BoUfoAction : public QObject
 {
 	Q_OBJECT
 public:
-	BoUfoAction(const QString& text, const KShortcut& cut, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const char* name);
+	BoUfoAction(const QString& text, const KShortcut& cut, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const QString& name);
 	~BoUfoAction();
 
 	void setText(const QString& text);
@@ -115,7 +115,7 @@ class BoUfoToggleAction : public BoUfoAction
 {
 	Q_OBJECT
 public:
-	BoUfoToggleAction(const QString& text, const KShortcut& cut, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const char* name);
+	BoUfoToggleAction(const QString& text, const KShortcut& cut, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const QString& name);
 	~BoUfoToggleAction();
 
 	virtual void plug(ufo::UWidget*);
@@ -141,7 +141,7 @@ class BoUfoActionMenu : public BoUfoAction
 {
 	Q_OBJECT
 public:
-	BoUfoActionMenu(const QString& text, BoUfoActionCollection* parent, const char* name);
+	BoUfoActionMenu(const QString& text, BoUfoActionCollection* parent, const QString& name);
 	~BoUfoActionMenu();
 
 	virtual void plug(ufo::UWidget*);
@@ -180,7 +180,7 @@ class BoUfoSelectAction : public BoUfoActionMenu
 {
 	Q_OBJECT
 public:
-	BoUfoSelectAction(const QString& text, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const char* name);
+	BoUfoSelectAction(const QString& text, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const QString& name);
 	~BoUfoSelectAction();
 
 	virtual void clear();
@@ -221,8 +221,8 @@ class BoUfoActionCollection : public QObject
 {
 	Q_OBJECT
 public:
-	BoUfoActionCollection(QObject* parent, const char* name);
-	BoUfoActionCollection(BoUfoActionCollection* parentCollection, QObject* parent, const char* name);
+	BoUfoActionCollection(QObject* parent, const QString& name);
+	BoUfoActionCollection(BoUfoActionCollection* parentCollection, QObject* parent, const QString& name);
 	~BoUfoActionCollection();
 
 	void insert(BoUfoAction* action);
@@ -294,13 +294,13 @@ public:
 
 	static BoUfoAction* create(StdAction id,
 			const QObject* receiver, const char* slot,
-			BoUfoActionCollection* parent, const char* name);
+			BoUfoActionCollection* parent, const QString& name);
 
 	/**
 	 * @return The name for @p id as it appears in the ui.rc file. E.g.
 	 * "game_quit" for GameQuit.
 	 **/
-	static const char* name(StdAction id);
+	static QString name(StdAction id);
 
 	/**
 	 * @return The label that is used by default for @p id.
@@ -309,48 +309,48 @@ public:
 
 
 	static BoUfoAction* fileNew(const QObject* receiver = 0, const char* slot = 0,
-			BoUfoActionCollection* parent = 0, const char* name = 0);
+			BoUfoActionCollection* parent = 0, const QString& name = QString());
 	static BoUfoAction* fileOpen(const QObject* receiver = 0, const char* slot = 0,
-			BoUfoActionCollection* parent = 0, const char* name = 0);
+			BoUfoActionCollection* parent = 0, const QString& name = QString());
 	static BoUfoAction* fileSave(const QObject* receiver = 0, const char* slot = 0,
-			BoUfoActionCollection* parent = 0, const char* name = 0);
+			BoUfoActionCollection* parent = 0, const QString& name = QString());
 	static BoUfoAction* fileSaveAs(const QObject* receiver = 0, const char* slot = 0,
-			BoUfoActionCollection* parent = 0, const char* name = 0);
+			BoUfoActionCollection* parent = 0, const QString& name = QString());
 	static BoUfoAction* fileClose(const QObject* receiver = 0, const char* slot = 0,
-			BoUfoActionCollection* parent = 0, const char* name = 0);
+			BoUfoActionCollection* parent = 0, const QString& name = QString());
 	static BoUfoAction* fileQuit(const QObject* receiver = 0, const char* slot = 0,
-			BoUfoActionCollection* parent = 0, const char* name = 0);
+			BoUfoActionCollection* parent = 0, const QString& name = QString());
 
 	static BoUfoAction* gameNew(const QObject* receiver = 0, const char* slot = 0,
-			BoUfoActionCollection* parent = 0, const char* name = 0);
+			BoUfoActionCollection* parent = 0, const QString& name = QString());
 	static BoUfoAction* gameLoad(const QObject* receiver = 0, const char* slot = 0,
-			BoUfoActionCollection* parent = 0, const char* name = 0);
+			BoUfoActionCollection* parent = 0, const QString& name = QString());
 	static BoUfoAction* gameSave(const QObject* receiver = 0, const char* slot = 0,
-			BoUfoActionCollection* parent = 0, const char* name = 0);
+			BoUfoActionCollection* parent = 0, const QString& name = QString());
 	static BoUfoAction* gameSaveAs(const QObject* receiver = 0, const char* slot = 0,
-			BoUfoActionCollection* parent = 0, const char* name = 0);
+			BoUfoActionCollection* parent = 0, const QString& name = QString());
 	static BoUfoAction* gameEnd(const QObject* receiver = 0, const char* slot = 0,
-			BoUfoActionCollection* parent = 0, const char* name = 0);
+			BoUfoActionCollection* parent = 0, const QString& name = QString());
 	static BoUfoToggleAction* gamePause(const QObject* receiver = 0, const char* slot = 0,
-			BoUfoActionCollection* parent = 0, const char* name = 0);
+			BoUfoActionCollection* parent = 0, const QString& name = QString());
 	static BoUfoAction* gameQuit(const QObject* receiver = 0, const char* slot = 0,
-			BoUfoActionCollection* parent = 0, const char* name = 0);
+			BoUfoActionCollection* parent = 0, const QString& name = QString());
 	static BoUfoAction* editUndo(const QObject* receiver = 0, const char* slot = 0,
-			BoUfoActionCollection* parent = 0, const char* name = 0);
+			BoUfoActionCollection* parent = 0, const QString& name = QString());
 	static BoUfoAction* editRedo(const QObject* receiver = 0, const char* slot = 0,
-			BoUfoActionCollection* parent = 0, const char* name = 0);
+			BoUfoActionCollection* parent = 0, const QString& name = QString());
 	static BoUfoToggleAction* showMenubar(const QObject* receiver = 0, const char* slot = 0,
-			BoUfoActionCollection* parent = 0, const char* name = 0);
+			BoUfoActionCollection* parent = 0, const QString& name = QString());
 	static BoUfoToggleAction* showToolbar(const QObject* receiver = 0, const char* slot = 0,
-			BoUfoActionCollection* parent = 0, const char* name = 0);
+			BoUfoActionCollection* parent = 0, const QString& name = QString());
 	static BoUfoToggleAction* showStatusbar(const QObject* receiver = 0, const char* slot = 0,
-			BoUfoActionCollection* parent = 0, const char* name = 0);
+			BoUfoActionCollection* parent = 0, const QString& name = QString());
 	static BoUfoToggleAction* fullScreen(const QObject* receiver = 0, const char* slot = 0,
-			BoUfoActionCollection* parent = 0, const char* name = 0);
+			BoUfoActionCollection* parent = 0, const QString& name = QString());
 	static BoUfoAction* keyBindings(const QObject* receiver = 0, const char* slot = 0,
-			BoUfoActionCollection* parent = 0, const char* name = 0);
+			BoUfoActionCollection* parent = 0, const QString& name = QString());
 	static BoUfoAction* preferences(const QObject* receiver = 0, const char* slot = 0,
-			BoUfoActionCollection* parent = 0, const char* name = 0);
+			BoUfoActionCollection* parent = 0, const QString& name = QString());
 };
 
 
@@ -364,7 +364,7 @@ class BoUfoMenuBarItem : public QObject
 {
 	Q_OBJECT
 public:
-	BoUfoMenuBarItem(BoUfoAction* a, const QString& text, QObject* parent, const char* name = 0);
+	BoUfoMenuBarItem(BoUfoAction* a, const QString& text, QObject* parent, const QString& name = QString());
 	~BoUfoMenuBarItem();
 
 	const QString& text() const
@@ -402,7 +402,7 @@ class BoUfoMenuBarMenu : public BoUfoMenuBarItem
 {
 	Q_OBJECT
 public:
-	BoUfoMenuBarMenu(const QString& text, QObject* parent, const char* name = 0);
+	BoUfoMenuBarMenu(const QString& text, QObject* parent, const QString& name = QString());
 	~BoUfoMenuBarMenu();
 
 	void addMenuItem(const QString& text, BoUfoAction* receiver, const char* slot);
@@ -433,7 +433,7 @@ class BoUfoMenuBar : public BoUfoMenuBarMenu
 {
 	Q_OBJECT
 public:
-	BoUfoMenuBar(BoUfoManager* parent, const char* name = 0);
+	BoUfoMenuBar(BoUfoManager* parent, const QString& name = QString());
 	~BoUfoMenuBar();
 
 	void setVisible(bool v);
@@ -459,7 +459,7 @@ class BoUfoToolBar : public BoUfoMenuBarMenu
 {
 	Q_OBJECT
 public:
-	BoUfoToolBar(BoUfoManager* parent, const char* name = 0);
+	BoUfoToolBar(BoUfoManager* parent, const QString& name = QString());
 	~BoUfoToolBar();
 
 	void setVisible(bool v);

@@ -20,7 +20,8 @@
 #ifndef BOORBITERWIDGET_H
 #define BOORBITERWIDGET_H
 
-#include "bosonglwidget.h"
+#include <bogl.h>
+#include <QGLWidget>
 //Added by qt3to4:
 #include <QMouseEvent>
 
@@ -52,7 +53,7 @@ class BoOrbiterWidgetPrivate;
  * need this signal.
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BoOrbiterWidget : public BosonGLWidget
+class BoOrbiterWidget : public QGLWidget
 {
 	Q_OBJECT
 public:

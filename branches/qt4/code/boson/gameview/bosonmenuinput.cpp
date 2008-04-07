@@ -55,6 +55,7 @@
 #include <kgame/kgamedebugdialog.h>
 #include <kmessagebox.h>
 #include <kfiledialog.h>
+#include <KInputDialog>
 
 #include <qpointer.h>
 #include <q3ptrdict.h>
@@ -175,44 +176,32 @@ void BosonMenuInputData::initUfoActions(bool gameMode)
  QSignalMapper* scrollMapper = new QSignalMapper(this);
  connect(scrollMapper, SIGNAL(mapped(int)), this, SIGNAL(signalScroll(int)));
  BoUfoAction* a;
- KShortcut scrollUp(Qt::Key_Up);
- scrollUp.append(KKeySequence(KKey(Qt::Key_W)));
- a = new BoUfoAction(i18n("Scroll Up"), scrollUp, scrollMapper,
+ a = new BoUfoAction(i18n("Scroll Up"), KShortcut(Qt::Key_Up, Qt::Key_W), scrollMapper,
 		SLOT(map()), actionCollection(),
 		"scroll_up");
  scrollMapper->setMapping(a, ScrollUp);
- KShortcut scrollDown(Qt::Key_Down);
- scrollDown.append(KKeySequence(KKey(Qt::Key_S)));
- a = new BoUfoAction(i18n("Scroll Down"), scrollDown, scrollMapper,
+ a = new BoUfoAction(i18n("Scroll Down"), KShortcut(Qt::Key_Down, Qt::Key_S), scrollMapper,
 		SLOT(map()), actionCollection(),
 		"scroll_down");
  scrollMapper->setMapping(a, ScrollDown);
- KShortcut scrollLeft(Qt::Key_Left);
- scrollLeft.append(KKeySequence(KKey(Qt::Key_A)));
- a = new BoUfoAction(i18n("Scroll Left"), scrollLeft, scrollMapper,
+ a = new BoUfoAction(i18n("Scroll Left"), KShortcut(Qt::Key_Left, Qt::Key_A), scrollMapper,
 		SLOT(map()), actionCollection(),
 		"scroll_left");
  scrollMapper->setMapping(a, ScrollLeft);
- KShortcut scrollRight(Qt::Key_Right);
- scrollRight.append(KKeySequence(KKey(Qt::Key_D)));
- a = new BoUfoAction(i18n("Scroll Right"), scrollRight, scrollMapper,
+ a = new BoUfoAction(i18n("Scroll Right"), KShortcut(Qt::Key_Right, Qt::Key_D), scrollMapper,
 		SLOT(map()), actionCollection(),
 		"scroll_right");
  scrollMapper->setMapping(a, ScrollRight);
- KShortcut rotateLeft(Qt::Key_Q);
- a = new BoUfoAction(i18n("Rotate Left"), rotateLeft, this,
+ a = new BoUfoAction(i18n("Rotate Left"), KShortcut(Qt::Key_Q), this,
 		SIGNAL(signalRotateLeft()), actionCollection(),
 		"rotate_left");
- KShortcut rotateRight(Qt::Key_E);
- a = new BoUfoAction(i18n("Rotate Right"), rotateRight, this,
+ a = new BoUfoAction(i18n("Rotate Right"), KShortcut(Qt::Key_E), this,
 		SIGNAL(signalRotateRight()), actionCollection(),
 		"rotate_right");
- KShortcut zoomIn(Qt::Key_F);
- a = new BoUfoAction(i18n("Zoom In"), zoomIn, this,
+ a = new BoUfoAction(i18n("Zoom In"), KShortcut(Qt::Key_F), this,
 		SIGNAL(signalZoomIn()), actionCollection(),
 		"zoom_in");
- KShortcut zoomOut(Qt::Key_V);
- a = new BoUfoAction(i18n("Zoom out"), zoomOut, this,
+ a = new BoUfoAction(i18n("Zoom out"), KShortcut(Qt::Key_V), this,
 		SIGNAL(signalZoomOut()), actionCollection(),
 		"zoom_out");
 
@@ -399,17 +388,17 @@ void BosonMenuInputData::initUfoGameActions()
 
  for (int i = 0; i < 10; i++) {
 	BoUfoAction* a = new BoUfoAction(i18n("Select Group %1").arg(i == 0 ? 10 : i),
-			Qt::Key_0 + i, d->mSelectMapper,
+			KShortcut(Qt::Key_0 + i), d->mSelectMapper,
 			SLOT(map()), actionCollection(),
 			QString("select_group_%1").arg(i));
 	d->mSelectMapper->setMapping(a, i);
 	a = new BoUfoAction(i18n("Create Group %1").arg(i == 0 ? 10 : i),
-			Qt::CTRL + Qt::Key_0 + i, d->mCreateMapper,
+			KShortcut(Qt::CTRL + Qt::Key_0 + i), d->mCreateMapper,
 			SLOT(map()), actionCollection(),
 			QString("create_group_%1").arg(i));
 	d->mCreateMapper->setMapping(a, i);
 	a = new BoUfoAction(i18n("Show Group %1").arg(i == 0 ? 10 : i),
-			Qt::ALT + Qt::Key_0 + i, d->mShowSelectionMapper,
+			KShortcut(Qt::ALT + Qt::Key_0 + i), d->mShowSelectionMapper,
 			SLOT(map()), actionCollection(),
 			QString("show_group_%1").arg(i));
 	d->mShowSelectionMapper->setMapping(a, i);
@@ -442,9 +431,7 @@ void BosonMenuInputData::initUfoEditorActions()
 		this, SLOT(slotEditorPlace(int)));
  d->mActionEditorPlace->setItems(list);
 
- KShortcut s;
- s.append(KKeySequence(QKeySequence(Qt::Key_Delete)));
- (void)new BoUfoAction(i18n("Delete selected unit"), KShortcut(s), this,
+ (void)new BoUfoAction(i18n("Delete selected unit"), KShortcut(Qt::Key_Delete), this,
 		SIGNAL(signalEditorDeleteSelectedUnits()), actionCollection(),
 		"editor_delete_selected_unit");
 
@@ -524,14 +511,13 @@ void BosonMenuInputData::createEditorPlayerMenu()
 {
  BO_CHECK_NULL_RET(boGame);
  BO_CHECK_NULL_RET(d->mActionEditorPlayer);
- Q3PtrList<Player> players = boGame->gamePlayerList();
  QStringList items;
 
  d->mEditorPlayers.clear();
  d->mActionEditorPlayer->clear();
- for (Q3PtrListIterator<Player> it(players); it.current(); ++it) {
-	d->mEditorPlayers.append(it.current());
-	items.append(it.current()->name());
+ foreach (Player* p, boGame->gamePlayerList()) {
+	d->mEditorPlayers.append(p);
+	items.append(p->name());
  }
  d->mActionEditorPlayer->setItems(items);
 }
@@ -547,10 +533,7 @@ void BosonMenuInputData::createDebugPlayersMenu()
  d->mActionDebugPlayers = new BoUfoActionMenu(i18n("Players"),
 		actionCollection(), "debug_players");
 
- Q3PtrList<Player> players = boGame->gamePlayerList();
- Q3PtrListIterator<Player> it(players);
- for (; it.current(); ++it) {
-	KPlayer* player = it.current();
+ foreach (Player* player, boGame->gamePlayerList()) {
 	BoUfoActionMenu* menu = new BoUfoActionMenu(player->name(),
 			actionCollection(),
 			QString("debug_players_%1").arg(player->name()));
@@ -958,13 +941,14 @@ void BosonMenuInput::slotSetDebugMode(int index)
 void BosonMenuInput::slotDebugEditPlayerInputs(Player* p)
 {
  BO_CHECK_NULL_RET(p);
- KDialogBase* dialog = new KDialogBase(KDialogBase::Plain, i18n("Player Inputs"),
-		KDialogBase::Ok | KDialogBase::Cancel, KDialogBase::Ok, 0,
-		"playerinputs", true, true);
+ KDialog* dialog = new KDialog(0);
+ dialog->setWindowTitle(KDialog::makeStandardCaption(i18n("Player Inputs")));
+ dialog->setButtons(KDialog::Ok | KDialog::Cancel);
+ dialog->setDefaultButton(KDialog::Ok);
  connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
- Q3VBoxLayout* layout = new Q3VBoxLayout(dialog->plainPage());
+ Q3VBoxLayout* layout = new Q3VBoxLayout(dialog->mainWidget());
 
- BoEditPlayerInputsWidget* widget = new BoEditPlayerInputsWidget(dialog->plainPage());
+ BoEditPlayerInputsWidget* widget = new BoEditPlayerInputsWidget(dialog->mainWidget());
  layout->addWidget(widget);
 
  widget->setPlayer(p);
@@ -980,7 +964,7 @@ void BosonMenuInput::slotDebugEditPlayerInputs(Player* p)
 void BosonMenuInput::slotDebugKillPlayer(quint32 playerId)
 {
  QByteArray b;
- QDataStream stream(b, QIODevice::WriteOnly);
+ QDataStream stream(&b, QIODevice::WriteOnly);
  stream << (quint32)playerId;
  boGame->sendMessage(b, BosonMessageIds::IdKillPlayer);
 }
@@ -988,7 +972,7 @@ void BosonMenuInput::slotDebugKillPlayer(quint32 playerId)
 void BosonMenuInput::slotDebugModifyMinerals(quint32 playerId, int amount)
 {
  QByteArray b;
- QDataStream stream(b, QIODevice::WriteOnly);
+ QDataStream stream(&b, QIODevice::WriteOnly);
  stream << (quint32)playerId;
  stream << (qint32)amount;
  boGame->sendMessage(b, BosonMessageIds::IdModifyMinerals);
@@ -997,7 +981,7 @@ void BosonMenuInput::slotDebugModifyMinerals(quint32 playerId, int amount)
 void BosonMenuInput::slotDebugModifyOil(quint32 playerId, int amount)
 {
  QByteArray b;
- QDataStream stream(b, QIODevice::WriteOnly);
+ QDataStream stream(&b, QIODevice::WriteOnly);
  stream << (quint32)playerId;
  stream << (qint32)amount;
  boGame->sendMessage(b, BosonMessageIds::IdModifyOil);
@@ -1029,13 +1013,13 @@ void BosonMenuInput::slotExploreAll(Player* pl)
 	boError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
- Q3PtrList<Player> list;
+ QList<Player*> list;
  if (!pl) {
 	list = boGame->allPlayerList();
  } else {
 	list.append(pl);
  }
- for (unsigned int i = 0; i < list.count(); i++) {
+ for (int i = 0; i < list.count(); i++) {
 	Player* p = list.at(i);
 	for (unsigned int x = 0; x < map->width(); x++) {
 		for (unsigned int y = 0; y < map->height(); y++) {
@@ -1061,13 +1045,13 @@ void BosonMenuInput::slotUnfogAll(Player* pl)
 	boError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
- Q3PtrList<Player> list;
+ QList<Player*> list;
  if (!pl) {
 	list = boGame->allPlayerList();
  } else {
 	list.append(pl);
  }
- for (unsigned int i = 0; i < list.count(); i++) {
+ for (int i = 0; i < list.count(); i++) {
 	Player* p = list.at(i);
 	for (unsigned int x = 0; x < map->width(); x++) {
 		for (unsigned int y = 0; y < map->height(); y++) {
@@ -1093,13 +1077,13 @@ void BosonMenuInput::slotFogAll(Player* pl)
 	boError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
- Q3PtrList<Player> list;
+ QList<Player*> list;
  if (!pl) {
 	list = boGame->allPlayerList();
  } else {
 	list.append(pl);
  }
- for (unsigned int i = 0; i < list.count(); i++) {
+ for (int i = 0; i < list.count(); i++) {
 	Player* p = list.at(i);
 	for (unsigned int x = 0; x < map->width(); x++) {
 		for (unsigned int y = 0; y < map->height(); y++) {
@@ -1117,11 +1101,12 @@ void BosonMenuInput::slotDumpGameLog()
 
 void BosonMenuInput::slotEditConditions()
 {
- KDialogBase* dialog = new KDialogBase(KDialogBase::Plain, i18n("Conditions"),
-		KDialogBase::Ok | KDialogBase::Cancel, KDialogBase::Ok, 0,
-		"editconditions", true, true);
- Q3VBoxLayout* layout = new Q3VBoxLayout(dialog->plainPage());
- BoConditionWidget* widget = new BoConditionWidget(dialog->plainPage());
+ KDialog* dialog = new KDialog(0);
+ dialog->setWindowTitle(KDialog::makeStandardCaption(i18n("Conditions")));
+ dialog->setButtons(KDialog::Ok | KDialog::Cancel);
+ dialog->setDefaultButton(KDialog::Ok);
+ Q3VBoxLayout* layout = new Q3VBoxLayout(dialog->mainWidget());
+ BoConditionWidget* widget = new BoConditionWidget(dialog->mainWidget());
  layout->addWidget(widget);
 
  {
@@ -1151,7 +1136,7 @@ void BosonMenuInput::slotEditConditions()
 					boError() << k_funcinfo << "PlayerId attribute not a valid number" << endl;
 					continue;
 				}
-				Q3PtrList<Player> gamePlayerList = boGame->gamePlayerList();
+				QList<Player*> gamePlayerList = boGame->gamePlayerList();
 				Player* p = gamePlayerList.at(index);
 				e.setAttribute("PlayerId", p->bosonId());
 			}
@@ -1168,7 +1153,7 @@ void BosonMenuInput::slotEditConditions()
  widget = 0;
  delete dialog;
  dialog = 0;
- if (ret == KDialogBase::Accepted) {
+ if (ret == KDialog::Accepted) {
 	QDomDocument doc;
 	bool ret = doc.setContent(xml);
 	QDomElement root = doc.documentElement();
@@ -1293,7 +1278,7 @@ void BosonMenuInput::slotEditorEditMapDescription()
 
 // TODO: non-modal might be fine. one could use that for translations (one
 // dialog the original language, one the translated language)
- BPFDescriptionDialog* dialog = new BPFDescriptionDialog(0, true);
+ BPFDescriptionDialog* dialog = new BPFDescriptionDialog(0);
  dialog->setDescription(modifiedDescription);
  dialog->exec();
 
@@ -1310,13 +1295,15 @@ void BosonMenuInput::slotEditorEditPlayerMinerals()
  QIntValidator val(this);
  val.setBottom(0);
  val.setTop(1000000); // we need to set a top, because int is limited. this should be enough, i hope (otherwise feel free to increase)
- value = KLineEditDlg::getText(i18n("Minerals for player %1").arg(playerIO()->name()), value, &ok, 0, &val);
+ QString caption = i18n("Minerals for player %1").arg(playerIO()->name());
+ QString label = caption;
+ value = KInputDialog::getText(caption, label, value, &ok, 0, &val);
  if (!ok) {
 	// cancel pressed
 	return;
  }
  boDebug() << k_funcinfo << value << endl;
- unsigned long int v = value.toULong(&ok);
+ quint32 v = value.toULong(&ok);
  if (!ok) {
 	boWarning() << k_funcinfo << "value " << value << " not valid" << endl;
 	return;
@@ -1334,12 +1321,14 @@ void BosonMenuInput::slotEditorEditPlayerOil()
  QIntValidator val(this);
  val.setBottom(0);
  val.setTop(1000000); // we need to set a top, because int is limited. this should be enough, i hope (otherwise feel free to increase)
- value = KLineEditDlg::getText(i18n("Oil for player %1").arg(playerIO()->name()), value, &ok, 0, &val);
+ QString caption = i18n("Oil for player %1").arg(playerIO()->name());
+ QString label = caption;
+ value = KInputDialog::getText(caption, label, value, &ok, 0, &val);
  if (!ok) {
 	return;
  }
  boDebug() << k_funcinfo << value << endl;
- unsigned long int v = value.toULong(&ok);
+ quint32 v = value.toULong(&ok);
  if (!ok) {
 	boWarning() << k_funcinfo << "value " << value << " not valid" << endl;
 	return;

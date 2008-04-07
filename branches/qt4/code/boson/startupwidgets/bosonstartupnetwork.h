@@ -28,6 +28,7 @@ class KGamePropertyBase;
 class KPlayer;
 class BosonPlayField;
 class BPFPreview;
+class QColor;
 
 // does all the network stuff for startup widgets
 class BosonStartupNetwork : public QObject

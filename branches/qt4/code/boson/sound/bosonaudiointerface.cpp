@@ -308,9 +308,9 @@ void BosonMusicInterface::addToMusicList(const QString& file)
 QStringList BosonMusicInterface::availableMusic() const
 {
  QStringList list = KGlobal::dirs()->findAllResources("data",
-		"boson/music/*.mp3", true);
+		"boson/music/*.mp3", KStandardDirs::Recursive);
  list += KGlobal::dirs()->findAllResources("data",
-		"boson/music/*.ogg", true);
+		"boson/music/*.ogg", KStandardDirs::Recursive);
  if (list.isEmpty()) {
 	boDebug(200) << "no music found" << endl;
 	return list;

@@ -462,7 +462,7 @@ float BoWaterRenderer::waterAlphaAt(BoLakeGL* lake, float x, float y)
   {
     return 1.0f;
   }
-  return qMin(1.0, ((lake->lake->level - mMap->heightAtCorner((int)x, (int)y)) * lake->alphaMultiplier + lake->alphaBase)/* * mWaterDiffuseColor*/);
+  return qMin(1.0f, ((lake->lake->level - mMap->heightAtCorner((int)x, (int)y)) * lake->alphaMultiplier + lake->alphaBase)/* * mWaterDiffuseColor*/);
 }
 
 void BoWaterRenderer::cellExploredChanged(int x1, int x2, int y1, int y2)
@@ -658,7 +658,7 @@ void BoWaterRenderer::renderLake(BoLakeGL* lake)
       // Modify chunk's water detail
       if(distance > 50)
       {
-        chunk_detail = water_detail * qMin(((distance - 50) / 75 + 1), 4);
+        chunk_detail = water_detail * qMin(((distance - 50) / 75 + 1), 4.0f);
       }
     }
     renderChunk(lake, chunk, chunk_detail);
@@ -1067,8 +1067,8 @@ void BoWaterRenderer::calculatePerCornerStuff(RenderInfo* info)
     for(int y = 0; y < info->chunkcornerh; y++)
     {
       // Position of current corner, in cell coordinates
-      float posx = qMin(info->chunk->minx + x * info->detail, info->chunk->maxx);
-      float posy = qMin(info->chunk->miny + y * info->detail, info->chunk->maxy);
+      float posx = qMin(info->chunk->minx + x * info->detail, (float)info->chunk->maxx);
+      float posy = qMin(info->chunk->miny + y * info->detail, (float)info->chunk->maxy);
 
 //      if(!info->lake->hasAnyCorner(posx, posy, posx + info->detail, posy + info->detail))
       // hasAnyCorner() does automatic limits checking, so no need to worry about

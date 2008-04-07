@@ -162,9 +162,8 @@ void BosonUfoChat::setKGame(KGame* g, int msgid)
 		this, SLOT(slotAddPlayer(KPlayer*)));
  connect(game(), SIGNAL(signalPlayerLeftGame(KPlayer*)),
 		this, SLOT(slotRemovePlayer(KPlayer*)));
- Q3PtrList<KPlayer> playerList = *game()->playerList();
- for (Q3PtrListIterator<KPlayer> it(playerList); it.current(); ++it) {
-	slotAddPlayer(it.current());
+ foreach (KPlayer* p, *game()->playerList()) {
+	slotAddPlayer(p);
  }
 }
 
@@ -199,7 +198,7 @@ void BosonUfoChat::slotReceiveMessage(int msgid, const QByteArray& buffer, quint
  if (msgid != messageId()) {
 	return;
  }
- QDataStream msg(buffer, QIODevice::ReadOnly);
+ QDataStream msg(buffer);
  QString text;
  msg >> text;
 
@@ -231,7 +230,7 @@ void BosonUfoChat::addMessage(const QString& text)
 	return;
  }
  if (boConfig->intValue("ChatScreenMaxItems") > 0 &&
-		d->mMessages.count() + 1 > (unsigned int)boConfig->intValue("ChatScreenMaxItems")) {
+		d->mMessages.count() + 1 > boConfig->intValue("ChatScreenMaxItems")) {
 	removeFirstMessage();
  }
  d->mMessages.append(text);
@@ -351,7 +350,7 @@ void BosonUfoChat::removeSendingEntry(int id)
 int BosonUfoChat::sendingEntry() const
 {
  int index = d->mSendTo->currentItem();
- if (index < 0 || (unsigned int)index >= d->mSendingEntryIds.count()) {
+ if (index < 0 || index >= d->mSendingEntryIds.count()) {
 	return -1;
  }
  return d->mSendingEntryIds[index];

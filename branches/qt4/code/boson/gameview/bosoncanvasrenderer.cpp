@@ -1572,8 +1572,8 @@ void BosonCanvasRenderer::createRenderItemList(Q3ValueVector<BoRenderItem>* rend
 	d->mMaxItemDist = qMax(d->mMaxItemDist, dist);
  }
 
- d->mMinItemDist = qMax(0, d->mMinItemDist);
- d->mMaxItemDist = qMax(0, d->mMaxItemDist);
+ d->mMinItemDist = qMax((float)0, d->mMinItemDist);
+ d->mMaxItemDist = qMax((float)0, d->mMaxItemDist);
  if (renderItemList->isEmpty()) {
 	d->mMinItemDist = d->mMinItemDist = 0;
  }
@@ -1709,7 +1709,7 @@ void BosonCanvasRenderer::renderItems(RenderFlags flags)
 	glAlphaFunc(GL_GEQUAL, 0.2);
 	glDisable(GL_CULL_FACE);
 	//glDisable(GL_LIGHTING);
-	for (unsigned int i = 0; i < transparentModels.count(); i++) {
+	for (int i = 0; i < transparentModels.count(); i++) {
 		BosonItem* item = transparentModels[i].item;
 		BosonItemRenderer* itemRenderer = transparentModels[i].itemRenderer;
 		if (!itemRenderer) {

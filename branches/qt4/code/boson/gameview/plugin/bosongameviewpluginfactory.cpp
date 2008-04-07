@@ -26,24 +26,18 @@
 
 #include <bodebug.h>
 
-KInstance* BosonGameViewPluginFactory::mInstance = 0;
-
-BosonGameViewPluginFactory::BosonGameViewPluginFactory(QObject* parent, const char* name)
-	: KLibFactory(parent, name)
+BosonGameViewPluginFactory::BosonGameViewPluginFactory(QObject* parent)
+	: KLibFactory(parent)
 {
- mInstance = new KInstance("BosonGameViewPluginFactory");
 }
 
 BosonGameViewPluginFactory::~BosonGameViewPluginFactory()
 {
- delete mInstance;
- mInstance = 0;
 }
 
-QObject* BosonGameViewPluginFactory::createObject(QObject* parent, const char* name,
+QObject* BosonGameViewPluginFactory::createObject(QObject* parent,
 		const char* className, const QStringList &args)
 {
- Q_UNUSED(name);
  Q_UNUSED(args);
  Q_UNUSED(parent);
  QObject* o = 0;

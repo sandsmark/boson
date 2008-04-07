@@ -272,17 +272,19 @@ void BoUnitDebugWidget::update(Unit* unit)
  text += i18n("KGameProperty objects:\n");
 
  BosonCustomPropertyXML propertyXML;
- Q3IntDict<KGamePropertyBase>& dict = unit->dataHandler()->dict();
- for (Q3IntDictIterator<KGamePropertyBase> it(dict); it.current(); ++it) {
-	QString value = propertyXML.propertyValue(it.current());
+ QMultiHash<int, KGamePropertyBase*> dict = unit->dataHandler()->dict();
+ QHashIterator<int, KGamePropertyBase*> it(dict);
+ while (it.hasNext()) {
+	KGamePropertyBase* prop = it.next().value();
+	QString value = propertyXML.propertyValue(prop);
 	if (value.isNull()) {
 		value = i18n("<value could not be retrieved>");
 	}
-	QString name = unit->propertyName(it.current()->id());
+	QString name = unit->propertyName(prop->id());
 	if (name.isEmpty()) {
 		name = i18n("<unknown>");
 	}
-	text += i18n("%1 (ID=%2) = %3\n").arg(name).arg(it.current()->id()).arg(value);
+	text += i18n("%1 (ID=%2) = %3\n").arg(name).arg(prop->id()).arg(value);
  }
  text += "\n";
 

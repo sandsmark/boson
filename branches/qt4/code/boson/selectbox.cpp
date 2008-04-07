@@ -23,12 +23,11 @@
 #include "../bomemory/bodummymemory.h"
 #include "defines.h"
 #include "botexture.h"
-#include "bosonglwidget.h"
 #include "bodebug.h"
 
-#include <kimageeffect.h>
-
-#include <qimage.h>
+#include <QImage>
+#include <QPainter>
+#include <QGLWidget>
 
 #define POWER_LEVELS 15
 
@@ -92,8 +91,14 @@ void SelectBoxData::loadBoxes()
 // FIXME: Qt::red simply doesn't work - we need to use Qt::blue .. why???
 // QImage image = KImageEffect::gradient(QSize(48, 6), Qt::red, Qt::green, KImageEffect::HorizontalGradient);
 // QImage image = KImageEffect::gradient(QSize(48, 6), QColor(255,0,0), Qt::green, KImageEffect::HorizontalGradient);
- QImage image = KImageEffect::gradient(QSize(64, 1), Qt::red, Qt::green, KImageEffect::HorizontalGradient);
- image = BosonGLWidget::convertToGLFormat(image);
+ QLinearGradient gradient(QPointF(0.0, 0.0), QPointF(64.0, 0.0));
+ gradient.setColorAt(0.0, Qt::red);
+ gradient.setColorAt(1.0, Qt::green);
+ QImage image(64, 1, QImage::Format_RGB32);
+ QPainter painter(&image);
+ painter.fillRect(0, 0, 64, 1, gradient);
+ painter.end();
+ image = QGLWidget::convertToGLFormat(image);
 
  mTexture = new BoTexture(image.bits(), image.width(), image.height(), BoTexture::UI);
 

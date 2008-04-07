@@ -23,9 +23,10 @@
 #include "botexture.h"
 #include "bodebug.h"
 
-#include <ksimpleconfig.h>
 #include <kstandarddirs.h>
 #include <kcursor.h>
+#include <KConfig>
+#include <KConfigGroup>
 
 #include <qwidget.h>
 #include <qbitmap.h>
@@ -54,7 +55,7 @@ void BosonCursor::setCursor(int mode)
 
 QCursor BosonCursor::cursor() const
 {
- return QCursor(QCursor::ArrowCursor);
+ return QCursor(Qt::ArrowCursor);
 }
 
 QStringList BosonCursor::availableThemes()
@@ -62,7 +63,7 @@ QStringList BosonCursor::availableThemes()
  QStringList list = KGlobal::dirs()->findAllResources("data",
 		"boson/themes/cursors/*/index.cursor");
  QStringList retList;
- for (unsigned int i = 0; i < list.count(); i++) {
+ for (int i = 0; i < list.count(); i++) {
 	retList.append(list[i].left(list[i].length() - strlen("/index.cursor")));
  }
 
@@ -276,17 +277,17 @@ BosonOpenGLCursorData* BosonOpenGLCursor::loadSpriteCursor(QString baseDir, QStr
  if (baseDir.right(1) != QString::fromLatin1("/")) {
 	baseDir += QString::fromLatin1("/");
  }
- KSimpleConfig c(baseDir + cursor + QString::fromLatin1("/index.cursor"));
+ KConfig c(baseDir + cursor + QString::fromLatin1("/index.cursor"), KConfig::SimpleConfig);
  boDebug() << baseDir << endl;
  if (!c.hasGroup("Boson Cursor")) {
 	boWarning() << k_funcinfo << "index.cursor is missing default group" << endl;
 	return 0;
  }
- c.setGroup("Boson Cursor");
- QString filePrefix = c.readEntry("FilePrefix", QString::fromLatin1("cursor-"));
- unsigned int hotspotX = c.readUnsignedNumEntry(QString("HotspotX"), 0);
- unsigned int hotspotY = c.readUnsignedNumEntry(QString("HotspotY"), 0);
- bool animated = c.readBoolEntry("IsAnimated", false);
+ KConfigGroup group = c.group("Boson Cursor");
+ QString filePrefix = group.readEntry("FilePrefix", QString::fromLatin1("cursor-"));
+ unsigned int hotspotX = group.readEntry(QString("HotspotX"), (unsigned int)0);
+ unsigned int hotspotY = group.readEntry(QString("HotspotY"), (unsigned int)0);
+ bool animated = group.readEntry("IsAnimated", false);
  unsigned int animationSpeed = 0;
  unsigned int frames = 1;
  int rotateDegree = 0;
@@ -294,10 +295,10 @@ BosonOpenGLCursorData* BosonOpenGLCursor::loadSpriteCursor(QString baseDir, QStr
 	if (!c.hasGroup("Animation")) {
 		animated = false;
 	} else {
-		c.setGroup("Animation");
-		frames = c.readUnsignedNumEntry("FrameCount", 1);
-		animationSpeed = c.readUnsignedNumEntry("Speed", 0);
-		rotateDegree = c.readNumEntry("RotateDegree", 0);
+		KConfigGroup animationGroup = c.group("Animation");
+		frames = animationGroup.readEntry("FrameCount", (unsigned int)1);
+		animationSpeed = animationGroup.readEntry("Speed", (unsigned int)0);
+		rotateDegree = animationGroup.readEntry("RotateDegree", (int)0);
 	}
  }
 

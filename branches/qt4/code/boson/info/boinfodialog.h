@@ -19,7 +19,7 @@
 #ifndef BOINFODIALOG_H
 #define BOINFODIALOG_H
 
-#include <kdialogbase.h>
+#include <KPageDialog>
 
 class Q3ListViewItem;
 class QListViewItemNumber;
@@ -31,11 +31,11 @@ class BoInfoDialogPrivate;
  * @author Andreas Beckermann <b_mann@gmx.de>
  * @short Dialog that displays the data from @ref BoInfo
  **/
-class BoInfoDialog : public KDialogBase
+class BoInfoDialog : public KPageDialog
 {
 	Q_OBJECT
 public:
-	BoInfoDialog(QWidget* parent, bool modal = false);
+	BoInfoDialog(QWidget* parent);
 	~BoInfoDialog();
 
 	void loadFromFile(const QString& file);

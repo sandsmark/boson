@@ -57,15 +57,17 @@ public:
 };
 
 GameOverDialog::GameOverDialog(QWidget* parent, bool modal) 
-		: KDialogBase(Plain, i18n("Game Over"), Ok, Ok, parent,
-		"gameoverdialog", modal, true)
+		: KDialog(parent)
 {
  d = new GameOverDialogPrivate;
+ setWindowTitle(KDialog::makeStandardCaption(i18n("Game Over")));
+ setButtons(KDialog::Ok);
+ setDefaultButton(KDialog::Ok);
  setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum));
 
- Q3VBoxLayout* l = new Q3VBoxLayout(plainPage(), KDialog::spacingHint(), 
+ Q3VBoxLayout* l = new Q3VBoxLayout(mainWidget(), KDialog::spacingHint(), 
 		KDialog::marginHint());
- d->mWinnerLabel = new QLabel(plainPage());
+ d->mWinnerLabel = new QLabel(mainWidget());
  l->addWidget(d->mWinnerLabel);
 
  d->mPlayerLayout = new Q3HBoxLayout(l);
@@ -82,18 +84,15 @@ void GameOverDialog::createStatistics(Boson* boson, Player* winner, Player* p)
  d->mLocalPlayer = p;
 
  d->mWinnerLabel->setText(i18n("And the winner is: %1").arg(winner->name()));
- 
- Q3PtrList<Player> players = d->mBoson->gamePlayerList();
- Q3PtrListIterator<Player> it(players);
- while (it.current()) {
-	PlayerBox* winnerBox = addPlayer((Player*)it.current());
-	if ((Player*)it.current() == winner) {
+
+ foreach (Player* p, d->mBoson->gamePlayerList()) {
+	PlayerBox* winnerBox = addPlayer(p);
+	if (p == winner) {
 		winnerBox->setFrameStyle(Q3Frame::Box | Q3Frame::Raised);
 		winnerBox->setWinner(true);
 	} else {
 		winnerBox->setWinner(false);
-	 }
-	++it;
+	}
  }
 }
 
@@ -102,7 +101,7 @@ GameOverDialog::PlayerBox* GameOverDialog::addPlayer(Player* p)
  if (d->mPlayers[p]) {
 	return d->mPlayers[p];
  }
- PlayerBox* box = new PlayerBox(p, plainPage());
+ PlayerBox* box = new PlayerBox(p, mainWidget());
  d->mPlayerLayout->addWidget(box);
  box->show();
  d->mPlayers.insert(p, box);

@@ -99,11 +99,9 @@ bool BosonGUIStarting::createTasks(Q3PtrList<BosonStartingTask>* tasks)
  BosonStartingLoadEffects* effects = new BosonStartingLoadEffects(i18n("Load Effects"));
  tasks->append(effects);
 
- Q3PtrList<Player> gamePlayerList = boGame->gamePlayerList();
- for (Q3PtrListIterator<Player> it(gamePlayerList); it.current(); ++it) {
-	Player* p = (Player*)it.current();
+ int index = 0;
+ foreach (Player* p, boGame->gamePlayerList()) {
 	QString text;
-	unsigned int index = gamePlayerList.find(it.current());
 	if (p->isActiveGamePlayer()) {
 		text = i18n("Load player data of player %1 (of %2)").arg(index + 1).arg(boGame->activeGamePlayerCount());
 	} else {
@@ -113,6 +111,8 @@ bool BosonGUIStarting::createTasks(Q3PtrList<BosonStartingTask>* tasks)
 	BosonStartingLoadPlayerGUIData* playerData = new BosonStartingLoadPlayerGUIData(text);
 	playerData->setPlayer(p);
 	tasks->append(playerData);
+
+	index++;
  }
 
 
@@ -304,10 +304,10 @@ bool BosonStartingLoadPlayerGUIData::loadUnitDatas()
  SpeciesData* speciesData = boViewData->speciesData(player()->speciesTheme());
 
  // First get all id's of units
- Q3ValueList<unsigned long int> unitIds;
+ Q3ValueList<quint32> unitIds;
  unitIds += player()->speciesTheme()->allFacilities();
  unitIds += player()->speciesTheme()->allMobiles();
- Q3ValueList<unsigned long int>::iterator it;
+ Q3ValueList<quint32>::iterator it;
  int currentUnit = 0;
  float factor = 0.0f;
  for (it = unitIds.begin(); it != unitIds.end(); ++it, currentUnit++) {
@@ -411,14 +411,8 @@ bool BosonStartingCheckIOs::startTask()
 	BO_NULL_ERROR(boGame);
 	return false;
  }
- Q3PtrList<Player> allPlayerList = boGame->allPlayerList();
- for (unsigned int i = 0; i < boGame->allPlayerList().count(); i++) {
-	boDebug(270) << "init IO for player " << i << endl;
-	Player* p = allPlayerList.at(i);
-	if (!p) {
-		BO_NULL_ERROR(p);
-		return false;
-	}
+ foreach (Player* p, boGame->allPlayerList()) {
+	boDebug(270) << "init IO for player " << p->userId() << endl;
 	bool expectIO = true;
 	if (p->bosonId() < 128 || p->isVirtual()) {
 		expectIO = false;

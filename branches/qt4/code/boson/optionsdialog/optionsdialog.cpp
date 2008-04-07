@@ -39,16 +39,13 @@ public:
 };
 
 OptionsDialog::OptionsDialog(QWidget* parent)
-	: KPageDialog(Tabbed,
-			i18n("Boson Options"),
-			Ok|Apply|Default,
-			Cancel,
-			parent,
-			"bosonoptionsdialog",
-			/*modal*/false,
-			true)
+	: KPageDialog( parent)
 {
  d = new OptionsDialogPrivate;
+ setFaceType(KPageDialog::Tabbed);
+ setWindowTitle(KDialog::makeStandardCaption(i18n("Boson Options")));
+ setButtons(KDialog::Ok | KDialog::Apply | KDialog::Default);
+ setDefaultButton(KDialog::Cancel);
 
  initGeneralPage();
  initCursorPage();
@@ -68,15 +65,15 @@ OptionsDialog::~OptionsDialog()
 
 void OptionsDialog::initGeneralPage()
 {
- KVBox* vbox = addVBoxPage(i18n("&General"));
- GeneralOptions* o = new GeneralOptions(vbox);
+ GeneralOptions* o = new GeneralOptions(0);
+ addPage(o, i18n("&General"));
  addOptions(o);
 }
 
 void OptionsDialog::initCursorPage()
 {
- KVBox* vbox = addVBoxPage(i18n("C&ursor"));
- CursorOptions* o = new CursorOptions(vbox);
+ CursorOptions* o = new CursorOptions(0);
+ addPage(o, i18n("C&ursor"));
  connect(o, SIGNAL(signalCursorChanged(int, const QString&)),
 		this, SIGNAL(signalCursorChanged(int, const QString&)));
  addOptions(o);
@@ -84,22 +81,22 @@ void OptionsDialog::initCursorPage()
 
 void OptionsDialog::initScrollingPage()
 {
- KVBox* vbox = addVBoxPage(i18n("&Scrolling"));
- ScrollingOptions* o = new ScrollingOptions(vbox);
+ ScrollingOptions* o = new ScrollingOptions(0);
+ addPage(o, i18n("&Scrolling"));
  addOptions(o);
 }
 
 void OptionsDialog::initSoundsPage()
 {
- KVBox* vbox = addVBoxPage(i18n("S&ounds"));
- SoundOptions* o = new SoundOptions(vbox);
+ SoundOptions* o = new SoundOptions(0);
+ addPage(o, i18n("S&ounds"));
  addOptions(o);
 }
 
 void OptionsDialog::initOpenGLPage()
 {
- KVBox* vbox = addVBoxPage(i18n("&OpenGL"));
- OpenGLOptions* o = new OpenGLOptions(vbox);
+ OpenGLOptions* o = new OpenGLOptions(0);
+ addPage(o, i18n("&OpenGL"));
  connect(o, SIGNAL(signalFontChanged(const BoFontInfo&)),
 		this, SIGNAL(signalFontChanged(const BoFontInfo&)));
  addOptions(o);
@@ -107,22 +104,22 @@ void OptionsDialog::initOpenGLPage()
 
 void OptionsDialog::initWaterPage()
 {
- KVBox* vbox = addVBoxPage(i18n("&Water"));
- WaterOptions* o = new WaterOptions(vbox);
+ WaterOptions* o = new WaterOptions(0);
+ addPage(o, i18n("&Water"));
  addOptions(o);
 }
 
 void OptionsDialog::initChatPage()
 {
- KVBox* vbox = addVBoxPage(i18n("C&hat"));
- ChatOptions* o = new ChatOptions(vbox);
+ ChatOptions* o = new ChatOptions(0);
+ addPage(o, i18n("C&hat"));
  addOptions(o);
 }
 
 void OptionsDialog::initToolTipPage()
 {
- KVBox* vbox = addVBoxPage(i18n("&Tool Tips"));
- ToolTipOptions* o = new ToolTipOptions(vbox);
+ ToolTipOptions* o = new ToolTipOptions(0);
+ addPage(o, i18n("&Tool Tips"));
  addOptions(o);
 }
 

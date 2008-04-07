@@ -41,8 +41,9 @@
 
 #include <k3staticdeleter.h>
 #include <kstandarddirs.h>
-#include <ksimpleconfig.h>
 #include <ktemporaryfile.h>
+#include <KConfig>
+#include <KConfigGroup>
 
 static K3StaticDeleter< Q3Dict<SpeciesData> > sd;
 Q3Dict<SpeciesData>* SpeciesData::mSpeciesData = 0;
@@ -75,7 +76,7 @@ public:
 	~BosonModelFactory() { }
 
 	BosonModel* createUnitModel(const UnitProperties* prop, const QString& file);
-	BosonModel* createObjectModel(const KSimpleConfig* config, const QString& themePath);
+	BosonModel* createObjectModel(const KConfigGroup* config, const QString& themePath);
 };
 
 BosonModel* BosonModelFactory::createUnitModel(const UnitProperties* prop, const QString& file)
@@ -92,11 +93,11 @@ BosonModel* BosonModelFactory::createUnitModel(const UnitProperties* prop, const
  // now we load animation information. this is just which frame is used for
  // which animation mode - no frame/node/display list modifying needs to be
  // made.
- KSimpleConfig cfg(configfile);
- cfg.setGroup("Model");
- m->loadAnimationMode(UnitAnimationIdle, &cfg, QString::fromLatin1("Idle"));
- m->loadAnimationMode(UnitAnimationWreckage, &cfg, QString::fromLatin1("Wreckage"));
- m->loadAnimationMode(UnitAnimationConstruction, &cfg, QString::fromLatin1("Construction"));
+ KConfig cfg(configfile, KConfig::SimpleConfig);
+ KConfigGroup group = cfg.group("Model");
+ m->loadAnimationMode(UnitAnimationIdle, &group, QString::fromLatin1("Idle"));
+ m->loadAnimationMode(UnitAnimationWreckage, &group, QString::fromLatin1("Wreckage"));
+ m->loadAnimationMode(UnitAnimationConstruction, &group, QString::fromLatin1("Construction"));
 
  if (prop->isFacility()) {
 	m->generateConstructionAnimation(prop->constructionSteps());
@@ -105,7 +106,7 @@ BosonModel* BosonModelFactory::createUnitModel(const UnitProperties* prop, const
  return m;
 }
 
-BosonModel* BosonModelFactory::createObjectModel(const KSimpleConfig* config, const QString& themePath)
+BosonModel* BosonModelFactory::createObjectModel(const KConfigGroup* configGroup, const QString& themePath)
 {
  // Object models doesn't have per-model config, but bobmfconfig requires it to
  //  set size of the model.
@@ -113,22 +114,22 @@ BosonModel* BosonModelFactory::createObjectModel(const KSimpleConfig* config, co
  // TODO: separate BosonModelFactory into it's own file and make it also handle
  //  model caching?
  KTemporaryFile tmpconfig;
+ if (!tmpconfig.open()) {
+	boError() << k_funcinfo << "could not open temporary file";
+	return 0;
+ }
  // We want the temporary file to be deleted when we're done.
- tmpconfig.setAutoDelete(true);
+ tmpconfig.setAutoRemove(true);
 
  // We write the config file manually, using QTextStream.
  // There's no point in creating KConfig object to write a single entry.
- Q3TextStream* ts = tmpconfig.textStream();
- if (!ts) {
-	boError() << k_funcinfo << "Couldn't create textstream object for KTemporaryFile" << endl;
-	return 0;
- }
- (*ts) << "[Model]" << endl;
- (*ts) << "Size=" << config->readDoubleNumEntry(QString::fromLatin1("Width"), 1.0f) << endl;
+ QTextStream ts(&tmpconfig);
+ ts << "[Model]" << endl;
+ ts << "Size=" << configGroup->readEntry(QString::fromLatin1("Width"), 1.0f) << endl;
  tmpconfig.close();
 
  // Load name of the model file
- QString file = config->readEntry(QString::fromLatin1("File"), QString::fromLatin1("missile.3ds"));
+ QString file = configGroup->readEntry(QString::fromLatin1("File"), QString::fromLatin1("missile.3ds"));
 
 
  BosonModel* m = new BosonModel(themePath + QString::fromLatin1("/objects/"), file);
@@ -360,7 +361,7 @@ bool SpeciesData::loadUnitOverview(const UnitProperties* prop, const QColor& tea
 	if (!loadUnitImage(teamColor, path + "overview-big.png", image)) {
 		boError(270) << k_funcinfo << "Can't load " << path + "overview-big.png" << endl;
 		image = QImage(100, 100, 32);
-		image.fill(Qt::red.rgb());
+		image.fill(QColor(Qt::red).rgb());
 	}
 	if (image.width() != 100 || image.height() != 100) {
 		image = image.smoothScale(100, 100, Qt::ScaleMin);
@@ -380,7 +381,7 @@ bool SpeciesData::loadUnitOverview(const UnitProperties* prop, const QColor& tea
 	if (!loadUnitImage(teamColor, path + "overview-small.png", image)) {
 		boError(270) << k_funcinfo << "Can't load " << path + "overview-small.png" << endl;
 		image = QImage(50, 50, 32);
-		image.fill(Qt::red.rgb());
+		image.fill(QColor(Qt::red).rgb());
 	}
 	if (image.width() != 50 || image.height() != 50) {
 		image = image.smoothScale(50, 50, Qt::ScaleMin);
@@ -499,7 +500,7 @@ bool SpeciesData::loadObjects(const QColor& teamColor)
 	return true;
  }
 
- KSimpleConfig cfg(fileName);
+ KConfig cfg(fileName, KConfig::SimpleConfig);
  QStringList objects = cfg.groupList();
  if (objects.isEmpty()) {
 	boDebug(270) << k_funcinfo << "No objects found in objects file (" << fileName << ")" << endl;
@@ -512,7 +513,7 @@ bool SpeciesData::loadObjects(const QColor& teamColor)
  for (it = objects.begin(); it != objects.end(); ++it) {
 	boDebug(270) << k_funcinfo << "Loading object from group " << *it << endl;
 
-	cfg.setGroup(*it);
+	KConfigGroup group = cfg.group(*it);
 
 	if (boConfig->boolValue("ForceDisableModelLoading")) {
 		continue;
@@ -520,7 +521,7 @@ bool SpeciesData::loadObjects(const QColor& teamColor)
 	BosonModel* m = d->mObjectModels.find(*it);
 	if (!m) {
 		BosonModelFactory factory;
-		m = factory.createObjectModel(&cfg, themePath());
+		m = factory.createObjectModel(&group, themePath());
 		if (!m) {
 			boError(270) << k_funcinfo  << "NULL model created" << endl;
 			return false;
@@ -546,7 +547,7 @@ bool SpeciesData::loadActions()
 	return true;
  }
 
- KSimpleConfig cfg(fileName);
+ KConfig cfg(fileName, KConfig::SimpleConfig);
  QStringList actions = cfg.groupList();
  if (actions.isEmpty()) {
 	boWarning(270) << k_funcinfo << "No actions found in actions file (" << fileName << ")" << endl;

@@ -241,7 +241,7 @@ boson_target_link_libraries(modelrendering
 set(bosonmainlib_SRCS
 	bosonviewdata.cpp
 	botooltipcreator.cpp
-	bosonglwidget.cpp
+	#bosonglwidget.cpp
 	bosonufoglwidget.cpp
 	bomousemovediff.cpp
 	bomatrixwidget.cpp
@@ -283,7 +283,10 @@ boson_target_link_libraries(bosonmainlib
 	modelrendering
 	gameengine
 	common
-	${QT_AND_KDECORE_KDEUI_KIO_LIBS}
+	${KDE4_KDE3SUPPORT_LIBS}
+	${QT_QT3SUPPORT_LIBRARY}
+	${QT_QTOPENGL_LIBRARY}
+	${KDE4_KDEUI_LIBS}
 	${LIB3DS_LIBRARY}
 
 	${X11_XRANDR_LIB}

@@ -30,7 +30,7 @@
 static int getIntFromList(const QStringList& list, const QString& start, int default_ = 0)
 {
  QRegExp reg(QString("^%1 = ").arg(start));
- QStringList tmp = list.grep(reg);
+ QStringList tmp = list.filter(reg);
  if (tmp.isEmpty()) {
 	return default_;
  }
@@ -128,19 +128,19 @@ void BoInfoGLCache::update()
  d->mIsDirect = getBool(BoInfo::IsDirect);
  d->mGLXClientVersionString = getString(BoInfo::GLXClientVersionString);
  d->mGLXClientVendorString = getString(BoInfo::GLXClientVendorString);
- d->mGLXClientExtensions = QStringList::split('\n', getString(BoInfo::GLXClientExtensionsString));
- d->mGLXServerExtensions = QStringList::split('\n', getString(BoInfo::GLXServerExtensionsString));
+ d->mGLXClientExtensions = getString(BoInfo::GLXClientExtensionsString).split('\n');
+ d->mGLXServerExtensions = getString(BoInfo::GLXServerExtensionsString).split('\n');
  d->mGLXVersionMajor = getInt(BoInfo::GLXVersionMajor);
  d->mGLXVersionMinor = getInt(BoInfo::GLXVersionMinor);
 
  d->mGLUVersionString = getString(BoInfo::GLUVersionString);
- d->mGLUExtensions = QStringList::split('\n', getString(BoInfo::GLUExtensionsString));
+ d->mGLUExtensions = getString(BoInfo::GLUExtensionsString).split('\n');
 
  d->mOpenGLVersionString = getString(BoInfo::OpenGLVersionString);
  d->mOpenGLVendorString = getString(BoInfo::OpenGLVendorString);
  d->mOpenGLRendererString = getString(BoInfo::OpenGLRendererString);
  d->mOpenGLVersion = getUInt(BoInfo::OpenGLVersion);
- d->mOpenGLExtensions = QStringList::split('\n', getString(BoInfo::OpenGLExtensionsString));
+ d->mOpenGLExtensions = getString(BoInfo::OpenGLExtensionsString).split('\n');
 
  QStringList glValues = mInfo->openGLValues();
  d->mMaxTextureSize = getIntFromList(glValues, "GL_MAX_TEXTURE_SIZE", 1);
