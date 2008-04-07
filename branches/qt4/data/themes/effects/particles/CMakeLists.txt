@@ -1,4 +1,5 @@
-set(particles_install_dir ${KDE3_DATA_INSTALL_DIR}/boson/themes/effects/particles)
+set(particles_install_dir ${KDE4_DATA_INSTALL_DIR}/boson/themes/effects/particles)
 
-install_files(${particles_install_dir} .*\\.png)
+FILE(GLOB png_files "*.png")
+install(FILES ${png_files} DESTINATION ${particles_install_dir})
 

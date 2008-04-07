@@ -1,4 +1,5 @@
-set(ui_install_dir ${KDE3_DATA_INSTALL_DIR}/boson/themes/ui/standard)
+set(ui_install_dir ${KDE4_DATA_INSTALL_DIR}/boson/themes/ui/standard)
 
-install_files(${ui_install_dir} .*\\.png)
+FILE(GLOB png_files "*.png")
+install(FILES ${png_files} DESTINATION ${ui_install_dir})
 

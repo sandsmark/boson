@@ -1,4 +1,5 @@
-set(fonts_install_dir ${KDE3_DATA_INSTALL_DIR}/boson/fonts)
+set(fonts_install_dir ${KDE4_DATA_INSTALL_DIR}/boson/fonts)
 
-install_files(${fonts_install_dir} .*\\.txf)
+FILE(GLOB font_files "*.txf")
+install(FILES ${font_files} DESTINATION ${fonts_install_dir})
 

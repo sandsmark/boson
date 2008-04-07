@@ -1,5 +1,10 @@
-set(textures_install_dir ${KDE3_DATA_INSTALL_DIR}/boson/themes/textures)
+set(textures_install_dir ${KDE4_DATA_INSTALL_DIR}/boson/themes/textures)
 
-install_files(${textures_install_dir} .*\\.png)
-install_files(${textures_install_dir} .*\\.jpg)
+FILE(GLOB png_files "*.png")
+FILE(GLOB jpg_files "*.jpg")
+install(
+	FILES
+	${png_files}
+	${jpg_files}
+	DESTINATION ${textures_install_dir})
 

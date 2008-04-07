@@ -11,16 +11,22 @@ macro(BOSON_INSTALL_SPECIES species_source_path species_install_dir species)
 	set(full_species_path ${species_source_path}/${species})
 	set(full_species_install_path ${species_install_dir}/${species})
 
-	install_files(${full_species_install_path} FILES
+	install(
+		FILES
 		${full_species_path}/index.species
 		${full_species_path}/index.technologies
+		DESTINATION
+		${full_species_install_path}
 	)
 
 
 	# AB: non-playable players won't have this
 	if(EXISTS ${full_species_path}/actions.boson)
-		install_files(${full_species_install_path} FILES
+		install(
+			FILES
 			${full_species_path}/actions.boson
+			DESTINATION
+			${full_species_install_path}
 		)
 	endif(EXISTS ${full_species_path}/actions.boson)
 
@@ -39,8 +45,11 @@ macro(BOSON_INSTALL_SPECIES_PIXMAPS pixmaps_source pixmaps_dest)
 	file(GLOB jpg ${pixmaps_source}/*.jpg)
 	file(GLOB png ${pixmaps_source}/*.png)
 	foreach(file ${jpg} ${png})
-		install_files(${pixmaps_dest} FILES
+		install(
+			FILES
 			${file}
+			DESTINATION
+			${pixmaps_dest}
 		)
 	endforeach(file)
 endmacro(BOSON_INSTALL_SPECIES_PIXMAPS pixmaps_source pixmaps_dest)
@@ -48,23 +57,32 @@ endmacro(BOSON_INSTALL_SPECIES_PIXMAPS pixmaps_source pixmaps_dest)
 macro(BOSON_INSTALL_SPECIES_SOUNDS sounds_source sounds_dest)
 	file(GLOB sound_files ${sounds_source}/*.ogg)
 	foreach(file ${sound_files})
-		install_files(${sounds_dest} FILES
+		install(
+			FILES
 			${file}
+			DESTINATION
+			${sounds_dest}
 		)
 	endforeach(file)
 endmacro(BOSON_INSTALL_SPECIES_SOUNDS sounds_source sounds_dest)
 
 
 macro(BOSON_INSTALL_SPECIES_OBJECTS objects_source objects_dest)
-	install_files(${objects_dest} FILES
+	install(
+		FILES
 		${objects_source}/objects.boson
+		DESTINATION
+		${objects_dest}
 	)
 
 	file(GLOB object_models_3ds ${objects_source}/*.3ds)
 	file(GLOB object_models_ac ${objects_source}/*.ac)
 	foreach(file ${object_models_3ds} ${object_models_ac})
-		install_files(${objects_dest} FILES
+		install(
+			FILES
 			${file}
+			DESTINATION
+			${objects_dest}
 		)
 	endforeach(file)
 endmacro(BOSON_INSTALL_SPECIES_OBJECTS objects_source objects_dest)
@@ -81,14 +99,20 @@ macro(BOSON_INSTALL_SPECIES_UNITS units_source units_dest)
 		string(REGEX REPLACE index\\.unit$ "" unit ${unit})
 
 		set(unit_path ${units_source}/${unit})
-		install_files(${units_dest}/${unit} FILES
+		install(
+			FILES
 			${unit_path}/index.unit
+			DESTINATION
+			${units_dest}/${unit}
 		)
 		file(GLOB unit_files ${unit_path}/unit.*)
 		file(GLOB png ${unit_path}/*.png)
 		foreach(file ${png} ${unit_files})
-			install_files(${units_dest}/${unit} FILES
+			install(
+				FILES
 				${file}
+				DESTINATION
+				${units_dest}/${unit}
 			)
 		endforeach(file)
 	endforeach(abs_unit)

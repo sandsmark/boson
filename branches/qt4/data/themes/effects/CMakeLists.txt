@@ -1,7 +1,8 @@
-set(effects_install_dir ${KDE3_DATA_INSTALL_DIR}/boson/themes/effects)
+set(effects_install_dir ${KDE4_DATA_INSTALL_DIR}/boson/themes/effects)
 
-install_files(${effects_install_dir} FILES
-	effects.boson
+install(
+	FILES effects.boson
+	DESTINATION ${effects_install_dir}
 )
 
 add_subdirectory(particles)

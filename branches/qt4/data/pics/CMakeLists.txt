@@ -1,4 +1,5 @@
-set(pics_install_dir ${KDE3_DATA_INSTALL_DIR}/boson/pics)
+set(pics_install_dir ${KDE4_DATA_INSTALL_DIR}/boson/pics)
 
-install_files(${pics_install_dir} .*\\.png)
+FILE(GLOB pics "*.png")
+install(FILES ${pics} DESTINATION ${pics_install_dir})
 

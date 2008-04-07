@@ -1,4 +1,4 @@
-set(cursors_install_dir ${KDE3_DATA_INSTALL_DIR}/boson/themes/cursors)
+set(cursors_install_dir ${KDE4_DATA_INSTALL_DIR}/boson/themes/cursors)
 
 set(cursors
 	alternative
@@ -12,7 +12,7 @@ foreach(index_file ${index_files})
 	file(RELATIVE_PATH index_file ${CMAKE_CURRENT_SOURCE_DIR} ${index_file})
 	string(REGEX REPLACE \\/.* "" type ${index_file})
 
-	install_files(${cursors_install_dir}/${type} FILES ${index_file})
+	install(FILES ${index_file} DESTINATION ${cursors_install_dir}/${type} )
 
 	file(GLOB mode_index_files ${CMAKE_CURRENT_SOURCE_DIR}/${type}/*/index.cursor)
 
@@ -20,13 +20,13 @@ foreach(index_file ${index_files})
 		file(RELATIVE_PATH mode_index_file ${CMAKE_CURRENT_SOURCE_DIR}/${type} ${mode_index_file})
 		string(REGEX REPLACE \\/.* "" mode ${mode_index_file})
 
-		install_files(${cursors_install_dir}/${type}/${mode} FILES ${type}/${mode_index_file})
+		install(FILES ${type}/${mode_index_file} DESTINATION ${cursors_install_dir}/${type}/${mode})
 
 
 		file(GLOB jpeg_files ${CMAKE_CURRENT_SOURCE_DIR}/${type}/${mode}/*.jpg)
 		file(GLOB png_files ${CMAKE_CURRENT_SOURCE_DIR}/${type}/${mode}/*.png)
 		foreach(image ${jpeg_files} ${png_files})
-			install_files(${cursors_install_dir}/${type}/${mode} FILES ${image})
+			install(FILES ${image} DESTINATION ${cursors_install_dir}/${type}/${mode})
 		endforeach(image)
 	endforeach(mode_index_file)
 
