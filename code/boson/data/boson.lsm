@@ -11,7 +11,7 @@ Primary-site:   http://sourceforge.net/project/showfiles.php?group_id=15087
                 1.8M boson-code-0.13.tar.bz2
                 18M  boson-data-0.13.tar.bz2
                 16M  boson-music-0.13.tar.bz2
-Alternate-site: ftp.kde.org /pub/kde/unstable/apps/KDE3.x/games/
+Alternate-site: ftp.kde.org /pub/kde/unstable/apps/KDE4.x/games/
 Home-page:      http://boson.eu.org/
 Original-site:
 Platform:       Linux and other Unices, needs Qt>=3.1.0, kdelibs>=3.1, lib3ds and OpenGL
