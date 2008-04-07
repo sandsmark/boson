@@ -194,7 +194,7 @@ void BosonMainWidget::init()
  connect(d->mFPSCounter, SIGNAL(signalSkipFrame()),
 		this, SLOT(slotSkipFrame()));
 
- setUpdatesEnabled(false);
+ setUpdatesEnabled(true);
  setFocusPolicy(Qt::WheelFocus);
  setMouseTracking(true);
 
