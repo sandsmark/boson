@@ -421,10 +421,10 @@ if (list) {
 // mMap = 0;
  mCount = 0;
  if (minDist) {
-	*minDist = qMax(0, mMinDistance);
+	*minDist = qMax(0.0f, mMinDistance);
  }
  if (maxDist) {
-	*maxDist = qMax(0, mMaxDistance);
+	*maxDist = qMax(0.0f, mMaxDistance);
  }
  return renderCells;
 }

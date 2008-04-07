@@ -32,7 +32,7 @@
 #include <stdlib.h>
 #include <dlfcn.h>
 
-BOPLUGIN_MANAGER(BosonGameViewPluginManager, libbosongameviewplugin)
+BOPLUGIN_MANAGER(BosonGameViewPluginManager, bosongameviewplugin)
 
 BosonGameViewPluginManager* BosonGameViewPluginManager::mManager = 0;
 

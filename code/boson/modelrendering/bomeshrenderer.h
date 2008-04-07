@@ -284,4 +284,6 @@ private:
 	BoMeshRendererStatistics* mCurrentStatistics;
 };
 
+Q_DECLARE_INTERFACE(BoMeshRenderer, "BoMeshRenderer")
+
 #endif

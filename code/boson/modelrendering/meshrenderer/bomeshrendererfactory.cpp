@@ -29,40 +29,39 @@
 
 #include <bodebug.h>
 
-KInstance* BoMeshRendererFactory::mInstance = 0;
-
-BoMeshRendererFactory::BoMeshRendererFactory(QObject* parent, const char* name)
-	: KLibFactory(parent, name)
+BoMeshRendererFactory::BoMeshRendererFactory(QObject* parent)
+	: KLibFactory(parent)
 {
- mInstance = new KInstance("BoMeshRendererFactory");
 }
 
 BoMeshRendererFactory::~BoMeshRendererFactory()
 {
- delete mInstance;
- mInstance = 0;
 }
 
-QObject* BoMeshRendererFactory::createObject(QObject* parent, const char* name,
-		const char* className, const QStringList &args)
+QObject* BoMeshRendererFactory::create(const char* iface,
+		QWidget* parentWidget,
+		QObject* parent,
+		const QVariantList& args,
+		const QString& keyWord)
 {
- Q_UNUSED(name);
- Q_UNUSED(args);
+ Q_UNUSED(iface);
+ Q_UNUSED(parentWidget);
  Q_UNUSED(parent);
+ Q_UNUSED(args);
  QObject* o = 0;
- if (qstrcmp(className, "BoPluginInformation") == 0) {
-	// note: the _libbomeshrendererplugin is NOT part of the string
-	o = new BoPluginInformation_libbomeshrendererplugin;
- } else if (qstrcmp(className, "BoMeshRendererSemiImmediate") == 0) {
+ if (keyWord == "BoPluginInformation") {
+	// note: the _bomeshrendererplugin is NOT part of the string
+	o = new BoPluginInformation_bomeshrendererplugin;
+ } else if (keyWord == "BoMeshRendererSemiImmediate") {
 	o = new BoMeshRendererSemiImmediate;
- } else if (qstrcmp(className, "BoMeshRendererImmediate") == 0) {
+ } else if (keyWord == "BoMeshRendererImmediate") {
 	o = new BoMeshRendererImmediate;
- } else if (qstrcmp(className, "BoMeshRendererVertexArray") == 0) {
+ } else if (keyWord == "BoMeshRendererVertexArray") {
 	o = new BoMeshRendererVertexArray;
- } else if (qstrcmp(className, "BoMeshRendererVBO") == 0) {
+ } else if (keyWord == "BoMeshRendererVBO") {
 	o = new BoMeshRendererVBO;
  } else {
-	boError() << k_funcinfo << "no such class available: " << className << endl;
+	boError() << k_funcinfo << "no such class available: " << keyWord << endl;
 	return 0;
  }
  emit objectCreated(o);
@@ -70,7 +69,7 @@ QObject* BoMeshRendererFactory::createObject(QObject* parent, const char* name,
 }
 
 
-QStringList BoPluginInformation_libbomeshrendererplugin::plugins() const
+QStringList BoPluginInformation_bomeshrendererplugin::plugins() const
 {
  QStringList list;
  list.append("BoMeshRendererVBO");
@@ -80,5 +79,5 @@ QStringList BoPluginInformation_libbomeshrendererplugin::plugins() const
  return list;
 }
 
-BO_EXPORT_PLUGIN_FACTORY( libbomeshrendererplugin, BoMeshRendererFactory )
+BO_EXPORT_PLUGIN_FACTORY( bomeshrendererplugin, BoMeshRendererFactory )
 

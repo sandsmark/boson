@@ -313,5 +313,7 @@ private:
 	unsigned int mRenderCellsCount; // actual number of cells in the array
 };
 
+Q_DECLARE_INTERFACE(BoGroundRenderer, "BoGroundRenderer")
+
 #endif
 

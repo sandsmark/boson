@@ -13,8 +13,6 @@ set(boglc_SRCS
 find_package(Qt3 REQUIRED)
 include_directories(${QT_INCLUDE_DIR})
 
-#kde3_automoc(${boglc_SRCS})
-
 add_executable(boglc ${boglc_SRCS})
 target_link_libraries(boglc
 	${QT_LIBRARIES}

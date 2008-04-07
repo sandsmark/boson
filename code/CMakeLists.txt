@@ -36,7 +36,7 @@ option(BOSON_LINK_STATIC
 )
 option(BOSON_USE_DEBUG_PLUGINS
   "use debugging plugins that allow to use new code without restarting boson.  only useful to developers."
-  ON
+  OFF
 )
 option(BOSON_USE_BOMEMORY
   "debug memory usage. this is a very experimental debugging option!"

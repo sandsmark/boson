@@ -75,6 +75,7 @@ BoDefaultGroundRenderer::~BoDefaultGroundRenderer()
 
 bool BoDefaultGroundRenderer::usable() const
 {
+ boDebug() << boConfig;
  bool u = BoGroundRendererBase::usable();
  if (!u) {
 	return false;

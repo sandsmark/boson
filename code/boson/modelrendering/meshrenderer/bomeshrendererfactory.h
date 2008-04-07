@@ -27,26 +27,21 @@ class BoMeshRendererFactory : public KLibFactory
 {
 	Q_OBJECT
 public:
-	BoMeshRendererFactory(QObject* parent = 0, const char* name = 0);
+	BoMeshRendererFactory(QObject* parent = 0);
 	~BoMeshRendererFactory();
 
 protected:
-	virtual QObject* createObject(QObject* parent = 0, const char* name = 0,
-			const char* className = "QObject",
-			const QStringList &args = QStringList());
-
-private:
-	static KInstance* mInstance;
+	virtual QObject* create(const char* iface, QWidget* parentWidget, QObject* parent, const QVariantList& args, const QString& keyWord);
 };
 
-class BoPluginInformation_libbomeshrendererplugin : public BoPluginInformation
+class BoPluginInformation_bomeshrendererplugin : public BoPluginInformation
 {
 	Q_OBJECT
 public:
-	BoPluginInformation_libbomeshrendererplugin() : BoPluginInformation()
+	BoPluginInformation_bomeshrendererplugin() : BoPluginInformation()
 	{
 	}
-	~BoPluginInformation_libbomeshrendererplugin()
+	~BoPluginInformation_bomeshrendererplugin()
 	{
 	}
 

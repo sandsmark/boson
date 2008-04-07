@@ -31,28 +31,24 @@ class BoGroundRendererFactory : public KLibFactory
 {
 	Q_OBJECT
 public:
-	BoGroundRendererFactory(QObject* parent = 0, const char* name = 0);
+	BoGroundRendererFactory(QObject* parent = 0);
 	~BoGroundRendererFactory();
 
 protected:
-	virtual QObject* createObject(QObject* parent = 0, const char* name = 0,
-			const char* className = "QObject",
-			const QStringList &args = QStringList());
+	virtual QObject* create(const char* iface, QWidget* parentWidget, QObject* parent, const QVariantList& args, const QString& keyWord);
 
 	bool rendererUsable(BoGroundRenderer* r) const;
-
-private:
-	static KInstance* mInstance;
 };
 
-class BoPluginInformation_libbogroundrendererplugin : public BoPluginInformation
+class BoPluginInformation_bogroundrendererplugin : public BoPluginInformation
 {
 	Q_OBJECT
+	Q_INTERFACES(BoPluginInformation)
 public:
-	BoPluginInformation_libbogroundrendererplugin() : BoPluginInformation()
+	BoPluginInformation_bogroundrendererplugin() : BoPluginInformation()
 	{
 	}
-	~BoPluginInformation_libbogroundrendererplugin()
+	~BoPluginInformation_bogroundrendererplugin()
 	{
 	}
 

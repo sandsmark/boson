@@ -862,8 +862,8 @@ BosonGameView::~BosonGameView()
  delete d->mGameGLMatrices;
  delete d->mToolTips;
  d->mGameViewPlugin = 0;
- BoMeshRendererManager::manager()->unsetCurrentRenderer();
  BoGroundRendererManager::manager()->unsetCurrentRenderer();
+ BoMeshRendererManager::manager()->unsetCurrentRenderer();
  BosonGameViewPluginManager::manager()->unsetCurrentPlugin();
  SpeciesData::clearSpeciesData();
  BoGroundRendererManager::deleteStatic();
@@ -907,9 +907,9 @@ void BosonGameView::init()
  BoMeshRendererManager::initStatic();
  BosonGameViewPluginManager::initStatic();
  boProfiling->pop();
- BoMeshRendererManager::manager()->makeRendererCurrent(QString::null);
- BoGroundRendererManager::manager()->makeRendererCurrent(QString::null);
- BosonGameViewPluginManager::manager()->makePluginCurrent(QString::null);
+ BoMeshRendererManager::manager()->makeRendererCurrent(QString());
+ BoGroundRendererManager::manager()->makeRendererCurrent(QString());
+ BosonGameViewPluginManager::manager()->makePluginCurrent(QString());
  resetGameViewPlugin();
 
  boWaterRenderer->setViewFrustum(&d->mViewFrustum);
