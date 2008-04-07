@@ -106,7 +106,7 @@ void BosonOrderWidget::ensureButtons(unsigned int number)
 		connect(b, SIGNAL(signalMouseEntered()),
 				this, SLOT(slotMouseEnteredButton()));
 		connect(b, SIGNAL(signalMouseLeft()),
-				this, SLOT(slotMouseQt::LeftButton()));
+				this, SLOT(slotMouseLeftButton()));
 	}
  }
 }
@@ -124,7 +124,7 @@ void BosonOrderWidget::setOrderButtons(const Q3ValueList<BoSpecificAction>& acti
  ensureButtons(actions.count());
  hideOrderButtons();
 
- unsigned long int id = 0;
+ quint32 id = 0;
  ProductionType type = ProduceNothing;
  ProductionPlugin* production = 0;
 
@@ -139,8 +139,8 @@ void BosonOrderWidget::setOrderButtons(const Q3ValueList<BoSpecificAction>& acti
 	}
  }
 
- QPair<ProductionType, long unsigned int> pair;
- for (unsigned int i = 0; i < actions.count(); i++) {
+ QPair<ProductionType, quint32> pair;
+ for (int i = 0; i < actions.count(); i++) {
 	resetButton(d->mOrderButton[i]);
 	d->mOrderButton[i]->setAction(actions[i]);
 	if (id > 0 && production) { // production has already started
@@ -166,7 +166,7 @@ void BosonOrderWidget::setOrderButtons(const Q3ValueList<BoSpecificAction>& acti
 
  for (Q3ValueList<int>::const_iterator it = unavailableActions.begin(); it != unavailableActions.end(); ++it) {
 	int index = *it;
-	if (index < 0 || (unsigned int)index >= actions.count()) {
+	if (index < 0 || index >= actions.count()) {
 		boError() << k_funcinfo << "invalid unavailableActions index " << index << endl;
 		continue;
 	}
@@ -301,7 +301,7 @@ void BosonOrderWidget::slotMouseEnteredButton()
  }
 }
 
-void BosonOrderWidget::slotMouseQt::LeftButton()
+void BosonOrderWidget::slotMouseLeftButton()
 {
  BosonOrderButton* button = (BosonOrderButton*)sender();
  boDebug() << k_funcinfo << "button: " << button << endl;

@@ -25,9 +25,8 @@
 #include "boapplication.h"
 #include "boversion.h"
 #include "bodebug.h"
-#include "bodebugdcopiface.h"
 #include "bo3dtools.h"
-#include "boeventloop.h"
+//#include "boeventloop.h"
 #include "bosongameengine.h"
 #include "bosongldriverworkarounds.h"
 #include <config.h>
@@ -43,38 +42,9 @@
 // sound is enabled by default atm
 #define HARDCODE_NOSOUND 0
 
-static const char *description =
-    I18N_NOOP("A realtime strategy game for KDE");
 
 static const char *version = BOSON_VERSION_STRING;
 
-static KCmdLineOptions options[] =
-{
-#if HARDCODE_NOSOUND
-    { "sound", I18N_NOOP("Enable Sounds"), 0 },
-#else
-    { "nosound", I18N_NOOP("Disable Sounds"), 0 },
-#endif
-    { "new", I18N_NOOP("Skip Welcome Widget and display the New Game screen"), 0 },
-    { "editor", I18N_NOOP("Skip Welcome Widget and display the Start Editor screen"), 0 },
-    { "load", I18N_NOOP("Skip Welcome Widget and display the Load Game screen"), 0 },
-    { "load-from-log <file>", I18N_NOOP("Load from emergency log, for debugging"), 0 },
-    { "playfield <identifier>", I18N_NOOP("Playfield identifier for newgame/start editor widget"), 0 },
-    { "computer <count>", I18N_NOOP("Add (currently dummy) computer player"), 0 },
-    { "start", I18N_NOOP("Start the game"), 0},
-    { "aidelay <delay>", I18N_NOOP("Set AI delay (in seconds). The less it is, the faster AI will send it's units"), 0 },
-    { "noai", I18N_NOOP("Disable AI"), 0 },
-    { "indirect", I18N_NOOP("Use Indirect rendering (sloooow!! - debugging only)"), 0 },
-    { "ati-depth-workaround", I18N_NOOP("Enable the ATI (proprietary) driver workaround for reading the depth buffer. Will use depth of 0.00390625. This workaround is deprecated and not required anymore!"), 0 },
-    { "mesa-vertexarray-workaround", I18N_NOOP("Enable the MESA driver workaround for vertex arrays. This is required for mesa <= 6.5.1, which will probably crash otherwise."), 0 },
-    { "ati-depth-workaround-depth <depth>", I18N_NOOP("Use with --ati-depth-workaround. Supply a depth value for your system (default=0.00390625)"), 0 },
-    { "default-lodcount <count>", I18N_NOOP("Use <count> for default level of detail count"), 0 },
-    { "nomodels", I18N_NOOP("Disable model loading for faster startup (you won't see the units)"), 0 },
-    { "notexturecompression", I18N_NOOP("Disable texture compression for faster startup"), 0 },
-    { "fast", I18N_NOOP("Fast Startup"), 0 },
-    { "veryfast", I18N_NOOP("Very Fast Startup (debugging only!)"), 0 },
-    { 0, 0, 0 }
-};
 
 
 void postBosonConfigInit();
@@ -83,21 +53,50 @@ void postBosonConfigInit();
 int main(int argc, char **argv)
 {
  KAboutData about("boson",
-        I18N_NOOP("Boson"),
+        QByteArray(),
+        ki18n("Boson"),
         version,
-        description,
+        ki18n("A realtime strategy game for KDE"),
         KAboutData::License_GPL,
-        "(C) 1999-2000,2001-2005 The Boson team",
-        0,
+        ki18n("(C) 1999-2000,2001-2005 The Boson team"),
+        KLocalizedString(),
         "http://boson.eu.org");
- about.addAuthor("Thomas Capricelli", I18N_NOOP("Initial Game Design & Coding"),
+ about.addAuthor(ki18n("Thomas Capricelli"), ki18n("Initial Game Design & Coding"),
         "orzel@freehackers.org", "http://orzel.freehackers.org");
- about.addAuthor("Benjamin Adler", I18N_NOOP("Graphics & Homepage Design"),
+ about.addAuthor(ki18n("Benjamin Adler"), ki18n("Graphics & Homepage Design"),
         "benadler@bigfoot.de");
- about.addAuthor("Andreas Beckermann", I18N_NOOP("Coding & Current Maintainer"), "b_mann@gmx.de");
- about.addAuthor("Rivo Laks", I18N_NOOP("Coding & Homepage Redesign"), "rivolaks@hot.ee");
- about.addAuthor("Felix Seeger", I18N_NOOP("Documentation"), "felix.seeger@gmx.de");
- about.addAuthor("Christopher J. Jepson (Xenthorious)", I18N_NOOP("Modeling & texturing"), "xenthorious@yahoo.com");
+ about.addAuthor(ki18n("Andreas Beckermann"), ki18n("Coding & Current Maintainer"), "b_mann@gmx.de");
+ about.addAuthor(ki18n("Rivo Laks"), ki18n("Coding & Homepage Redesign"), "rivolaks@hot.ee");
+ about.addAuthor(ki18n("Felix Seeger"), ki18n("Documentation"), "felix.seeger@gmx.de");
+ about.addAuthor(ki18n("Christopher J. Jepson (Xenthorious)"), ki18n("Modeling & texturing"), "xenthorious@yahoo.com");
+
+
+ KCmdLineOptions options;
+#if HARDCODE_NOSOUND
+ options.add("sound", ki18n("Enable Sounds"));
+#else
+ options.add("nosound", ki18n("Disable Sounds"));
+#endif
+ options.add("new", ki18n("Skip Welcome Widget and display the New Game screen"));
+ options.add("editor", ki18n("Skip Welcome Widget and display the Start Editor screen"));
+ options.add("load", ki18n("Skip Welcome Widget and display the Load Game screen"));
+ options.add("load-from-log <file>", ki18n("Load from emergency log, for debugging"));
+ options.add("playfield <identifier>", ki18n("Playfield identifier for newgame/start editor widget"));
+ options.add("computer <count>", ki18n("Add (currently dummy) computer player"));
+ options.add("start", ki18n("Start the game"));
+ options.add("aidelay <delay>", ki18n("Set AI delay (in seconds). The less it is, the faster AI will send it's units"));
+ options.add("noai", ki18n("Disable AI"));
+ options.add("indirect", ki18n("Use Indirect rendering (sloooow!! - debugging only)"));
+ options.add("ati-depth-workaround", ki18n("Enable the ATI (proprietary) driver workaround for reading the depth buffer. Will use depth of 0.00390625. This workaround is deprecated and not required anymore!"));
+ options.add("mesa-vertexarray-workaround", ki18n("Enable the MESA driver workaround for vertex arrays. This is required for mesa <= 6.5.1, which will probably crash otherwise."));
+ options.add("ati-depth-workaround-depth <depth>", ki18n("Use with --ati-depth-workaround. Supply a depth value for your system (default=0.00390625)"));
+ options.add("default-lodcount <count>", ki18n("Use <count> for default level of detail count"));
+ options.add("nomodels", ki18n("Disable model loading for faster startup (you won't see the units)"));
+ options.add("notexturecompression", ki18n("Disable texture compression for faster startup"));
+ options.add("fast", ki18n("Fast Startup"));
+ options.add("veryfast", ki18n("Very Fast Startup (debugging only!)"));
+
+
 
  // first tell BoGlobal that we need to do extra stuff after BosonConfig's
  // initialization
@@ -106,9 +105,6 @@ int main(int argc, char **argv)
  Q3CString argv0(argv[0]);
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
-#if BOSON_LINK_STATIC
- KApplication::disableAutoDcopRegistration();
-#endif
 
  boDebug() << k_funcinfo << "Boson " << version << " is starting..." << endl;
  boDebug() << k_funcinfo << "resolving GL, GLX and GLU symbols" << endl;
@@ -120,14 +116,11 @@ int main(int argc, char **argv)
  }
  boDebug() << k_funcinfo << "GL, GLX and GLU symbols successfully resolved" << endl;
 
- BoEventLoop eventLoop(0, "main event loop");
+ //BoEventLoop eventLoop(0, "main event loop");
  BoApplication app(argv0);
  KGlobal::locale()->insertCatalog("libkdegames");
 
  KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
-
-    // register ourselves as a dcop client
-//    app.dcopClient()->registerAs(app.name(), false);
 
  // make sure the data files are installed at the correct location
  BoCheckInstallation checkInstallation;
@@ -139,22 +132,17 @@ int main(int argc, char **argv)
 	return 1;
  }
 
- BoDebugDCOPIface* iface = 0;
-#if !BOSON_LINK_STATIC
- // AB: if we build a static binary, we do not allow DCOP connections, so no
- // need to construct this.
- iface = new BoDebugDCOPIface;
-#endif
-
  BosonGameEngine* gameEngine = new BosonGameEngine(0);
 
  bool forceWantDirect = boConfig->boolValue("ForceWantDirect");
  BosonMainWidget* top = new BosonMainWidget(0, forceWantDirect);
 
- QString glDriverBroken = top->glDriverBroken();
- if (!top->directRendering()) {
+ bool directRendering = top->format().directRendering();
+ if (!directRendering) {
 	boWarning() << "using INDIRECT (software) rendering" << endl;
  }
+#if 0
+ QString glDriverBroken = top->glDriverBroken();
  if (!glDriverBroken.isEmpty()) {
 	KMessageBox::information(0, i18n("Your OpenGL driver appears to be broken! The reported error is:\n%1"
 			"\n\nGL library used: %2"
@@ -164,7 +152,10 @@ int main(int argc, char **argv)
 			arg(BoGL::bogl()->OpenGLFile()).
 			arg(BoGL::bogl()->GLUFile()));
  }
- if (!top->directRendering()) {
+#else
+#warning TODO: port BosonGLWidget::glDriverBroken()
+#endif
+ if (!directRendering) {
 	KMessageBox::information(0, i18n("Direct rendering is NOT enabled! 3d acceleration is DISABLED.\nBoson will run very slowly (seconds per frame instead of frames per second).\n\nIf you are sure that your 3d drivers are installed correctly and support 3d acceleration, please let us know about this problem and help us fixing it: boson-devel@lists.sourceforge.net"));
  }
 
@@ -175,7 +166,6 @@ int main(int argc, char **argv)
 
  top->initUfoGUI();
 
- app.setMainWidget(top);
  top->show();
 
  top->setGameEngine(gameEngine);
@@ -246,7 +236,6 @@ int main(int argc, char **argv)
  }
  int ret = app.exec();
 
- delete iface;
  delete top;
  delete gameEngine;
 

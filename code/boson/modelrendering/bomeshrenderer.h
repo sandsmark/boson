@@ -191,7 +191,7 @@ public:
 	 * @param mesh The mesh MUST belong to the model that has been set by
 	 * @ref setModel
 	 **/
-	void renderMesh(const QColor* teamColor, BoMesh* mesh, RenderFlags flags);
+	void renderMesh(const QColor& teamColor, BoMesh* mesh, RenderFlags flags);
 
 	QString statisticsData() const;
 
@@ -209,7 +209,7 @@ protected:
 	/**
 	 * @return How many points have been rendered
 	 **/
-	virtual unsigned int render(const QColor* teamColor, BoMesh* mesh, RenderFlags flags) = 0;
+	virtual unsigned int render(const QColor& teamColor, BoMesh* mesh, RenderFlags flags) = 0;
 
 	/**
 	 * Called by @ref initializeData before @ref initModelData is called. The

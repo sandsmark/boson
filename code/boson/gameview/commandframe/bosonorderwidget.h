@@ -140,7 +140,7 @@ protected slots:
 	void slotPlaceGround(unsigned int groundtype);
 
 	void slotMouseEnteredButton();
-	void slotMouseQt::LeftButton();
+	void slotMouseLeftButton();
 	void slotMouseMoved(QMouseEvent* e);
 	void slotCheckCursor();
 

@@ -25,3 +25,12 @@ else(BOSON_USE_DEBUG_PLUGINS)
 endif(BOSON_USE_DEBUG_PLUGINS)
 
 
+target_link_libraries(bosongameviewplugin
+	boufo
+	bogl
+	kgame
+	${QT_QT3SUPPORT_LIBRARY}
+	${KDE4_KDEUI_LIBS}
+)
+
+

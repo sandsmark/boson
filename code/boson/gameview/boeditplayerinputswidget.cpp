@@ -100,8 +100,8 @@ void BoEditPlayerInputsWidget::setPlayer(Player* p)
  d->mNewPlayerIOs->clear();
  d->mNewRTTIs.clear();
 
- for (Q3PtrListIterator<KGameIO> it(*p->ioList()); it.current(); ++it) {
-	new Q3ListBoxText(d->mCurrentPlayerIOs, rttiString(it.current()->rtti()));
+ foreach (KGameIO* io, *p->ioList()) {
+	new Q3ListBoxText(d->mCurrentPlayerIOs, rttiString(io->rtti()));
  }
 
 
@@ -127,7 +127,7 @@ void BoEditPlayerInputsWidget::slotAddIO()
 	boDebug() << k_funcinfo << "invalid index " << current << endl;
 	return;
  }
- if ((unsigned int)current >= d->mNewRTTIs.count()) {
+ if (current >= d->mNewRTTIs.count()) {
 	boDebug() << k_funcinfo << "index " << current << " out of bounds" << endl;
 	return;
  }
@@ -174,7 +174,7 @@ void BoEditPlayerInputsWidget::slotRemoveIO()
 	boDebug() << k_funcinfo << "invalid index " << current << endl;
 	return;
  }
- if ((unsigned int)current >= d->mPlayer->ioList()->count()) {
+ if (current >= d->mPlayer->ioList()->count()) {
 	boDebug() << k_funcinfo << "index " << current << " out of bounds" << endl;
 	return;
  }

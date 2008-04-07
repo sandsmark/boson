@@ -1010,7 +1010,7 @@ void BoUfoOrbiterCameraWidget::updateFromCamera()
  BO_CHECK_NULL_RET(camera());
 
  if (d->mOrbiter) {
-	d->mOrbiter->slotUpdateGL();
+	d->mOrbiter->updateGL();
  }
 
 // BoMatrix rotationMatrix = camera()->rotationMatrix();
@@ -1186,7 +1186,7 @@ BoUfoLightCameraWidget::~BoUfoLightCameraWidget()
  delete mCamera;
 }
 
-void BoUfoLightCameraWidget::setLight(BoLight* light, BoContext* context)
+void BoUfoLightCameraWidget::setLight(BoLight* light, QGLContext* context)
 {
  boDebug() << k_funcinfo << endl;
  if (mCamera) {
@@ -1248,7 +1248,7 @@ void BoUfoLightCameraWidget::slotLightChanged()
 	return;
  }
  boDebug() << k_funcinfo << endl;
- BoContext* old = BoContext::currentContext();
+ const QGLContext* old = QGLContext::currentContext();
  mContext->makeCurrent();
 
  mLight->setDirectional(mDirectional->checked());
@@ -1260,7 +1260,7 @@ void BoUfoLightCameraWidget::slotLightChanged()
  mLight->setQuadraticAttenuation(mQuadraticAttenuation->value());
 
  if (old) {
-	old->makeCurrent();
+	const_cast<QGLContext*>(old)->makeCurrent();
  }
 
  // when directional light is enabled attenuation is per definition disabled
@@ -1285,7 +1285,7 @@ void BoUfoLightCameraWidget::slotLightModelChanged()
  }
 
  boDebug() << k_funcinfo << endl;
- BoContext* old = BoContext::currentContext();
+ const QGLContext* old = QGLContext::currentContext();
  mContext->makeCurrent();
 
  GLfloat amb[4];
@@ -1296,7 +1296,7 @@ void BoUfoLightCameraWidget::slotLightModelChanged()
  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, amb);
 
  if (old) {
-	old->makeCurrent();
+	const_cast<QGLContext*>(old)->makeCurrent();
  }
 }
 
@@ -1316,7 +1316,7 @@ public:
 
 	void initialize()
 	{
-		initGL();
+		glInit();
 	}
 	virtual void paintGL()
 	{
@@ -1335,9 +1335,11 @@ public:
 protected:
 	virtual void initializeGL()
 	{
-		if (isInitialized()) {
+		static bool isInitialized = false;
+		if (isInitialized) {
 			return;
 		}
+		isInitialized = true;
 		BO_CHECK_NULL_RET(context());
 		static bool recursive = false;
 		if (recursive) {
@@ -1382,7 +1384,7 @@ BoLightCameraWidget1::~BoLightCameraWidget1()
 {
 }
 
-void BoLightCameraWidget1::setLight(BoLight* l, BoContext* c)
+void BoLightCameraWidget1::setLight(BoLight* l, QGLContext* c)
 {
  mLightWidget->setLight(l, c);
 }

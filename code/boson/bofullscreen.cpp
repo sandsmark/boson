@@ -145,12 +145,12 @@ void BoFullScreen::resizeToFullScreen(QWidget* w, int width, int height)
 	boError() << k_funcinfo << "w must be a toplevel widget" << endl;
 	return;
  }
- w->reparent(0, QWidget::Qt::WType_TopLevel |
-		QWidget::Qt::WStyle_Customize |
-		QWidget::Qt::WStyle_NoBorder |
-		QWidget::WDestructiveClose
+ w->reparent(0, Qt::WType_TopLevel |
+		Qt::WStyle_Customize |
+		Qt::WStyle_NoBorder
 		/* | w->getWFlags() & 0xffff0000*/,
 		w->mapToGlobal(QPoint(0, 0)));
+ w->setAttribute(Qt::WA_DeleteOnClose);
  w->resize(width, height);
  w->raise();
  w->show();
@@ -169,8 +169,9 @@ void BoFullScreen::leaveFullScreen()
 	return;
  }
  BoFullScreen::enterOriginalMode();
- w->reparent(0, QWidget::Qt::WType_TopLevel | QWidget::WDestructiveClose,
+ w->reparent(0, Qt::WType_TopLevel,
 		QPoint(0, 0));
+ w->setAttribute(Qt::WA_DeleteOnClose);
  w->show();
 }
 

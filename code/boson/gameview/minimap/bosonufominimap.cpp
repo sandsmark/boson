@@ -165,7 +165,7 @@ void BosonUfoMiniMap::setImageTheme(const QString& theme)
 			h = 100;
 		}
 		d->mLogo = QImage(w, h, 32);
-		d->mLogo.fill(Qt::red.rgb());
+		d->mLogo.fill(QColor(Qt::red).rgb());
 	}
  } else {
 	d->mLogo = image;
@@ -260,10 +260,10 @@ void BosonUfoMiniMap::slotZoomDefault()
 
 QImage BosonUfoMiniMap::imageFromTheme(const QString& file, const QString& theme) const
 {
- QString f = locate("data", QString::fromLatin1("boson/themes/ui/%1/%2").arg(theme).arg(file));
+ QString f = KStandardDirs::locate("data", QString::fromLatin1("boson/themes/ui/%1/%2").arg(theme).arg(file));
  QFileInfo info(f);
  if (!info.exists()) {
-	f = locate("data", QString::fromLatin1("boson/themes/ui/%1/%2").arg(QString::fromLatin1("standard").arg(file)));
+	f = KStandardDirs::locate("data", QString::fromLatin1("boson/themes/ui/%1/%2").arg(QString::fromLatin1("standard").arg(file)));
 	info.setFile(f);
 	if (!info.exists()) {
 		boError() << k_funcinfo << "Can't find " << f << " in " << theme << " or standard" << endl;

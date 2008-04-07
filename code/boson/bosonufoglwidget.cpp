@@ -51,8 +51,8 @@ public:
 	}
 };
 
-BosonUfoGLWidget::BosonUfoGLWidget(QWidget* parent, const char* name, bool direct)
-	: BosonGLWidget(parent, name, direct)
+BosonUfoGLWidget::BosonUfoGLWidget(QWidget* parent, bool direct)
+	: QGLWidget(QGLFormat(direct ? QGL::DirectRendering : QGL::IndirectRendering), parent)
 {
  mUfoManager = 0;
  mSendEvents = true;
@@ -91,7 +91,7 @@ void BosonUfoGLWidget::initUfo()
 bool BosonUfoGLWidget::eventFilter(QObject* o, QEvent* e)
 {
  if (!ufoManager()) {
-	return BosonGLWidget::eventFilter(o, e);
+	return QGLWidget::eventFilter(o, e);
  }
  switch (e->type()) {
 	case QEvent::AccelOverride:
@@ -112,14 +112,14 @@ bool BosonUfoGLWidget::eventFilter(QObject* o, QEvent* e)
 	default:
 		break;
  }
- return BosonGLWidget::eventFilter(o, e);
+ return QGLWidget::eventFilter(o, e);
 }
 
 void BosonUfoGLWidget::makeCurrent()
 {
  boProfiling->pushStorage("BoUfo");
  boProfiling->push("makeCurrent()");
- BosonGLWidget::makeCurrent();
+ QGLWidget::makeCurrent();
  if (mUfoManager) {
 	mUfoManager->makeContextCurrent();
  }
@@ -208,7 +208,7 @@ void BosonUfoGLWidget::keyPressEvent(QKeyEvent* e)
 	mUfoManager->sendEvent(e);
 	update();
  }
- BosonGLWidget::keyPressEvent(e);
+ QGLWidget::keyPressEvent(e);
  boProfiling->pop(); // "keyPressEvent()"
  boProfiling->popStorage();
 }
@@ -222,7 +222,7 @@ void BosonUfoGLWidget::keyReleaseEvent(QKeyEvent* e)
 	mUfoManager->sendEvent(e);
 	update();
  }
- BosonGLWidget::keyReleaseEvent(e);
+ QGLWidget::keyReleaseEvent(e);
  boProfiling->pop(); // "keyReleaseEvent()"
  boProfiling->popStorage();
 }

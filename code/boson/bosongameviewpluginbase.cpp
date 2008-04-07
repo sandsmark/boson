@@ -34,7 +34,7 @@ public:
 };
 
 BosonGameViewPluginBase::BosonGameViewPluginBase()
-	: QObject(0, "gameviewplugin")
+	: QObject(0)
 {
  d = new BosonGameViewPluginBasePrivate;
  d->mInitialized = false;

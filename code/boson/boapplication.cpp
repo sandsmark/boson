@@ -91,7 +91,7 @@ BoApplication::BoApplication(const Q3CString& argv0, bool enableGUI)
 
  BoGlobal::initStatic();
  BoGlobal::boGlobal()->initGlobalObjects();
- BoImageIO::init();
+// BoImageIO::init();
 }
 
 BoApplication::~BoApplication()

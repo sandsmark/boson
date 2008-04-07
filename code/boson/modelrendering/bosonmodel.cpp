@@ -25,7 +25,7 @@
 #include "bosonmodeltextures.h"
 #include "../bosonprofiling.h"
 #include "../bo3dtools.h"
-#include "../bosonglwidget.h" // BoContext
+#include <QGLContext>
 #include "bodebug.h"
 #include "bomesh.h"
 #include "../bomaterial.h"
@@ -187,7 +187,7 @@ BoMatrix* BoFrame::matrix(int index) const
  return mMatrices[index];
 }
 
-void BoFrame::renderFrame(const Q3ValueVector<const BoMatrix*>& itemMatrices,const QColor* teamColor, bool transparentmeshes, RenderFlags flags, int mode)
+void BoFrame::renderFrame(const Q3ValueVector<const BoMatrix*>& itemMatrices, const QColor& teamColor, bool transparentmeshes, RenderFlags flags, int mode)
 {
  if ((unsigned int)itemMatrices.count() != mNodeCount) {
 	boError() << k_funcinfo << "must have exactly one item matrix per node. itemMatrices parameter provided " << itemMatrices.count() << " matrices, have " << mNodeCount << " nodes." << endl;
@@ -496,7 +496,7 @@ bool BosonModel::loadModel(const QString& configfilename)
  loadTextures(modelTextures);
  boProfiling->pop(); // LoadModelTextures
 
- if (!BoContext::currentContext()) {
+ if (!QGLContext::currentContext()) {
 	boError(100) << k_funcinfo << "NULL current context" << endl;
 	return false;
  }

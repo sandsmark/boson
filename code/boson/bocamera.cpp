@@ -25,7 +25,7 @@
 #include "defines.h"
 #include "bosonconfig.h"
 #include "bodebug.h"
-#include "bosonglwidget.h" // BoContext
+#include <QGLContext>
 #include "bolight.h"
 #include "gameengine/bosoncanvas.h"
 
@@ -422,7 +422,7 @@ void BoGameCamera::checkCameraPosition()
       const float step = 1 / (float)iterations;
       for(float factor = 1 - step; factor >= 0; factor -= step)
       {
-        mActualDistance = qMax(CAMERA_MIN_DISTANCE, mDistance * factor);
+        mActualDistance = qMax((float)CAMERA_MIN_DISTANCE, mDistance * factor);
         // Recalc camera pos
         setPositionDirty();
         BoVector3Float newcamerapos = cameraPos();
@@ -470,7 +470,7 @@ void BoGameCamera::checkXRotation()
     // No restrictions
     return;
   }
-  mXRotation = qMax(0, qMin(CAMERA_MAX_XROTATION, mXRotation));
+  mXRotation = qMax(0.0f, qMin((float)CAMERA_MAX_XROTATION, mXRotation));
 }
 
 
@@ -588,7 +588,7 @@ void BoGameCamera::setCameraPos(const BoVector3Float& pos)
 
 void BoGameCamera::setXRotation(GLfloat r)
 {
-  mXRotation = qMax(0, qMin(CAMERA_MAX_XROTATION, r));
+  mXRotation = qMax(0.0f, qMin((float)CAMERA_MAX_XROTATION, r));
   setPositionDirty();
 
   checkXRotation();
@@ -613,7 +613,7 @@ void BoGameCamera::setRotation(GLfloat r)
 
 void BoGameCamera::setDistance(GLfloat dist)
 {
-  mDistance = qMin(CAMERA_MAX_DISTANCE, qMax(CAMERA_MIN_DISTANCE, dist));
+  mDistance = qMin((float)CAMERA_MAX_DISTANCE, qMax((float)CAMERA_MIN_DISTANCE, dist));
   mActualDistance = mDistance;
 
   setPositionDirty();
@@ -668,7 +668,7 @@ void BoGameCamera::setUseLimits(bool use)
 
 /*****  BoLightCamera  *****/
 
-BoLightCamera::BoLightCamera(BoLight* light, BoContext* ctx) : BoCamera()
+BoLightCamera::BoLightCamera(BoLight* light, QGLContext* ctx) : BoCamera()
 {
   mContext = ctx;
   mLight = light;
@@ -702,7 +702,7 @@ void BoLightCamera::setGluLookAt(const BoVector3Float& c, const BoVector3Float& 
   {
     return;
   }
-  BoContext* old = BoContext::currentContext();
+  QGLContext* old = const_cast<QGLContext*>(QGLContext::currentContext());
   mContext->makeCurrent();
   mLight->setPosition3(l * -1);
 

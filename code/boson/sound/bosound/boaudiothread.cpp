@@ -124,8 +124,11 @@ void BoAudioThread::slotReceiveStdin(int sock)
 	return;
  }
  QFile readFile;
- readFile.open(QIODevice::ReadOnly | QIODevice::Unbuffered, sock);
- int ch = readFile.getch();
+ readFile.open(sock, QIODevice::ReadOnly | QIODevice::Unbuffered);
+ char ch;
+ if (!readFile.getChar(&ch)) {
+	return;
+ }
  if (ch == -1) {
 	return;
  }
@@ -134,7 +137,8 @@ void BoAudioThread::slotReceiveStdin(int sock)
 	g_buffer = QString::null;
 	BoAudioCommand* cmd = parseCommand(command);
 	if (!cmd) {
-		fprintf(stderr, "parsing error on command %s\n", command.latin1());
+		QByteArray tmp = command.toLatin1();
+		fprintf(stderr, "parsing error on command %s\n", tmp.constData());
 	} else {
 		enqueueCommand(cmd);
 	}
@@ -210,19 +214,21 @@ bool parseInt(QString& command, int* result)
 {
  bool ok = false;
  QString s;
- int index = command.find(' ');
+ int index = command.indexOf(' ');
  if (index >= 0) {
 	s = command.left(index);
  } else {
 	s = command;
  }
  if (s.isEmpty()) {
-	fprintf(stderr, "Could not parse integer - command: %s\n", command.latin1());
+	QByteArray tmp = command.toLatin1();
+	fprintf(stderr, "Could not parse integer - command: %s\n", tmp.constData());
 	return 0;
  }
  *result = s.toInt(&ok);
  if (!ok) {
-	fprintf(stderr, "Parsed value not an integer - command: %s\n", command.latin1());
+	QByteArray tmp = command.toLatin1();
+	fprintf(stderr, "Parsed value not an integer - command: %s\n", tmp.constData());
  }
  if (index >= 0) {
 	command = command.right(command.length() - index - 1);
@@ -235,7 +241,7 @@ bool parseInt(QString& command, int* result)
 bool parseString(QString& command, QString* result)
 {
  QString s;
- int index = command.find(' ');
+ int index = command.indexOf(' ');
  if (index >= 0) {
 	s = command.left(index);
 	command = command.right(command.length() - index - 1);

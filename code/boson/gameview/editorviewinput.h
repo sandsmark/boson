@@ -42,7 +42,7 @@ public:
 	 * The specified unitType is marked to be placed whenever the user
 	 * clicks on the map.
 	 **/
-	virtual void placeUnit(unsigned long int unitType, Player* owner);
+	virtual void placeUnit(quint32 unitType, Player* owner);
 
 	virtual void placeGround(unsigned int textureCount, unsigned char* alpha);
 

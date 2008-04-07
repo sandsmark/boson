@@ -97,6 +97,7 @@
 #include <qdom.h>
 #include <q3valuevector.h>
 #include <qapplication.h>
+#include <QTime>
 //Added by qt3to4:
 #include <QWheelEvent>
 #include <QMouseEvent>
@@ -2190,15 +2191,15 @@ void BosonGameView::slotMouseEvent(QMouseEvent* e)
  event.setGroundWorldPos(posX, posY, posZ);
  if (e->type() != QEvent::Wheel) {
 	event.setGameViewWidgetPos(e->pos());
-	event.setControlModifier(e->state() & ControlButton);
-	event.setShiftModifier(e->state() & ShiftButton);
-	event.setAltModifier(e->state() & AltButton);
+	event.setControlModifier(e->state() & Qt::ControlButton);
+	event.setShiftModifier(e->state() & Qt::ShiftButton);
+	event.setAltModifier(e->state() & Qt::AltButton);
  } else {
 	QWheelEvent* w = (QWheelEvent*)e;
 	event.setGameViewWidgetPos(w->pos());
-	event.setControlModifier(w->state() & ControlButton);
-	event.setShiftModifier(w->state() & ShiftButton);
-	event.setAltModifier(w->state() & AltButton);
+	event.setControlModifier(w->state() & Qt::ControlButton);
+	event.setShiftModifier(w->state() & Qt::ShiftButton);
+	event.setAltModifier(w->state() & Qt::AltButton);
  }
  event.setUnitAtEventPos(d->mUfoCanvasWidget->unitAtWidgetPos(event.gameViewWidgetPos()));
 
@@ -2234,7 +2235,7 @@ void BosonGameView::slotMouseEvent(QMouseEvent* e)
 			case Qt::LeftButton:
 				d->mLeftButtonState->pressButton(event.gameViewWidgetPos());
 				break;
-			case MidButton:
+			case Qt::MidButton:
 				d->mMiddleButtonState->pressButton(event.gameViewWidgetPos());
 				break;
 			case Qt::RightButton:
@@ -2271,7 +2272,7 @@ void BosonGameView::slotWheelEvent(QWheelEvent* e)
  slotMouseEvent((QMouseEvent*)ev);
 }
 
-void BosonGameView::mouseEventWheel(float delta, Orientation orientation, const BoMouseEvent& boEvent)
+void BosonGameView::mouseEventWheel(float delta, Qt::Orientation orientation, const BoMouseEvent& boEvent)
 {
  int action;
  if (boEvent.shiftButton()) {
@@ -2291,7 +2292,7 @@ void BosonGameView::mouseEventWheel(float delta, Orientation orientation, const 
 			scrollY = 20;
 			delta *= QApplication::wheelScrollLines();
 		}
-		if (orientation == Horizontal) {
+		if (orientation == Qt::Horizontal) {
 			scrollX *= (int)delta;
 			scrollY = 0;
 		} else {
@@ -2371,7 +2372,7 @@ void BosonGameView::mouseEventMove(int buttonState, const BoMouseEvent& event)
  if (buttonState & Qt::LeftButton) {
 	d->mLeftButtonState->mouseMoved(event);
  }
- if (buttonState & MidButton) {
+ if (buttonState & Qt::MidButton) {
 	d->mMiddleButtonState->mouseMoved(event);
  }
  if (buttonState & Qt::RightButton) {
@@ -2390,7 +2391,7 @@ void BosonGameView::mouseEventMove(int buttonState, const BoMouseEvent& event)
  displayInput()->updateCursor();
 }
 
-void BosonGameView::mouseEventRelease(ButtonState button, const BoMouseEvent& event)
+void BosonGameView::mouseEventRelease(Qt::ButtonState button, const BoMouseEvent& event)
 {
  switch (button) {
 	case Qt::LeftButton:
@@ -2398,7 +2399,7 @@ void BosonGameView::mouseEventRelease(ButtonState button, const BoMouseEvent& ev
 		d->mLeftButtonState->releaseButton(event);
 		break;
 	}
-	case MidButton:
+	case Qt::MidButton:
 	{
 		d->mMiddleButtonState->releaseButton(event);
 		break;
@@ -2415,7 +2416,7 @@ void BosonGameView::mouseEventRelease(ButtonState button, const BoMouseEvent& ev
  displayInput()->updateCursor();
 }
 
-void BosonGameView::mouseEventReleaseDouble(ButtonState button, const BoMouseEvent& event)
+void BosonGameView::mouseEventReleaseDouble(Qt::ButtonState button, const BoMouseEvent& event)
 {
  switch (button) {
 	case Qt::LeftButton:
@@ -2423,7 +2424,7 @@ void BosonGameView::mouseEventReleaseDouble(ButtonState button, const BoMouseEve
 		d->mLeftButtonState->releaseButton(event, true);
 		break;
 	}
-	case MidButton:
+	case Qt::MidButton:
 	{
 		d->mMiddleButtonState->releaseButton(event, true);
 		break;
@@ -3005,11 +3006,8 @@ void BosonGameViewScriptConnector::slotCommitCameraChanges(int ticks)
 
 void BosonGameViewScriptConnector::slotSetAcceptUserInput(bool accept)
 {
- Q3PtrList<KGameIO>* iolist = mDisplay->localPlayerIO()->ioList();
- Q3PtrListIterator<KGameIO> it(*iolist);
- while (it.current()) {
-	(*it)->blockSignals(!accept);
-	++it;
+ foreach (KGameIO* io, *mDisplay->localPlayerIO()->ioList()) {
+	io->blockSignals(!accept);
  }
 }
 

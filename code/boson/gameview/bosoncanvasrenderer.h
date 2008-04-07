@@ -56,6 +56,7 @@ class BosonItemContainer;
 class KGameChat;
 class KGameIO;
 class QDomElement;
+class QRect;
 template<class T> class Q3PtrList;
 template<class T> class Q3ValueVector;
 template<class T> class Q3ValueList;

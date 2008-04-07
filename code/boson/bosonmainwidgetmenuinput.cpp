@@ -94,6 +94,10 @@ void BosonMainWidgetMenuInput::init(BoUfoActionCollection* parentCollection)
  d = new BosonMainWidgetMenuInputPrivate;
  d->mActionCollection = new BoUfoActionCollection(parentCollection, this, "mainwidget_actioncollection");
 
+ if (!qobject_cast<QWidget*>(parent()) || qobject_cast<QWidget*>(parent())->parent() != 0) {
+	boError() << k_funcinfo << "parent() is not a toplevel QWidget! slotGrabScreenshot() relies on that!";
+ }
+
  initUfoActions();
 }
 
@@ -240,16 +244,16 @@ void BosonMainWidgetMenuInput::slotDebugKGame()
  }
  KGameDebugDialog* dlg = new KGameDebugDialog(boGame, 0, false);
 
- KVBox* b = dlg->addVBoxPage(i18n("Debug &Units"));
- KGameUnitDebug* units = new KGameUnitDebug(b);
+ KGameUnitDebug* units = new KGameUnitDebug(0);
+ dlg->addPage(units, i18n("Debug &Units"));
  units->setBoson(boGame);
 
- b = dlg->addVBoxPage(i18n("Debug &Boson Players"));
- KGamePlayerDebug* player = new KGamePlayerDebug(b);
+ KGamePlayerDebug* player = new KGamePlayerDebug(0);
+ dlg->addPage(player, i18n("Debug &Boson Players"));
  player->setBoson(boGame);
 
- b = dlg->addVBoxPage(i18n("Debug &Advance messages"));
- KGameAdvanceMessagesDebug* messages = new KGameAdvanceMessagesDebug(b);
+ KGameAdvanceMessagesDebug* messages = new KGameAdvanceMessagesDebug(0);
+ dlg->addPage(messages, i18n("Debug &Advance messages"));
  messages->setBoson(boGame);
 
 #if 0
@@ -259,12 +263,12 @@ void BosonMainWidgetMenuInput::slotDebugKGame()
 		boError() << k_funcinfo << "NULL map" << endl;
 		return;
 	}
-	b = dlg->addVBoxPage(i18n("Debug &Cells"));
 
 	// AB: this hardly does anything atm (04/04/23), but it takes a lot of
 	// time and memory to be initialized on big maps (on list item per cell,
 	// on a 500x500 map thats a lot)
 	KGameCellDebug* cells = new KGameCellDebug(b);
+	dlg->addPage(cells, i18n("Debug &Cells"));
 	cells->setMap(map);
  }
 #endif
@@ -348,7 +352,17 @@ void BosonMainWidgetMenuInput::slotGrabScreenshot()
 {
  boDebug() << k_funcinfo << "Taking screenshot!" << endl;
 
- QPixmap shot = QPixmap::grabWindow(qApp->mainWidget()->winId());
+ QWidget* topWidget = qobject_cast<QWidget*>(parent());
+ if (!topWidget) {
+	boError() << k_funcinfo << "parent() is not a QWidget. cannot take screenshot.";
+	return;
+ }
+ if (topWidget->parent()) {
+	boError() << k_funcinfo << "parent() is not a tiplevel widget. screenshot may be incomplete!";
+	// do not return
+ }
+
+ QPixmap shot = QPixmap::grabWindow(topWidget->winId());
  if (shot.isNull()) {
 	boError() << k_funcinfo << "NULL image returned" << endl;
 	return;
@@ -392,7 +406,8 @@ void BosonMainWidgetMenuInput::slotGrabProfiling()
 void BosonMainWidgetMenuInput::slotShowGLStates()
 {
  boDebug() << k_funcinfo << endl;
- BoGLStateWidget* w = new BoGLStateWidget(0, 0, WDestructiveClose);
+ BoGLStateWidget* w = new BoGLStateWidget(0);
+ w->setAttribute(Qt::WA_DeleteOnClose);
  w->show();
 }
 

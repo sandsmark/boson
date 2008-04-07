@@ -33,6 +33,7 @@ set(bosonsound_sources
 	bosonaudio.cpp
 )
 
+add_definitions(-DQT3_SUPPORT)
 
 boson_add_library(bosonsoundcommon STATIC ${bosonsoundcommon_sources})
 boson_add_library(bosonsound STATIC ${bosonsound_sources})

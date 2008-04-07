@@ -190,10 +190,8 @@ Q3ValueList<int> BosonScript::allGamePlayers() const
     return players;
   }
 
-  Q3PtrListIterator<Player> it(game()->gamePlayerList());
-  for (; it.current(); ++it)
+  foreach (Player* p, game()->gamePlayerList())
   {
-    Player* p = it.current();
     players.append(p->bosonId());
   }
 
@@ -378,7 +376,7 @@ void BosonScript::addMinerals(int player, int amount)
   }
 
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
   stream << (quint32)player;
   stream << (qint32)amount;
   game()->sendMessage(b, BosonMessageIds::IdModifyMinerals);
@@ -417,7 +415,7 @@ void BosonScript::addOil(int player, int amount)
   }
 
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
   stream << (quint32)player;
   stream << (qint32)amount;
   game()->sendMessage(b, BosonMessageIds::IdModifyOil);
@@ -454,7 +452,7 @@ Q3ValueList<BoVector2Fixed> BosonScript::nearestOilLocations(int x, int y, unsig
 void BosonScript::moveUnit(int id, float x, float y)
 {
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
 
   Q3ValueList<quint32> moveUnits;
   moveUnits.append((quint32)id);
@@ -465,14 +463,14 @@ void BosonScript::moveUnit(int id, float x, float y)
     return;
   }
 
-  QDataStream msg(b, QIODevice::ReadOnly);
+  QDataStream msg(b);
   sendInput(msg);
 }
 
 void BosonScript::moveUnitWithAttacking(int id, float x, float y)
 {
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
 
   Q3ValueList<quint32> moveUnits;
   moveUnits.append((quint32)id);
@@ -483,14 +481,14 @@ void BosonScript::moveUnitWithAttacking(int id, float x, float y)
     return;
   }
 
-  QDataStream msg(b, QIODevice::ReadOnly);
+  QDataStream msg(b);
   sendInput(msg);
 }
 
 void BosonScript::attack(int attackerId, int targetId)
 {
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
 
   Q3ValueList<quint32> units;
   units.append((quint32)attackerId);
@@ -501,14 +499,14 @@ void BosonScript::attack(int attackerId, int targetId)
     return;
   }
 
-  QDataStream msg(b, QIODevice::ReadOnly);
+  QDataStream msg(b);
   sendInput(msg);
 }
 
 void BosonScript::stopUnit(int id)
 {
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
 
   Q3ValueList<quint32> units;
   units.append((quint32)id);
@@ -519,7 +517,7 @@ void BosonScript::stopUnit(int id)
     return;
   }
 
-  QDataStream msg(b, QIODevice::WriteOnly);
+  QDataStream msg(&b, QIODevice::WriteOnly);
   sendInput(msg);
 }
 
@@ -547,7 +545,7 @@ void BosonScript::mineUnit(int id, float x, float y)
   }
 
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
 
   BosonMessageMoveMine message(id, resourceUnit->id());
   if(!message.save(stream))
@@ -556,14 +554,14 @@ void BosonScript::mineUnit(int id, float x, float y)
     return;
   }
 
-  QDataStream msg(b, QIODevice::ReadOnly);
+  QDataStream msg(b);
   sendInput(msg);
 }
 
 void BosonScript::setUnitRotation(int id, float rotation)
 {
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
 
   BosonMessageMoveRotate message(id, playerId(), rotation);
   if(!message.save(stream))
@@ -572,14 +570,14 @@ void BosonScript::setUnitRotation(int id, float rotation)
     return;
   }
 
-  QDataStream msg(b, QIODevice::ReadOnly);
+  QDataStream msg(b);
   sendInput(msg);
 }
 
 void BosonScript::dropBomb(int id, int weapon, float x, float y)
 {
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
 
   Q3ValueList<quint32> units;
   Q3ValueList<quint32> weapons;
@@ -592,14 +590,14 @@ void BosonScript::dropBomb(int id, int weapon, float x, float y)
     return;
   }
 
-  QDataStream msg(b, QIODevice::ReadOnly);
+  QDataStream msg(b);
   sendInput(msg);
 }
 
 void BosonScript::produceUnit(int factory, int production)
 {
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
 
   BosonMessageMoveProduce message((quint32)ProduceUnit, playerId(), factory, production);
   if(!message.save(stream))
@@ -608,7 +606,7 @@ void BosonScript::produceUnit(int factory, int production)
     return;
   }
 
-  QDataStream msg(b, QIODevice::ReadOnly);
+  QDataStream msg(b);
   sendInput(msg);
 }
 
@@ -620,7 +618,7 @@ void BosonScript::spawnUnit(int type, float x, float y)
     return;
   }
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
 
 #warning AB: This is an editor message. it should not be here.
   boWarning() << k_funcinfo << "FIXME" << endl;
@@ -631,7 +629,7 @@ void BosonScript::spawnUnit(int type, float x, float y)
   stream << BoVector2Fixed(x, y);
 #endif
 
-  QDataStream msg(b, QIODevice::ReadOnly);
+  QDataStream msg(b);
   sendInput(msg);
 }
 
@@ -643,7 +641,7 @@ void BosonScript::teleportUnit(int id, float x, float y)
     return;
   }
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
 
   BosonMessageMoveTeleport message(id, playerId(), BoVector2Fixed(x, y));
   if(!message.save(stream))
@@ -652,7 +650,7 @@ void BosonScript::teleportUnit(int id, float x, float y)
     return;
   }
 
-  QDataStream msg(b, QIODevice::ReadOnly);
+  QDataStream msg(b);
   sendInput(msg);
 }
 
@@ -698,7 +696,7 @@ void BosonScript::placeProduction(int factoryid, float x, float y)
   }
 
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
 
   BosonMessageMoveBuild message((quint32)ProduceUnit, p->playerId(), u->id(), BoVector2Fixed(x, y));
   if(!message.save(stream))
@@ -707,7 +705,7 @@ void BosonScript::placeProduction(int factoryid, float x, float y)
     return;
   }
 
-  QDataStream msg(b, QIODevice::ReadOnly);
+  QDataStream msg(b);
   sendInput(msg);
 }
 
@@ -1649,8 +1647,8 @@ void BosonScript::exploreAllPlayers()
     boError() << k_funcinfo << "NULL map" << endl;
     return;
   }
-  Q3PtrList<Player> list = game()->allPlayerList();
-  for(unsigned int i = 0; i < list.count(); i++)
+  QList<Player*> list = game()->allPlayerList();
+  for(int i = 0; i < list.count(); i++)
   {
     Player* p = list.at(i);
     internalExplorePlayer(map, p);
@@ -1709,8 +1707,8 @@ void BosonScript::unfogAllPlayers()
     boError() << k_funcinfo << "NULL map" << endl;
     return;
   }
-  Q3PtrList<Player> list = game()->allPlayerList();
-  for(unsigned int i = 0; i < list.count(); i++)
+  QList<Player*> list = game()->allPlayerList();
+  for(int i = 0; i < list.count(); i++)
   {
     Player* p = list.at(i);
     internalUnfogPlayer(map, p);
@@ -1769,8 +1767,8 @@ void BosonScript::fogAllPlayers()
     boError() << k_funcinfo << "NULL map" << endl;
     return;
   }
-  Q3PtrList<Player> list = game()->allPlayerList();
-  for(unsigned int i = 0; i < list.count(); i++)
+  QList<Player*> list = game()->allPlayerList();
+  for(int i = 0; i < list.count(); i++)
   {
     Player* p = list.at(i);
     internalFogPlayer(map, p);

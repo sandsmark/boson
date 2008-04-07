@@ -385,7 +385,7 @@ bool BosonEffectParticleGeneric::saveAsXML(QDomElement& root) const
 
   // Init byte array and data stream
   QByteArray ba;
-  QDataStream stream(ba, QIODevice::WriteOnly);
+  QDataStream stream(&ba, QIODevice::WriteOnly);
 
   // Save matrix
   for(int i = 0; i < 4; i++)
@@ -503,7 +503,7 @@ bool BosonEffectParticleGeneric::loadFromXML(const QDomElement& root)
   KCodecs::base64Decode(base64data.utf8(), ba);  // Is utf8() safe to use here?
 
   // Init data stream
-  QDataStream stream(ba, QIODevice::ReadOnly);
+  QDataStream stream(ba);
 
   // Load matrix
   for(int i = 0; i < 4; i++)
@@ -734,7 +734,7 @@ bool BosonEffectParticleTrail::saveAsXML(QDomElement& root) const
 
   // Init byte array and data stream
   QByteArray ba;
-  QDataStream stream(ba, QIODevice::WriteOnly);
+  QDataStream stream(&ba, QIODevice::WriteOnly);
 
   // Save matrix
   for(int i = 0; i < 4; i++)
@@ -848,7 +848,7 @@ bool BosonEffectParticleTrail::loadFromXML(const QDomElement& root)
   KCodecs::base64Decode(base64data.utf8(), ba);  // Is utf8() safe to use here?
 
   // Init data stream
-  QDataStream stream(ba, QIODevice::ReadOnly);
+  QDataStream stream(ba);
 
   // Load matrix
   for(int i = 0; i < 4; i++)
@@ -1202,7 +1202,7 @@ bool BosonEffectParticleEnvironmental::saveAsXML(QDomElement& root) const
 
   // Init byte array and data stream
   QByteArray ba;
-  QDataStream stream(ba, QIODevice::WriteOnly);
+  QDataStream stream(&ba, QIODevice::WriteOnly);
 
   // Save particles
   int particlessaved = 0;
@@ -1294,7 +1294,7 @@ bool BosonEffectParticleEnvironmental::loadFromXML(const QDomElement& root)
   KCodecs::base64Decode(base64data.utf8(), ba);  // Is utf8() safe to use here?
 
   // Init data stream
-  QDataStream stream(ba, QIODevice::ReadOnly);
+  QDataStream stream(ba);
 
   // Load particles
   for(int i = 0; i < mNum; i++)

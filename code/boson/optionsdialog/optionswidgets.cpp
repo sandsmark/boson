@@ -41,9 +41,9 @@
 #include <kapplication.h>
 #include <klocale.h>
 #include <knuminput.h>
-#include <ksimpleconfig.h>
 #include <kstandarddirs.h>
 #include <kmessagebox.h>
+#include <KConfigGroup>
 
 #include <qlabel.h>
 #include <qcombobox.h>
@@ -143,12 +143,12 @@ CursorOptions::CursorOptions(QWidget* parent) : Q3VBox(parent), OptionsWidget()
  mCursorTheme = new QComboBox(hbox);
  QStringList list = BosonCursor::availableThemes();
  for (int i = 0; i < (int)list.count(); i++) {
-	KSimpleConfig cfg(list[i] + QString::fromLatin1("/index.cursor"));
+	KConfig cfg(list[i] + QString::fromLatin1("/index.cursor"), KConfig::SimpleConfig);
 	if (!cfg.hasGroup("Boson Cursor")) {
 		boWarning(210) << "invalid cursor " << list[i] << endl;
 	} else {
-		cfg.setGroup("Boson Cursor");
-		QString name = cfg.readEntry("Name", i18n("Unknown"));
+		KConfigGroup group = cfg.group("Boson Cursor");
+		QString name = group.readEntry("Name", i18n("Unknown"));
 		mCursorTheme->insertItem(name);
 		mCursorThemes.append(list[i]);
 	}
@@ -408,7 +408,7 @@ ToolTipOptions::ToolTipOptions(QWidget* parent) : Q3VBox(parent), OptionsWidget(
  mToolTipCreator = new QComboBox(hbox);
  BoToolTipCreatorFactory factory;
  Q3ValueList<int> tips = factory.availableTipCreators();
- for (unsigned int i = 0; i < tips.count(); i++) {
+ for (int i = 0; i < tips.count(); i++) {
 	mToolTipCreator->insertItem(factory.tipCreatorName(tips[i]));
  }
 }
@@ -437,7 +437,7 @@ void ToolTipOptions::setDefaults()
  BoToolTipCreatorFactory factory;
  Q3ValueList<int> tips = factory.availableTipCreators();
  int index = -1;
- for (unsigned int i = 0; i < tips.count(); i++) {
+ for (int i = 0; i < tips.count(); i++) {
 	if (tips[i] == boConfig->intDefaultValue("ToolTipCreator")) {
 		index = i;
 	}
@@ -451,7 +451,7 @@ void ToolTipOptions::load()
  BoToolTipCreatorFactory factory;
  Q3ValueList<int> tips = factory.availableTipCreators();
  int index = -1;
- for (unsigned int i = 0; i < tips.count(); i++) {
+ for (int i = 0; i < tips.count(); i++) {
 	if (tips[i] == boConfig->intValue("ToolTipCreator")) {
 		index = i;
 	}

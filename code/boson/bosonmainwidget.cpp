@@ -53,7 +53,7 @@
 #include "bosonfpscounter.h"
 #include "bosonmainwidgetmenuinput.h"
 #include "bosondata.h"
-#include "boufo/boufodebugwidget.h"
+//#include "boufo/boufodebugwidget.h"
 #include "boufo/boufofactory.h"
 #include "bodebug.h"
 #include "optionsdialog/optionsdialog.h"
@@ -137,11 +137,11 @@ public:
 };
 
 BosonMainWidget::BosonMainWidget(QWidget* parent, bool wantDirect)
-		: BosonUfoGLWidget(parent, "bigdisplay", wantDirect)
+		: BosonUfoGLWidget(parent, wantDirect)
 {
  boDebug() << k_funcinfo << endl;
  init();
- initGL();
+ glInit();
  boDebug() << k_funcinfo << "done" << endl;
 }
 
@@ -218,10 +218,11 @@ void BosonMainWidget::init()
 
 void BosonMainWidget::initializeGL()
 {
- if (isInitialized()) {
-	// already called initializeGL()
+ static bool isInitialized = false;
+ if (isInitialized) {
 	return;
  }
+ isInitialized = true;
  boDebug() << k_funcinfo << endl;
  BosonProfiler prof("initializeGL");
 
@@ -266,6 +267,7 @@ void BosonMainWidget::initializeGL()
 
  d->mFPSCounter->reset();
 
+#if 0
  if (!context()->deviceIsPixmap()) {
 	// start rendering (will also start the timer if necessary)
 	QTimer::singleShot(d->mUpdateInterval, this, SLOT(slotUpdateGL()));
@@ -276,6 +278,7 @@ void BosonMainWidget::initializeGL()
 	BoInfo::boInfo()->update(this);
 	boProfiling->pop();
  }
+#endif
 
  boProfiling->push("init texture manager");
  BoTextureManager::initStatic();
@@ -446,10 +449,6 @@ void BosonMainWidget::slotUpdateGL()
 
 void BosonMainWidget::paintGL()
 {
- if (!isInitialized()) {
-	initGL();
-	return;
- }
  BosonProfiler prof("paintGL");
 
  if (Bo3dTools::checkError()) {
@@ -1165,6 +1164,7 @@ void BosonMainWidget::slotPreferencesApply()
 
 void BosonMainWidget::slotDebugUfoWidgets()
 {
+#if 0
  KDialog* dialog = new KDialog();
  dialog->setWindowTitle(KDialog::makeStandardCaption(i18n("Debug Ufo Widgets")));
  dialog->setButtons(KDialog::Close);
@@ -1178,6 +1178,9 @@ void BosonMainWidget::slotDebugUfoWidgets()
  debug->setBoUfoManager(ufoManager());
 
  dialog->show();
+#else
+ boError() << k_funcinfo << "BoUfoDebugWidget has been disabled due to the Qt4 port" << endl;
+#endif
 }
 
 void BosonMainWidget::slotDebugTextures()

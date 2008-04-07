@@ -91,7 +91,7 @@ BoTexture* BoMesh::textureObject() const
  return 0;
 }
 
-void BoMesh::renderMesh(const BoMatrix* itemMeshMatrix, const BoMatrix* matrix, const QColor* teamColor, RenderFlags flags)
+void BoMesh::renderMesh(const BoMatrix* itemMeshMatrix, const BoMatrix* matrix, const QColor& teamColor, RenderFlags flags)
 {
  BoMeshRenderer* renderer = BoMeshRendererManager::manager()->currentRenderer();
  if (!renderer) {

@@ -27,6 +27,7 @@
 #include <qlayout.h>
 #include <qslider.h>
 #include <qlabel.h>
+#include <QDoubleSpinBox>
 //Added by qt3to4:
 #include <Q3HBoxLayout>
 #include <Q3VBoxLayout>
@@ -173,11 +174,11 @@ void BoIntNumInput::setRange(int min, int max, int step, bool slider)
  d->mSpin->setMaxValue(max);
  d->mSpin->setLineStep(step);
 
- step = d->mSpin->lineStep(); // in case it wasn't fully valid
+ step = d->mSpin->singleStep(); // in case it wasn't fully valid
 
  if (slider) {
 	if (!d->mSlider) {
-		d->mSlider = new QSlider(QSlider::Horizontal, this, "bointnuminput_slider");
+		d->mSlider = new QSlider(Qt::Horizontal, this, "bointnuminput_slider");
 		d->mSlider->setTickmarks(QSlider::TicksBelow);
 		connect(d->mSlider, SIGNAL(valueChanged(int)), this, SLOT(slotSliderMoved(int)));
 		sliderLayout()->addWidget(d->mSlider);
@@ -244,7 +245,7 @@ public:
 		mSpin = 0;
 		mSlider = 0;
 	}
-	KDoubleSpinBox* mSpin;
+	QDoubleSpinBox* mSpin;
 	QSlider* mSlider;
 };
 
@@ -261,9 +262,12 @@ BoFloatNumInput::~BoFloatNumInput()
 void BoFloatNumInput::init()
 {
  d = new BoFloatNumInputPrivate;
- d->mSpin = new KDoubleSpinBox(0.0, 9999.0, 0.1, 0.0, 2, this, "bofloatnuminput_spinbox");
- QSpinBox* spin = d->mSpin;
- connect(spin, SIGNAL(valueChanged(int)), this, SLOT(slotSpinValueChanged(int)));
+ d->mSpin = new QDoubleSpinBox(this);
+ d->mSpin->setRange(0.0, 9999.0);
+ d->mSpin->setSingleStep(0.1);
+ d->mSpin->setValue(0.0);
+ d->mSpin->setDecimals(2);
+ connect(d->mSpin, SIGNAL(valueChanged(int)), this, SLOT(slotSpinValueChanged(int)));
  mainLayout()->addWidget(d->mSpin);
 
  setFocusProxy(d->mSpin);
@@ -284,19 +288,18 @@ void BoFloatNumInput::setRange(float min, float max, float step, bool slider)
  }
  min = qMin(min, max);
  max = qMax(min, max);
- d->mSpin->setRange(min, max, step, d->mSpin->precision());
+ d->mSpin->setRange(min, max);
+ d->mSpin->setSingleStep(step);
 
- step = d->mSpin->lineStep(); // in case it wasn't fully valid
+ step = d->mSpin->singleStep(); // in case it wasn't fully valid
 
  if (slider) {
-	// upcast to base type to get min/maxValue in int form
-	QSpinBox* spin = d->mSpin;
-	int smin = spin->minValue();
-	int smax = spin->maxValue();
-	int svalue = spin->value();
-	int sstep = spin->lineStep();
+	int smin = d->mSpin->minimum();
+	int smax = d->mSpin->maximum();
+	int svalue = d->mSpin->value();
+	int sstep = d->mSpin->singleStep();
 	if (!d->mSlider) {
-		d->mSlider = new QSlider(QSlider::Horizontal, this, "bofloatnuminput_slider");
+		d->mSlider = new QSlider(Qt::Horizontal, this, "bofloatnuminput_slider");
 		d->mSlider->setTickmarks(QSlider::TicksBelow);
 		connect(d->mSlider, SIGNAL(valueChanged(int)), this, SLOT(slotSliderMoved(int)));
 		sliderLayout()->addWidget(d->mSlider);
@@ -344,12 +347,12 @@ float BoFloatNumInput::value() const
 
 float BoFloatNumInput::minValue() const
 {
- return (float)d->mSpin->minValue();
+ return (float)d->mSpin->minimum();
 }
 
 float BoFloatNumInput::maxValue() const
 {
- return (float)d->mSpin->maxValue();
+ return (float)d->mSpin->maximum();
 }
 
 bool BoFloatNumInput::showSlider() const
@@ -360,8 +363,8 @@ bool BoFloatNumInput::showSlider() const
 double BoFloatNumInput::mapSliderToSpin(int val) const
 {
  // map [slidemin,slidemax] to [spinmin,spinmax]
- double spinmin = d->mSpin->minValue();
- double spinmax = d->mSpin->maxValue();
+ double spinmin = d->mSpin->minimum();
+ double spinmax = d->mSpin->maximum();
  double slidemin = d->mSlider->minValue(); // cast int to double to avoid
  double slidemax = d->mSlider->maxValue(); // overflow in rel denominator
  double rel = ( double(val) - slidemin ) / ( slidemax - slidemin );

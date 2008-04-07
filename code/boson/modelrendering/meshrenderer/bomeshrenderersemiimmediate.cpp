@@ -75,7 +75,7 @@ void BoMeshRendererSemiImmediate::deinitFrame()
  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
-unsigned int BoMeshRendererSemiImmediate::render(const QColor* teamColor, BoMesh* mesh, RenderFlags flags)
+unsigned int BoMeshRendererSemiImmediate::render(const QColor& teamColor, BoMesh* mesh, RenderFlags flags)
 {
  if (mesh->pointCount() == 0) {
 	// nothing to do.
@@ -96,9 +96,9 @@ unsigned int BoMeshRendererSemiImmediate::render(const QColor* teamColor, BoMesh
 
  if (!(flags & DepthOnly)) {
 	BoMaterial::activate(mesh->material());
-	if (mesh->isTeamColor() && teamColor) {
+	if (mesh->isTeamColor() && !teamColor.isNull()) {
 		glPushAttrib(GL_CURRENT_BIT);
-		glColor3ub(teamColor->red(), teamColor->green(), teamColor->blue());
+		glColor3ub(teamColor.red(), teamColor.green(), teamColor.blue());
 		resetColor = true;
 	}
 	if (mesh->material()->twoSided()) {

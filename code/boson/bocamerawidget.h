@@ -27,7 +27,7 @@ class BoCamera;
 class BoGameCamera;
 class BoLight;
 class BoLightCamera;
-class BoContext;
+class QGLContext;
 
 class BosonGLWidgetLight;
 class BoUfoLightCameraWidget;
@@ -52,7 +52,7 @@ public:
 	BoLightCameraWidget1(QWidget* parent = 0, bool showGlobalValues = false);
 	~BoLightCameraWidget1();
 
-	void setLight(BoLight* light, BoContext* context);
+	void setLight(BoLight* light, QGLContext* context);
 
 private:
 	BosonGLWidgetLight* mWidget;
@@ -319,7 +319,7 @@ public:
 	BoUfoLightCameraWidget(bool showGlobalValues = false);
 	~BoUfoLightCameraWidget();
 
-	void setLight(BoLight* light, BoContext* context);
+	void setLight(BoLight* light, QGLContext* context);
 
 private slots:
 	void slotLightChanged();
@@ -329,7 +329,7 @@ private:
 	BoLightCamera* mCamera;
 	BoUfoCameraWidget* mCameraWidget;
 	BoLight* mLight;
-	BoContext* mContext;
+	QGLContext* mContext;
 	bool mBlockLightChanges;
 	bool mShowGlobalValues;
 

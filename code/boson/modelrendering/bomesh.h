@@ -87,7 +87,7 @@ public:
 	const QString& name() const { return mName; }
 	void setName(const QString& name) { mName = name; }
 
-	void renderMesh(const BoMatrix* itemMeshMatrix, const BoMatrix* matrix, const QColor* color, RenderFlags flags);
+	void renderMesh(const BoMatrix* itemMeshMatrix, const BoMatrix* matrix, const QColor& color, RenderFlags flags);
 
 	void renderVertexPoints(const BosonModel* model);
 

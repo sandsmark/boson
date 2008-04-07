@@ -23,8 +23,7 @@
 #ifndef BOPIXMAPRENDERER_H
 #define BOPIXMAPRENDERER_H
 
-class BosonGLWidget;
-class BoContext;
+class QGLWidget;
 
 class QString;
 template<class T> class Q3ValueList;
@@ -37,7 +36,7 @@ public:
 	BoPixmapRenderer();
 	~BoPixmapRenderer();
 
-	void setWidget(BosonGLWidget* w, int width = -1, int height = -1);
+	void setWidget(QGLWidget* w, int width = -1, int height = -1);
 
 	/**
 	 * Uses @ref startPixmap, @ref BosonGLWidget::slotUpdateGL and @ref
@@ -64,7 +63,7 @@ public:
 
 private:
 	BoPixmapRendererPrivate* d;
-	BosonGLWidget* mGLWidget;
+	QGLWidget* mGLWidget;
 };
 
 #endif

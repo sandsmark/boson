@@ -93,7 +93,7 @@ public:
 	 * @return The production id that is displayed or 0 if none. See also @ref
 	 * texture and @ref unit
 	 **/
-	unsigned long int productionId() const;
+	quint32 productionId() const;
 
 	ProductionType productionType() const;
 
@@ -169,7 +169,7 @@ signals:
 
 protected:
 	virtual void displayUnitPixmap(Unit* unit);
-	virtual void displayUnitPixmap(unsigned long int unitType, const Player* owner);
+	virtual void displayUnitPixmap(quint32 unitType, const Player* owner);
 
 	void setImage(const BoUfoImage& image, float progressPercentage = 100.0f);
 

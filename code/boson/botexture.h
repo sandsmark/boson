@@ -25,8 +25,9 @@
 #include <q3ptrlist.h>
 #include <q3valuevector.h>
 
+#include <QString>
 
-class QString;
+
 class QStringList;
 
 

@@ -265,7 +265,7 @@ void BoSelection::loadFromXML(const QDomElement& root, bool activate)
 	// It's ok to have no units in selection
 	return;
  }
- for (unsigned int i = 0; i < list.count(); i++) {
+ for (int i = 0; i < list.count(); i++) {
 	QDomElement e = list.item(i).toElement();
 	if (e.isNull()) {
 		boError(260) << k_funcinfo << i << " is not an element" << endl;
@@ -409,7 +409,7 @@ bool BoSelectionGroup::loadFromXML(const QDomElement& root)
 	return false;
  }
  QDomNodeList list = root.elementsByTagName(QString::fromLatin1("Group"));
- for (unsigned int i = 0; i < list.count(); i++) {
+ for (int i = 0; i < list.count(); i++) {
 	QDomElement e = list.item(i).toElement();
 	if (e.isNull()) {
 		boError(260) << k_funcinfo << i << " is not an element" << endl;

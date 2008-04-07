@@ -33,6 +33,7 @@
 #include <kstandarddirs.h>
 #include <kmessagebox.h>
 #include <klocale.h>
+#include <KComponentData>
 
 class BoUfoLoadSaveGameWidgetPrivate
 {
@@ -151,7 +152,7 @@ void BoUfoLoadSaveGameWidget::slotCancel()
 QString BoUfoLoadSaveGameWidget::defaultDir()
 {
  QString dir = KGlobal::dirs()->saveLocation("data",
-		KGlobal::instance()->instanceName() + "/savegames/",
+		KGlobal::mainComponent().componentName() + "/savegames/",
 		true);
  if (dir.isEmpty()) {
 	boError() << k_funcinfo << "cannot find default dir?!" << endl;
@@ -219,7 +220,7 @@ void BoUfoLoadSaveGameWidget::updateGames()
  }
 
  QStringList list = entryList();
- for (unsigned int i = 0; i < list.count(); i++) {
+ for (int i = 0; i < list.count(); i++) {
 	QString file = d->mDir.absPath() + QString::fromLatin1("/") + list[i];
 	readFile(file, i);
  }
@@ -298,7 +299,8 @@ void BoUfoLoadSaveGameWidget::slotDelete()
  QString file = w->file();
  int r = KMessageBox::questionYesNoCancel(0,
 		i18n("Do you really want to delete %1 ?").arg(QFileInfo(file).fileName()),
-		QString::null, KStandardGuiItem::yes(), KStandardGuiItem::no(), "ConfirmDeleteGame");
+		QString(), KStandardGuiItem::yes(), KStandardGuiItem::no(), KStandardGuiItem::cancel(),
+		"ConfirmDeleteGame");
  if (r != KMessageBox::Yes) {
 	return;
  }
@@ -414,7 +416,7 @@ QString BoUfoLoadSaveGameWidget::saveFileName()
  QStringList files = entryList();
  QString file;
  bool ok = false;
- unsigned int i = 0;
+ int i = 0;
  for (i = 0; i < files.count() + 1 && !ok; i++) {
 	file.sprintf("ksavegame-%04d", i);
 	file += s;

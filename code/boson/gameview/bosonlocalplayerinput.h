@@ -88,7 +88,7 @@ class BosonLocalPlayerInput : public KGameIO
     void follow(const Q3PtrList<Unit>& units, Unit* target);
     void enterUnit(const Q3PtrList<Unit>& units, Unit* target);
 
-    void placeUnit(Player* owner, unsigned long int unitType, bofixed x, bofixed y);
+    void placeUnit(Player* owner, quint32 unitType, bofixed x, bofixed y);
     void changeHeight(int x, int y, bofixed height);
     void changeHeight(const Q3ValueList< QPair<QPoint, bofixed> >& heights);
 

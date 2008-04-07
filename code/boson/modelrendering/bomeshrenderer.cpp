@@ -193,7 +193,7 @@ void BoMeshRenderer::stopModelRendering()
  completeFrameStatistics();
 }
 
-void BoMeshRenderer::renderMesh(const QColor* teamColor, BoMesh* mesh, RenderFlags flags)
+void BoMeshRenderer::renderMesh(const QColor& teamColor, BoMesh* mesh, RenderFlags flags)
 {
  BO_CHECK_NULL_RET(mesh);
  BO_CHECK_NULL_RET(model());

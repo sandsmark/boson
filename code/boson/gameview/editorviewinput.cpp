@@ -88,7 +88,7 @@ public:
 		mTextureAlpha = 0;
 	}
 
-	void placeUnit(unsigned long int t, Player* owner)
+	void placeUnit(quint32 t, Player* owner)
 	{
 		reset();
 		mType = PlaceUnit;
@@ -115,7 +115,7 @@ public:
 	 * @return The ID of the unittype to be placed, or 0 if none is to be
 	 * placed.
 	 **/
-	unsigned long int unitType() const
+	quint32 unitType() const
 	{
 		if (isUnit()) {
 			return mUnitType;
@@ -161,7 +161,7 @@ public:
 
 private:
 	PlacementType mType;
-	unsigned long int mUnitType;
+	quint32 mUnitType;
 	Player* mOwner;
 	unsigned int mTextureCount;
 	unsigned char* mTextureAlpha;
@@ -365,7 +365,7 @@ bool EditorViewInput::actionPlace(const BoVector3Fixed& groundCanvasVector, bool
 	}
 
 	QByteArray b;
-	QDataStream stream(b, QIODevice::WriteOnly);
+	QDataStream stream(&b, QIODevice::WriteOnly);
 
 	BosonMessageEditorMoveChangeTexMap message(cornersX, cornersY, cornersTextureCount, cornerTextures, cornerAlpha);
 	if (!message.save(stream)) {
@@ -373,7 +373,7 @@ bool EditorViewInput::actionPlace(const BoVector3Fixed& groundCanvasVector, bool
 		return false;
 	}
 
-	QDataStream msg(b, QIODevice::ReadOnly);
+	QDataStream msg(b);
 	localPlayerInput()->sendInput(msg);
 	ret = true;
  }
@@ -419,7 +419,7 @@ bool EditorViewInput::actionChangeHeight(const BoVector3Fixed& groundCanvasVecto
 
 // the place*() methods get called when an item in (e.g.) the commandframe is
 // selected.
-void EditorViewInput::placeUnit(unsigned long int unitType, Player* owner)
+void EditorViewInput::placeUnit(quint32 unitType, Player* owner)
 {
  boDebug() << k_funcinfo << endl;
  if (!owner) {
@@ -464,21 +464,21 @@ void EditorViewInput::deleteSelectedUnits()
  Q3PtrList<Unit> units = selection()->allUnits();
  selection()->clear();
 
- Q3ValueList<Q_ULONG> items;
+ Q3ValueList<quint32> items;
  Q3PtrListIterator<Unit> it(units);
  for (; it.current(); ++it) {
 	items.append(it.current()->id());
  }
 
  QByteArray b;
- QDataStream stream(b, QIODevice::WriteOnly);
+ QDataStream stream(&b, QIODevice::WriteOnly);
  BosonMessageEditorMoveDeleteItems message(items);
  if (!message.save(stream)) {
 	boError() << k_funcinfo << "unable to save message (" << message.messageId() << ")" << endl;
 	return;
  }
 
- QDataStream msg(b, QIODevice::ReadOnly);
+ QDataStream msg(b);
  localPlayerInput()->sendInput(msg);
 }
 
@@ -535,9 +535,8 @@ void EditorViewInput::action(const BoSpecificAction& action)
 bool EditorViewInput::selectAll(const UnitProperties* prop, bool replace)
 {
  Q3PtrList<Unit> list;
- Q3PtrList<Player> gamePlayerList = boGame->gamePlayerList();
- for (unsigned int i = 0; i < gamePlayerList.count(); i++) {
-	Q3PtrListIterator<Unit> it(*((gamePlayerList.at(i))->allUnits()));
+ foreach (Player* p, boGame->gamePlayerList()) {
+	Q3PtrListIterator<Unit> it(*(p->allUnits()));
 	while (it.current()) {
 		if (it.current()->unitProperties()->typeId() == prop->typeId()) {
 			if (canSelect(it.current()) == CanSelectMultipleOk) {
@@ -639,7 +638,7 @@ void EditorViewInput::undo()
  message->setUndo();
 
  QByteArray b;
- QDataStream stream(b, QIODevice::WriteOnly);
+ QDataStream stream(&b, QIODevice::WriteOnly);
  if (!message->save(stream)) {
 	boError() << k_funcinfo << "unable to save message (" << message->messageId() << ")" << endl;
 	delete message;
@@ -648,7 +647,7 @@ void EditorViewInput::undo()
 
  delete message;
 
- QDataStream msg(b, QIODevice::ReadOnly);
+ QDataStream msg(b);
  localPlayerInput()->sendInput(msg);
 
  emit signalEditorHasUndo(messageName(d->mUndoStack.top()));
@@ -665,7 +664,7 @@ void EditorViewInput::redo()
  message->setRedo();
 
  QByteArray b;
- QDataStream stream(b, QIODevice::WriteOnly);
+ QDataStream stream(&b, QIODevice::WriteOnly);
  if (!message->save(stream)) {
 	boError() << k_funcinfo << "unable to save message (" << message->messageId() << ")" << endl;
 	delete message;
@@ -674,7 +673,7 @@ void EditorViewInput::redo()
 
  delete message;
 
- QDataStream msg(b, QIODevice::ReadOnly);
+ QDataStream msg(b);
  localPlayerInput()->sendInput(msg);
 
  emit signalEditorHasRedo(messageName(d->mRedoStack.top()));

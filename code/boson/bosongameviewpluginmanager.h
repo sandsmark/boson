@@ -40,7 +40,7 @@ public:
 protected:
 	virtual QString configKey() const;
 	virtual QString libname() const;
-	virtual KLibFactory* initWithoutLibrary();
+	virtual KPluginFactory* initWithoutLibrary();
 
 	virtual void initializePlugin();
 	virtual void deinitializePlugin();

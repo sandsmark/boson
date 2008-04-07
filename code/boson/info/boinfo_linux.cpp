@@ -31,7 +31,7 @@
 
 #include <linux/version.h>
 
-QString readFile(const char* fileName)
+QString readFile(QString fileName)
 {
  QFile file(fileName);
  if (!file.exists()) {
@@ -83,10 +83,10 @@ void BoInfo::updateOSInfo()
 
  QString kernelModules = readFile("/proc/modules");
  if (!kernelModules.isEmpty()) {
-	QStringList list = QStringList::split('\n', kernelModules);
+	QStringList list = kernelModules.split('\n');
 	QString nvidia = QString::fromLatin1("");
 	QString tdfx = QString::fromLatin1("");
-	for (unsigned int i = 0; i < list.count(); i++) {
+	for (int i = 0; i < list.count(); i++) {
 		if (list[i].contains(QRegExp("^tdfx\\s*"))) {
 			if (!tdfx.isEmpty()) {
 				boWarning() << k_funcinfo << "found more than one tdfx kernel modules" << endl;
@@ -120,9 +120,9 @@ float BoInfo::cpuSpeed() const
 	return -1.0f;
  }
  QRegExp exp("^cpu MHz\\s*:\\s*");
- QStringList list = QStringList::split('\n', cpu);
- for (unsigned int i = 0; i < list.count(); i++) {
-	if (exp.search(list[i]) >= 0) {
+ QStringList list = cpu.split('\n');
+ for (int i = 0; i < list.count(); i++) {
+	if (exp.indexIn(list[i]) >= 0) {
 		QString s = list[i];
 		s.replace(exp, QString::fromLatin1(""));
 		bool ok = true;
@@ -156,8 +156,8 @@ bool BoCurrentInfo::memoryInUse(QString* vmSize, QString* vmLck, QString* vmRSS,
 	return false;
  }
  // we need the lines starting with Vm only
- QStringList list = QStringList::split('\n', status);
- QStringList vm = list.grep(QRegExp("^Vm\\S+:.*"));
+ QStringList list = status.split('\n');
+ QStringList vm = list.filter(QRegExp("^Vm\\S+:.*"));
  if (vm.count() == 0) {
 	boError() << k_funcinfo << "file could be opened, but Vm* entries could not be read" << endl;
 	return false;
@@ -165,7 +165,7 @@ bool BoCurrentInfo::memoryInUse(QString* vmSize, QString* vmLck, QString* vmRSS,
 
  if (vmSize) {
 	QString* string = vmSize;
-	QStringList l = vm.grep(QRegExp("^VmSize:.*"));
+	QStringList l = vm.filter(QRegExp("^VmSize:.*"));
 	if (l.count() == 0) {
 		*string = QString::null;
 	} else {
@@ -174,7 +174,7 @@ bool BoCurrentInfo::memoryInUse(QString* vmSize, QString* vmLck, QString* vmRSS,
  }
  if (vmLck) {
 	QString* string = vmLck;
-	QStringList l = vm.grep(QRegExp("^VmLck:.*"));
+	QStringList l = vm.filter(QRegExp("^VmLck:.*"));
 	if (l.count() == 0) {
 		*string = QString::null;
 	} else {
@@ -183,7 +183,7 @@ bool BoCurrentInfo::memoryInUse(QString* vmSize, QString* vmLck, QString* vmRSS,
  }
  if (vmRSS) {
 	QString* string = vmRSS;
-	QStringList l = vm.grep(QRegExp("^VmRSS:.*"));
+	QStringList l = vm.filter(QRegExp("^VmRSS:.*"));
 	if (l.count() == 0) {
 		*string = QString::null;
 	} else {
@@ -192,7 +192,7 @@ bool BoCurrentInfo::memoryInUse(QString* vmSize, QString* vmLck, QString* vmRSS,
  }
  if (vmData) {
 	QString* string = vmData;
-	QStringList l = vm.grep(QRegExp("^VmData:.*"));
+	QStringList l = vm.filter(QRegExp("^VmData:.*"));
 	if (l.count() == 0) {
 		*string = QString::null;
 	} else {
@@ -201,7 +201,7 @@ bool BoCurrentInfo::memoryInUse(QString* vmSize, QString* vmLck, QString* vmRSS,
  }
  if (vmStk) {
 	QString* string = vmStk;
-	QStringList l = vm.grep(QRegExp("^VmStk:.*"));
+	QStringList l = vm.filter(QRegExp("^VmStk:.*"));
 	if (l.count() == 0) {
 		*string = QString::null;
 	} else {
@@ -210,7 +210,7 @@ bool BoCurrentInfo::memoryInUse(QString* vmSize, QString* vmLck, QString* vmRSS,
  }
  if (vmExe) {
 	QString* string = vmExe;
-	QStringList l = vm.grep(QRegExp("^VmExe:.*"));
+	QStringList l = vm.filter(QRegExp("^VmExe:.*"));
 	if (l.count() == 0) {
 		*string = QString::null;
 	} else {
@@ -219,7 +219,7 @@ bool BoCurrentInfo::memoryInUse(QString* vmSize, QString* vmLck, QString* vmRSS,
  }
  if (vmLib) {
 	QString* string = vmLib;
-	QStringList l = vm.grep(QRegExp("^VmLib:.*"));
+	QStringList l = vm.filter(QRegExp("^VmLib:.*"));
 	if (l.count() == 0) {
 		*string = QString::null;
 	} else {
@@ -228,7 +228,7 @@ bool BoCurrentInfo::memoryInUse(QString* vmSize, QString* vmLck, QString* vmRSS,
  }
  if (vmPTE) {
 	QString* string = vmPTE;
-	QStringList l = vm.grep(QRegExp("^VmPTE:.*"));
+	QStringList l = vm.filter(QRegExp("^VmPTE:.*"));
 	if (l.count() == 0) {
 		*string = QString::null;
 	} else {

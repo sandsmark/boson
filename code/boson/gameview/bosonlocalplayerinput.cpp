@@ -157,7 +157,7 @@ void BosonLocalPlayerInput::produceAction(const BoSpecificAction& action)
   }
 
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
   bool ret = message->save(stream);
   int msgid = message->messageId();
   delete message;
@@ -167,7 +167,7 @@ void BosonLocalPlayerInput::produceAction(const BoSpecificAction& action)
     return;
   }
 
-  QDataStream msg(b, QIODevice::ReadOnly);
+  QDataStream msg(b);
   sendInput(msg);
 }
 
@@ -179,25 +179,25 @@ void BosonLocalPlayerInput::stopUnits(const Q3PtrList<Unit>& units)
     boError() << k_funcinfo << "No units!" << endl;
     return;
   }
-  Q3ValueList<Q_ULONG> stopUnits;
+  Q3ValueList<quint32> stopUnits;
   Q3PtrListIterator<Unit> it(units);
   while (it.current())
   {
-    stopUnits.append((Q_ULONG)it.current()->id());
+    stopUnits.append((quint32)it.current()->id());
     ++it;
   }
 
   BosonMessageMoveStop message(stopUnits);
 
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
   if (!message.save(stream))
   {
     boError() << k_funcinfo << "unable to save message (" << message.messageId() << ")" << endl;
     return;
   }
 
-  QDataStream msg(b, QIODevice::WriteOnly);
+  QDataStream msg(&b, QIODevice::WriteOnly);
   sendInput(msg);
 }
 
@@ -216,21 +216,21 @@ void BosonLocalPlayerInput::layMine(const BoSpecificAction& action)
 
   boDebug() << k_funcinfo << endl;
 
-  Q3ValueList<Q_ULONG> units;
+  Q3ValueList<quint32> units;
   units.append(action.unit()->id());
-  Q3ValueList<Q_ULONG> weapons;
+  Q3ValueList<quint32> weapons;
   weapons.append(action.weapon()->id());
   BosonMessageMoveLayMine message(units, weapons);
 
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
   if (!message.save(stream))
   {
     boError() << k_funcinfo << "unable to save message (" << message.messageId() << ")" << endl;
     return;
   }
 
-  QDataStream msg(b, QIODevice::ReadOnly);
+  QDataStream msg(b);
   sendInput(msg);
 }
 
@@ -245,14 +245,14 @@ void BosonLocalPlayerInput::harvest(const HarvesterPlugin* harvester, const Reso
   BosonMessageMoveMine message(harvester->unit()->id(), mine->unit()->id());
 
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
   if (!message.save(stream))
   {
     boError() << k_funcinfo << "unable to save message (" << message.messageId() << ")" << endl;
     return;
   }
 
-  QDataStream msg(b, QIODevice::ReadOnly);
+  QDataStream msg(b);
   sendInput(msg);
 }
 
@@ -263,7 +263,7 @@ void BosonLocalPlayerInput::moveWithoutAttack(const Q3PtrList<Unit>& units, bofi
   {
     return;
   }
-  Q3ValueList<Q_ULONG> moveUnits;
+  Q3ValueList<quint32> moveUnits;
   Q3PtrListIterator<Unit> it(units);
   while (it.current())
   {
@@ -274,14 +274,14 @@ void BosonLocalPlayerInput::moveWithoutAttack(const Q3PtrList<Unit>& units, bofi
   BosonMessageMoveMove message(false, BoVector2Fixed(x, y), moveUnits);
 
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
   if (!message.save(stream))
   {
     boError() << k_funcinfo << "unable to save message (" << message.messageId() << ")" << endl;
     return;
   }
 
-  QDataStream msg(b, QIODevice::ReadOnly);
+  QDataStream msg(b);
   sendInput(msg);
 
   emit signalMoveUnitsTo(units, BoVector2Fixed(x, y), false);
@@ -296,7 +296,7 @@ void BosonLocalPlayerInput::moveWithAttack(const Q3PtrList<Unit>& units, bofixed
   {
     return;
   }
-  Q3ValueList<Q_ULONG> moveUnits;
+  Q3ValueList<quint32> moveUnits;
   Q3PtrListIterator<Unit> it(units);
   while (it.current())
   {
@@ -307,14 +307,14 @@ void BosonLocalPlayerInput::moveWithAttack(const Q3PtrList<Unit>& units, bofixed
   BosonMessageMoveMove message(true, BoVector2Fixed(x, y), moveUnits);
 
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
   if (!message.save(stream))
   {
     boError() << k_funcinfo << "unable to save message (" << message.messageId() << ")" << endl;
     return;
   }
 
-  QDataStream msg(b, QIODevice::ReadOnly);
+  QDataStream msg(b);
   sendInput(msg);
 
   emit signalMoveUnitsTo(units, BoVector2Fixed(x, y), true);
@@ -331,14 +331,14 @@ void BosonLocalPlayerInput::build(ProductionType type, Unit* factory, bofixed x,
   BosonMessageMoveBuild message(type, factory->owner()->bosonId(), factory->id(), BoVector2Fixed(x, y));
 
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
   if (!message.save(stream))
   {
     boError() << k_funcinfo << "unable to save message (" << message.messageId() << ")" << endl;
     return;
   }
 
-  QDataStream msg(b, QIODevice::ReadOnly);
+  QDataStream msg(b);
   sendInput(msg);
 }
 
@@ -354,23 +354,23 @@ void BosonLocalPlayerInput::attack(const Q3PtrList<Unit>& units, Unit* target)
     return;
   }
 
-  Q3ValueList<Q_ULONG> attackUnits;
+  Q3ValueList<quint32> attackUnits;
   Q3PtrListIterator<Unit> it(units);
   while (it.current())
   {
-    attackUnits.append((Q_ULONG)it.current()->id());
+    attackUnits.append((quint32)it.current()->id());
     ++it;
   }
   BosonMessageMoveAttack message(target->id(), attackUnits);
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
   if (!message.save(stream))
   {
     boError() << k_funcinfo << "unable to save message (" << message.messageId() << ")" << endl;
     return;
   }
 
-  QDataStream msg(b, QIODevice::ReadOnly);
+  QDataStream msg(b);
   sendInput(msg);
 
   emit signalAttackUnit(units, target);
@@ -384,21 +384,21 @@ void BosonLocalPlayerInput::dropBomb(Unit* u, int weapon, bofixed x, bofixed y)
     return;
   }
 
-  Q3ValueList<Q_ULONG> units;
-  Q3ValueList<Q_ULONG> weapons;
+  Q3ValueList<quint32> units;
+  Q3ValueList<quint32> weapons;
   units.append(u->id());
   weapons.append(weapon);
   BosonMessageMoveDropBomb message(BoVector2Fixed(x, y), units, weapons);
 
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
   if (!message.save(stream))
   {
     boError() << k_funcinfo << "unable to save message (" << message.messageId() << ")" << endl;
     return;
   }
 
-  QDataStream msg(b, QIODevice::ReadOnly);
+  QDataStream msg(b);
   sendInput(msg);
 }
 
@@ -428,25 +428,25 @@ void BosonLocalPlayerInput::refine(const Q3PtrList<Unit>& units, Unit* refinery)
     return;
   }
 
-  Q3ValueList<Q_ULONG> refineUnits;
+  Q3ValueList<quint32> refineUnits;
   Q3PtrListIterator<Unit> it(units);
   while (it.current())
   {
-    refineUnits.append((Q_ULONG)it.current()->id());
+    refineUnits.append((quint32)it.current()->id());
     ++it;
   }
 
   BosonMessageMoveRefine message(refinery->owner()->bosonId(), refinery->id(), refineUnits);
 
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
   if (!message.save(stream))
   {
     boError() << k_funcinfo << "unable to save message (" << message.messageId() << ")" << endl;
     return;
   }
 
-  QDataStream msg(b, QIODevice::ReadOnly);
+  QDataStream msg(b);
   sendInput(msg);
 }
 
@@ -462,25 +462,25 @@ void BosonLocalPlayerInput::follow(const Q3PtrList<Unit>& units, Unit* target)
     return;
   }
 
-  Q3ValueList<Q_ULONG> followUnits;
+  Q3ValueList<quint32> followUnits;
   Q3PtrListIterator<Unit> it(units);
   while (it.current())
   {
-    followUnits.append((Q_ULONG)it.current()->id());
+    followUnits.append((quint32)it.current()->id());
     ++it;
   }
 
   BosonMessageMoveFollow message(target->id(), followUnits);
 
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
   if (!message.save(stream))
   {
     boError() << k_funcinfo << "unable to save message (" << message.messageId() << ")" << endl;
     return;
   }
 
-  QDataStream msg(b, QIODevice::ReadOnly);
+  QDataStream msg(b);
   sendInput(msg);
 }
 
@@ -496,27 +496,27 @@ void BosonLocalPlayerInput::enterUnit(const Q3PtrList<Unit>& units, Unit* target
     return;
   }
 
-  Q3ValueList<Q_ULONG> enterUnits;
+  Q3ValueList<quint32> enterUnits;
   for (Q3PtrListIterator<Unit> it(units); it.current(); ++it)
   {
-    enterUnits.append((Q_ULONG)it.current()->id());
+    enterUnits.append((quint32)it.current()->id());
   }
 
   BosonMessageMoveEnterUnit message(target->id(), enterUnits);
 
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
   if (!message.save(stream))
   {
     boError() << k_funcinfo << "unable to save message (" << message.messageId() << ")" << endl;
     return;
   }
 
-  QDataStream msg(b, QIODevice::ReadOnly);
+  QDataStream msg(b);
   sendInput(msg);
 }
 
-void BosonLocalPlayerInput::placeUnit(Player* owner, unsigned long int unitType, bofixed x, bofixed y)
+void BosonLocalPlayerInput::placeUnit(Player* owner, quint32 unitType, bofixed x, bofixed y)
 {
   BO_CHECK_NULL_RET(owner);
   boDebug() << k_funcinfo << endl;
@@ -538,14 +538,14 @@ void BosonLocalPlayerInput::placeUnit(Player* owner, unsigned long int unitType,
   BosonMessageEditorMovePlaceUnit message(unitType, owner->bosonId(), BoVector2Fixed(x, y), rotation);
 
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
   if (!message.save(stream))
   {
     boError() << k_funcinfo << "unable to save message (" << message.messageId() << ")" << endl;
     return;
   }
 
-  QDataStream msg(b, QIODevice::ReadOnly);
+  QDataStream msg(b);
   sendInput(msg);
 }
 
@@ -574,14 +574,14 @@ void BosonLocalPlayerInput::changeHeight(const Q3ValueList< QPair<QPoint, bofixe
   BosonMessageEditorMoveChangeHeight message(cornersX, cornersY, cornersHeight);
 
   QByteArray b;
-  QDataStream stream(b, QIODevice::WriteOnly);
+  QDataStream stream(&b, QIODevice::WriteOnly);
   if (!message.save(stream))
   {
     boError() << k_funcinfo << "unable to save message (" << message.messageId() << ")" << endl;
     return;
   }
 
-  QDataStream msg(b, QIODevice::ReadOnly);
+  QDataStream msg(b);
   sendInput(msg);
 }
 

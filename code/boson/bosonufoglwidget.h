@@ -19,7 +19,8 @@
 #ifndef BOSONUFOGLWIDGET_H
 #define BOSONUFOGLWIDGET_H
 
-#include "bosonglwidget.h"
+#include <bogl.h>
+#include <QGLWidget>
 //Added by qt3to4:
 #include <QMouseEvent>
 #include <QKeyEvent>
@@ -29,23 +30,23 @@
 class BoUfoManager;
 
 /**
- * @short A @ref BosonGLWidget with support for @ref BoUfoManager
+ * @short A @ref QGLWidget with support for @ref BoUfoManager
  *
- * This widget is just a @ref BosonGLWidget that provides one @ref BoUfoManager
+ * This widget is just a @ref QGLWidget that provides one @ref BoUfoManager
  * object. You must call @ref initUfo in your initializeGL() method in order to
  * use it.
  *
  * For convenience all event method have been implemented to call the proper
  * even method in the @ref BoUfoManager. Remember to call them in your version
- * (especially @ref resizeGL which does nothing in @ref BosonGLWidget).
+ * (especially @ref resizeGL which does nothing in @ref QGLWidget).
  *
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonUfoGLWidget : public BosonGLWidget
+class BosonUfoGLWidget : public QGLWidget
 {
 	Q_OBJECT
 public:
-	BosonUfoGLWidget(QWidget* parent = 0, const char* name = 0, bool direct = true);
+	BosonUfoGLWidget(QWidget* parent = 0, bool direct = true);
 	~BosonUfoGLWidget();
 
 	BoUfoManager* ufoManager() const { return mUfoManager; }
@@ -66,6 +67,10 @@ public:
 	{
 		mSendEvents = send;
 	}
+
+protected slots:
+	// TODO: remove. just a wrapper to make port to QGLWidget easier.
+	void slotUpdateGL() { updateGL(); }
 
 
 protected:

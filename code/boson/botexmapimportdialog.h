@@ -19,7 +19,7 @@
 #ifndef BOTEXMAPIMPORTDIALOG_H
 #define BOTEXMAPIMPORTDIALOG_H
 
-#include <kdialogbase.h>
+#include <KDialog>
 
 class BosonMap;
 
@@ -27,11 +27,11 @@ class BoTexMapImportDialogPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BoTexMapImportDialog : public KDialogBase
+class BoTexMapImportDialog : public KDialog
 {
 	Q_OBJECT
 public:
-	BoTexMapImportDialog(QWidget* parent, bool modal = false);
+	BoTexMapImportDialog(QWidget* parent);
 	~BoTexMapImportDialog();
 
 	void setMap(BosonMap* map);

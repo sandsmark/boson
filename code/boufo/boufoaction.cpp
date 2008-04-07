@@ -637,7 +637,7 @@ public:
 #endif
 };
 
-BoUfoAction::BoUfoAction(const QString& text, const KShortcut& cut, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const char* name)
+BoUfoAction::BoUfoAction(const QString& text, const KShortcut& cut, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const QString& name)
 	: QObject(parent)
 {
  setObjectName(name);
@@ -847,7 +847,7 @@ void BoUfoAction::unplug()
  }
 }
 
-BoUfoToggleAction::BoUfoToggleAction(const QString& text, const KShortcut& cut, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const char* name)
+BoUfoToggleAction::BoUfoToggleAction(const QString& text, const KShortcut& cut, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const QString& name)
 	: BoUfoAction(text, cut, receiver, slot, parent, name)
 {
  mChecked = false;
@@ -951,7 +951,7 @@ public:
 // however we cannot do this, as UMenu::add() takes ownership of the widgets.
 // so whenever this action is plugged to a menu/toolbar/... we need to create a
 // new UMenu.
-BoUfoActionMenu::BoUfoActionMenu(const QString& text, BoUfoActionCollection* parent, const char* name)
+BoUfoActionMenu::BoUfoActionMenu(const QString& text, BoUfoActionCollection* parent, const QString& name)
 	: BoUfoAction(text, KShortcut(), 0, 0, parent, name)
 {
  d = new BoUfoActionMenuPrivate;
@@ -1108,7 +1108,7 @@ public:
 	}
 };
 
-BoUfoSelectAction::BoUfoSelectAction(const QString& text, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const char* name)
+BoUfoSelectAction::BoUfoSelectAction(const QString& text, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const QString& name)
 	: BoUfoActionMenu(text, parent, name)
 {
  d = new BoUfoSelectActionPrivate;
@@ -1209,14 +1209,14 @@ public:
 #endif
 };
 
-BoUfoActionCollection::BoUfoActionCollection(QObject* parent, const char* name)
+BoUfoActionCollection::BoUfoActionCollection(QObject* parent, const QString& name)
 	: QObject(parent)
 {
  setObjectName(name);
  init();
 }
 
-BoUfoActionCollection::BoUfoActionCollection(BoUfoActionCollection* parentCollection, QObject* parent, const char* name)
+BoUfoActionCollection::BoUfoActionCollection(BoUfoActionCollection* parentCollection, QObject* parent, const QString& name)
 	: QObject(parent)
 {
  setObjectName(name);
@@ -1514,7 +1514,7 @@ public:
 	bool mIsVisible;
 };
 
-BoUfoMenuBar::BoUfoMenuBar(BoUfoManager* parent, const char* name)
+BoUfoMenuBar::BoUfoMenuBar(BoUfoManager* parent, const QString& name)
 	: BoUfoMenuBarMenu(QString::null, parent, name)
 {
  d = new BoUfoMenuBarPrivate;
@@ -1599,7 +1599,7 @@ public:
 	bool mIsVisible;
 };
 
-BoUfoToolBar::BoUfoToolBar(BoUfoManager* parent, const char* name)
+BoUfoToolBar::BoUfoToolBar(BoUfoManager* parent, const QString& name)
 	: BoUfoMenuBarMenu(QString::null, parent, name)
 {
  d = new BoUfoToolBarPrivate;
@@ -1668,7 +1668,7 @@ public:
 	Q3ValueList<BoUfoMenuBarItem*> mItems;
 };
 
-BoUfoMenuBarMenu::BoUfoMenuBarMenu(const QString& text, QObject* parent, const char* name)
+BoUfoMenuBarMenu::BoUfoMenuBarMenu(const QString& text, QObject* parent, const QString& name)
 	: BoUfoMenuBarItem(0, text, parent, name)
 {
  d = new BoUfoMenuBarMenuPrivate;
@@ -1785,7 +1785,7 @@ void BoUfoMenuBarMenu::createUfoToolBarSubMenu(ufo::UWidget* parentWidget)
 }
 
 
-BoUfoMenuBarItem::BoUfoMenuBarItem(BoUfoAction* action, const QString& text, QObject* parent, const char* name)
+BoUfoMenuBarItem::BoUfoMenuBarItem(BoUfoAction* action, const QString& text, QObject* parent, const QString& name)
 	: QObject(parent)
 {
  setObjectName(name);
@@ -1803,7 +1803,7 @@ struct BoUfoStdActionInfo
 	BoUfoStdAction::StdAction id;
 	KStandardShortcut::StandardShortcut globalAccel;
 	int shortcut;
-	const char* name;
+	QString name;
 	const char* label;
 	const char* whatsThis;
 	const char* iconName;
@@ -1860,7 +1860,7 @@ const BoUfoStdActionInfo* infoPtr(BoUfoStdAction::StdAction id)
  return 0;
 }
 
-BoUfoAction* BoUfoStdAction::create(StdAction id, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const char* name)
+BoUfoAction* BoUfoStdAction::create(StdAction id, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const QString& name)
 {
  BoUfoAction* action = 0;
  const BoUfoStdActionInfo* info = infoPtr(id);
@@ -1872,7 +1872,7 @@ BoUfoAction* BoUfoStdAction::create(StdAction id, const QObject* receiver, const
  KShortcut cut = (info->globalAccel == KStandardShortcut::AccelNone
 		? KShortcut(info->shortcut)
 		: KStandardShortcut::shortcut(info->globalAccel));
- const char* n = name ? name : info->name;
+ QString n = (!name.isNull()) ? name : info->name;
  switch (id) {
 	case Preferences:
 	{
@@ -1906,7 +1906,7 @@ BoUfoAction* BoUfoStdAction::create(StdAction id, const QObject* receiver, const
  return action;
 }
 
-const char* BoUfoStdAction::name(BoUfoStdAction::StdAction id)
+QString BoUfoStdAction::name(BoUfoStdAction::StdAction id)
 {
  const BoUfoStdActionInfo* info = infoPtr(id);
  if (info) {
@@ -1927,7 +1927,7 @@ const char* BoUfoStdAction::label(BoUfoStdAction::StdAction id)
 }
 
 #define ACTION(name1, name2, ret) \
-	ret* BoUfoStdAction::name1(const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const char* name) \
+	ret* BoUfoStdAction::name1(const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const QString& name) \
 	{ return (ret*)BoUfoStdAction::create(name2, receiver, slot, parent, name); }
 
 ACTION(fileNew, FileNew, BoUfoAction)

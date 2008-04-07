@@ -29,7 +29,7 @@
 
 BoMouseMoveDiff::BoMouseMoveDiff()
 {
- mButton = QMouseEvent::NoButton;
+ mButton = Qt::NoButton;
  mX = 0;
  mY = 0;
  mOldX = 0;
@@ -54,9 +54,9 @@ void BoMouseMoveDiff::moveEvent(int x, int y, int buttonState)
  mY = y;
 
  if (buttonState == -1) {
-	buttonState = QMouseEvent::NoButton;
+	buttonState = Qt::NoButton;
  }
- if (mButton != QMouseEvent::NoButton) {
+ if (mButton != Qt::NoButton) {
 	if (!(buttonState & mButton)) {
 		// button is not pressed anymore
 		stop();
@@ -66,12 +66,12 @@ void BoMouseMoveDiff::moveEvent(int x, int y, int buttonState)
 
 void BoMouseMoveDiff::stop()
 {
- mButton = QMouseEvent::NoButton;
+ mButton = Qt::NoButton;
 }
 
 bool BoMouseMoveDiff::isStopped() const
 {
- return button() == QMouseEvent::NoButton;
+ return button() == Qt::NoButton;
 }
 
 void BoMouseMoveDiff::start(int button)

@@ -78,10 +78,10 @@ public:
 
 
 BoOrbiterWidget::BoOrbiterWidget(QWidget* parent)
-	: BosonGLWidget(parent)
+	: QGLWidget(parent)
 {
  d = new BoOrbiterWidgetPrivate;
- connect(this, SIGNAL(signalChanged(BoCamera*)), this, SLOT(slotUpdateGL()));
+ connect(this, SIGNAL(signalChanged(BoCamera*)), this, SLOT(updateGL()));
  mMouseMoveDiff = new BoMouseMoveDiff();
  mCamera = 0;
 }
@@ -104,9 +104,11 @@ void BoOrbiterWidget::setCamera(BoCamera* camera)
 
 void BoOrbiterWidget::initializeGL()
 {
- if (isInitialized()) {
+ static bool isInitialized = false;
+ if (isInitialized) {
 	return;
  }
+ isInitialized = true;
  BO_CHECK_NULL_RET(context());
  static bool recursive = false;
  if (recursive) {
@@ -146,10 +148,6 @@ void BoOrbiterWidget::resizeGL(int w, int h)
 
 void BoOrbiterWidget::paintGL()
 {
- if (!isInitialized()) {
-	initGL();
-	return;
- }
  BO_CHECK_NULL_RET(camera());
  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
  glEnable(GL_DEPTH_TEST);

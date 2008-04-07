@@ -130,7 +130,7 @@ void BosonUnitView::setUnit(Unit* u)
  showGeneral();
 }
 
-void BosonUnitView::displayUnitPixmap(unsigned long int unitType, const Player* owner)
+void BosonUnitView::displayUnitPixmap(quint32 unitType, const Player* owner)
 {
  if (!owner) {
 	boError(220) << k_funcinfo << "NULL owner" << endl;

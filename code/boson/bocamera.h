@@ -28,7 +28,7 @@ class QDomElement;
 class BoAutoCamera;
 class BoAutoGameCamera;
 class BoLight;
-class BoContext;
+class QGLContext;
 class BosonCanvas;
 
 /**
@@ -344,7 +344,7 @@ class BoGameCamera : public BoCamera
 class BoLightCamera : public BoCamera
 {
   public:
-    BoLightCamera(BoLight* light, BoContext* context);
+    BoLightCamera(BoLight* light, QGLContext* context);
     ~BoLightCamera();
     virtual int cameraType() const { return LightCamera; }
 
@@ -352,7 +352,7 @@ class BoLightCamera : public BoCamera
     virtual void setGluLookAt(const BoVector3Float& c, const BoVector3Float& l, const BoVector3Float& u);
 
   private:
-    BoContext* mContext;
+    QGLContext* mContext;
     BoLight* mLight;
 };
 

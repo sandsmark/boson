@@ -29,7 +29,7 @@
 #include "bo3dtools.h"
 
 
-class KSimpleConfig;
+class KConfig;
 class QString;
 class BoTextureArray;
 class BosonEffectParticle;
@@ -49,7 +49,7 @@ class BosonEffectPropertiesParticle : public BosonEffectProperties
 
     //virtual BosonEffect::Type type()  { return mType; }
 
-    virtual bool load(KSimpleConfig* cfg, const QString& group, bool inherited);
+    virtual bool load(KConfig* cfg, const QString& group, bool inherited);
 
 
     static void initStatic(const QString& texdir);
@@ -86,7 +86,7 @@ class BosonEffectPropertiesParticleGeneric : public BosonEffectPropertiesParticl
 
     virtual BosonEffect::Type type() const  { return BosonEffect::ParticleGeneric; }
 
-    virtual bool load(KSimpleConfig* cfg, const QString& group, bool inherited = false);
+    virtual bool load(KConfig* cfg, const QString& group, bool inherited = false);
 
 
     virtual BosonEffect* newEffect(const BoVector3Fixed& pos, const BoVector3Fixed& rot = BoVector3Fixed()) const;
@@ -144,7 +144,7 @@ class BosonEffectPropertiesParticleTrail : public BosonEffectPropertiesParticle
 
     virtual BosonEffect::Type type() const  { return BosonEffect::ParticleTrail; }
 
-    virtual bool load(KSimpleConfig* cfg, const QString& group, bool inherited = false);
+    virtual bool load(KConfig* cfg, const QString& group, bool inherited = false);
 
 
     virtual BosonEffect* newEffect(const BoVector3Fixed& pos, const BoVector3Fixed& rot = BoVector3Fixed()) const;
@@ -200,7 +200,7 @@ class BosonEffectPropertiesParticleEnvironmental : public BosonEffectPropertiesP
 
     virtual BosonEffect::Type type() const  { return BosonEffect::ParticleEnvironmental; }
 
-    virtual bool load(KSimpleConfig* cfg, const QString& group, bool inherited = false);
+    virtual bool load(KConfig* cfg, const QString& group, bool inherited = false);
 
 
     virtual BosonEffect* newEffect(const BoVector3Fixed& pos, const BoVector3Fixed& rot = BoVector3Fixed()) const;

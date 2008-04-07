@@ -202,7 +202,7 @@ bool BosonGroundThemeData::loadTextures(const QString& dir, unsigned int i)
  }
  if (tmppix.isNull()) {
 	boWarning() << k_funcinfo << "unable to load pixmap for ground type " << groundData->groundType->name << " from " << dir + "/" + iconFile << endl;
-	tmppix = QPixmap(50, 50, 32);
+	tmppix = QPixmap(50, 50);
 	tmppix.fill(Qt::green);
  }
  // Final pixmap will be at most 50x50 pixels big

@@ -453,7 +453,7 @@ bool BosonUfoCanvasWidget::loadEffectsFromXML(const QDomElement& root)
  bool ret = true;
  QDomNodeList list = root.elementsByTagName(QString::fromLatin1("Effect"));
 
- for (unsigned int i = 0; i < list.count(); i++) {
+ for (int i = 0; i < list.count(); i++) {
 	QDomElement effect = list.item(i).toElement();
 	bool ok = false;
 
@@ -972,7 +972,7 @@ bool BosonUfoCanvasWidget::emulatePickGroundPos(const QPoint& pickPos, BoVector3
  pos = BoVector3Float(retNodes[0]->left(), -retNodes[0]->top(), map->cellAverageHeight(retNodes[0]->left(), retNodes[0]->top()));
 
  Q3ValueVector<EmulatePickRect> rects;
- for (unsigned int i = 0; i < retNodes.count(); i++) {
+ for (int i = 0; i < retNodes.count(); i++) {
 	const int x1 = retNodes[i]->left();
 	const int x2 = retNodes[i]->right() + 1;
 	const int y1 = retNodes[i]->top();
@@ -995,7 +995,7 @@ bool BosonUfoCanvasWidget::emulatePickGroundPos(const QPoint& pickPos, BoVector3
 	Q3ValueVector<EmulatePickRect> nextRects;
 	nextRects.reserve(rects.count() * 4);
 	const EmulatePickRect* firstVisible = 0;
-	for (unsigned int i = 0; i < rects.count(); i++) {
+	for (int i = 0; i < rects.count(); i++) {
 		const EmulatePickRect& r = rects[i];
 		BoVector3Float center = r.center();
 #define USE_BOX_NOT_SPHERE 1
@@ -1067,7 +1067,7 @@ bool BosonUfoCanvasWidget::emulatePickGroundPos(const QPoint& pickPos, BoVector3
  float x = 0.0f;
  float y = 0.0f;
  float z = 0.0f;
- for (unsigned int i = 0; i < rects.count(); i++) {
+ for (int i = 0; i < rects.count(); i++) {
 	BoVector3Float center = rects[i].center();
 	x += center.x();
 	y += center.y();

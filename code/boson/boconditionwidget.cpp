@@ -363,7 +363,7 @@ bool BoConditionWidget::loadConditions(const QDomElement& root)
  QDomNodeList list = root.elementsByTagName("Condition");
 
  // first test if conditions are valid
- for (unsigned int i = 0; i < list.count(); i++) {
+ for (int i = 0; i < list.count(); i++) {
 	QDomElement e = list.item(i).toElement();
 	BoCondition test;
 	if (!test.loadFromXML(e)) {
@@ -373,7 +373,7 @@ bool BoConditionWidget::loadConditions(const QDomElement& root)
  }
 
  // now copy conditions
- for (unsigned int i = 0; i < list.count(); i++) {
+ for (int i = 0; i < list.count(); i++) {
 	QDomElement e = list.item(i).toElement();
 	addCondition(e);
  }
@@ -528,7 +528,7 @@ void BoConditionEventsWidget::reloadEventMatchings()
  mEventMatchings->clear();
  QDomNodeList list = events.elementsByTagName("EventMatching");
  boDebug() << k_funcinfo << "displaying " << list.count() << " event matchings" << endl;
- for (unsigned int i = 0; i < list.count(); i++) {
+ for (int i = 0; i < list.count(); i++) {
 	QDomElement e = list.item(i).toElement();
 	BoEventMatching* matching = new BoEventMatching();
 	bool success = matching->loadFromXML(e);
@@ -703,7 +703,7 @@ bool BoConditionEventsWidget::loadCondition(const QDomElement& condition)
  QDomElement root = mConditionDocument->documentElement();
  QDomElement events = root.namedItem("Events").toElement();
  QDomNodeList list = condition.namedItem("Events").toElement().elementsByTagName("EventMatching");
- for (unsigned int i = 0; i < list.count(); i++) {
+ for (int i = 0; i < list.count(); i++) {
 	events.appendChild(list.item(i).cloneNode());
  }
  reloadEventMatchings();
@@ -923,7 +923,7 @@ QDomElement BoEventMatchingWidget::eventMatching() const
 
  QDomElement event = doc.createElement("Event");
  root.appendChild(event);
- BoEvent* saveEvent = new BoEvent(Q3CString(mName->text()), mData1->text(), mData2->text());
+ BoEvent* saveEvent = new BoEvent(QString(mName->text()), mData1->text(), mData2->text());
  saveEvent->setUnitId(mUnitId->value()); // even if mIgnoreUnitId is checked!
  if (!mIgnorePlayerId->isChecked() && mPlayerId->value() != 0) {
 	// note that 0 is an invalid ID!

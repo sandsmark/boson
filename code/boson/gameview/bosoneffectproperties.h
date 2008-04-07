@@ -31,7 +31,7 @@
 
 
 class BosonEffectProperties;
-class KSimpleConfig;
+class KConfig;
 class SpeciesTheme;
 class SpeciesData;
 
@@ -65,14 +65,14 @@ class BosonEffectPropertiesManager
     **/
     void loadEffectProperties();
 
-    const BosonEffectProperties* effectProperties(unsigned long int id) const;
+    const BosonEffectProperties* effectProperties(quint32 id) const;
 
   protected:
     /**
-     * Loads effect properties from given KSimpleConfig object, using given
+     * Loads effect properties from given KConfig object, using given
      *  group.
      **/
-    static BosonEffectProperties* loadEffectProperties(KSimpleConfig* cfg, const QString& group);
+    static BosonEffectProperties* loadEffectProperties(KConfig* cfg, const QString& group);
     /**
      * Creates new effect properties with given type.
      **/
@@ -107,14 +107,14 @@ class BosonEffectProperties
     virtual ~BosonEffectProperties();
 
     /**
-     * Loads the properties from the given KSimpleConfig object, from given
+     * Loads the properties from the given KConfig object, from given
      *  group.
      * This method handles inheritance, so unless you don't want to use it, you
      *  need to call this method at the beginning of your reimplementation.
      * @param inherited If true, inherited properties are being loaded, not the
      *  actual ones
      **/
-    virtual bool load(KSimpleConfig* cfg, const QString& group, bool inherited = false);
+    virtual bool load(KConfig* cfg, const QString& group, bool inherited = false);
 
     /**
      * Use this, if your effect properties need 2-level loading.
@@ -137,7 +137,7 @@ class BosonEffectProperties
     /**
      * @return Unique id of this effect properties object.
      **/
-    unsigned long int id() const  { return mId; }
+    quint32 id() const  { return mId; }
 
 
     /**
@@ -156,12 +156,12 @@ class BosonEffectProperties
      * E.g. if you have "MyKey=1,2,4", then effect properties with ids 1, 2 and
      *  4 are returned.
      **/
-    static Q3PtrList<BosonEffectProperties> loadEffectProperties(KSimpleConfig* cfg, QString key);
+    //static Q3PtrList<BosonEffectProperties> loadEffectProperties(KConfig* cfg, QString key);
     /**
      * Same as above, but uses already specified list of ids instead of loading
      *  them.
      **/
-    static Q3PtrList<BosonEffectProperties> loadEffectProperties(const Q3ValueList<unsigned long int>& ids);
+    static Q3PtrList<BosonEffectProperties> loadEffectProperties(const Q3ValueList<quint32>& ids);
 
     /**
      * Static helper method to create new effects.
@@ -181,7 +181,7 @@ class BosonEffectProperties
 
 
   protected:
-    unsigned long int mId;
+    quint32 mId;
     float mDelay;
 };
 
@@ -201,7 +201,7 @@ class BosonEffectPropertiesFog : public BosonEffectProperties
     virtual BosonEffect::Type type() const  { return BosonEffect::Fog; };
 
 
-    virtual bool load(KSimpleConfig* cfg, const QString& group, bool inherited = false);
+    virtual bool load(KConfig* cfg, const QString& group, bool inherited = false);
 
 
     virtual BosonEffect* newEffect(const BoVector3Fixed& pos, const BoVector3Fixed& rot = BoVector3Fixed()) const;
@@ -239,7 +239,7 @@ class BosonEffectPropertiesFade : public BosonEffectProperties
     virtual BosonEffect::Type type() const  { return BosonEffect::Fade; };
 
 
-    virtual bool load(KSimpleConfig* cfg, const QString& group, bool inherited = false);
+    virtual bool load(KConfig* cfg, const QString& group, bool inherited = false);
 
 
     virtual BosonEffect* newEffect(const BoVector3Fixed& pos, const BoVector3Fixed& rot = BoVector3Fixed()) const;
@@ -287,7 +287,7 @@ class BosonEffectPropertiesLight : public BosonEffectProperties
     virtual BosonEffect::Type type() const  { return BosonEffect::Light; };
 
 
-    virtual bool load(KSimpleConfig* cfg, const QString& group, bool inherited = false);
+    virtual bool load(KConfig* cfg, const QString& group, bool inherited = false);
 
 
     virtual BosonEffect* newEffect(const BoVector3Fixed& pos, const BoVector3Fixed& rot = BoVector3Fixed()) const;
@@ -337,7 +337,7 @@ class BosonEffectPropertiesBulletTrail : public BosonEffectProperties
     virtual BosonEffect::Type type() const  { return BosonEffect::BulletTrail; };
 
 
-    virtual bool load(KSimpleConfig* cfg, const QString& group, bool inherited = false);
+    virtual bool load(KConfig* cfg, const QString& group, bool inherited = false);
 
 
     virtual BosonEffect* newEffect(const BoVector3Fixed& pos, const BoVector3Fixed& rot = BoVector3Fixed()) const;
@@ -384,7 +384,7 @@ class BosonEffectPropertiesCollection : public BosonEffectProperties
     virtual BosonEffect::Type type() const  { return BosonEffect::Collection; };
 
 
-    virtual bool load(KSimpleConfig* cfg, const QString& group, bool inherited = false);
+    virtual bool load(KConfig* cfg, const QString& group, bool inherited = false);
     virtual bool finishLoading(const BosonEffectPropertiesManager* theme);
 
 
@@ -402,7 +402,7 @@ class BosonEffectPropertiesCollection : public BosonEffectProperties
 
 
     Q3PtrList<BosonEffectProperties> mEffects;
-    Q3ValueList<unsigned long int> mEffectIds;
+    Q3ValueList<quint32> mEffectIds;
 };
 
 #endif //BOSONEFFECTPROPERTIES_H

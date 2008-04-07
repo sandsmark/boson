@@ -22,6 +22,7 @@
 #include "defines.h"
 #include <bogl.h>
 #include <qobject.h>
+#include <QMap>
 
 class QPoint;
 class QWidget;

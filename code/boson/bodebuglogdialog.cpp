@@ -35,6 +35,7 @@
 #include <q3vbox.h>
 #include <q3textedit.h>
 #include <qlabel.h>
+#include <QSplitter>
 
 class BoDebugLogWidgetPrivate
 {
@@ -47,11 +48,11 @@ public:
 	QMap<Q3ListViewItem*, QString> mItem2Backtrace;
 };
 
-BoDebugLogWidget::BoDebugLogWidget(QWidget* parent, const char* name) : QWidget(parent, name)
+BoDebugLogWidget::BoDebugLogWidget(QWidget* parent) : QWidget(parent)
 {
  d = new BoDebugLogWidgetPrivate;
  Q3VBoxLayout* topLayout = new Q3VBoxLayout(this);
- QSplitter* splitter = new QSplitter(Vertical, this);
+ QSplitter* splitter = new QSplitter(Qt::Vertical, this);
  topLayout->addWidget(splitter);
  d->mMessages = new Q3ListView(splitter);
  connect(d->mMessages, SIGNAL(selectionChanged(Q3ListViewItem*)), this, SLOT(slotMessageSelected(Q3ListViewItem*)));
@@ -144,20 +145,24 @@ public:
 	QMap<int, BoDebugLogWidget*> mLevel2Widget;
 };
 
-BoDebugLogDialog::BoDebugLogDialog(QWidget* parent, const char* name)
-	: KPageDialog(Tabbed, i18n("BoDebug messages"), Ok, Ok, parent, name, false, true)
+BoDebugLogDialog::BoDebugLogDialog(QWidget* parent)
+	: KPageDialog(parent)
 {
  d = new BoDebugLogDialogPrivate;
+ setFaceType(Tabbed);
+ setWindowTitle(KDialog::makeStandardCaption(i18n("BoDebug messages")));
+ setButtons(KDialog::Ok);
+ setDefaultButton(KDialog::Ok);
 
- KVBox* errorPage = addVBoxPage(i18n("Errors"));
- KVBox* warningPage = addVBoxPage(i18n("Warnings"));
- KVBox* debugPage = addVBoxPage(i18n("Debug"));
- KVBox* allPage = addVBoxPage(i18n("All"));
 
- BoDebugLogWidget* error = new BoDebugLogWidget(errorPage);
- BoDebugLogWidget* warning = new BoDebugLogWidget(warningPage);
- BoDebugLogWidget* debug = new BoDebugLogWidget(debugPage);
- BoDebugLogWidget* all = new BoDebugLogWidget(allPage);
+ BoDebugLogWidget* error = new BoDebugLogWidget(0);
+ addPage(error, i18n("Errors"));
+ BoDebugLogWidget* warning = new BoDebugLogWidget(0);
+ addPage(warning, i18n("Warnings"));
+ BoDebugLogWidget* debug = new BoDebugLogWidget(0);
+ addPage(debug, i18n("Debug"));
+ BoDebugLogWidget* all = new BoDebugLogWidget(0);
+ addPage(all, i18n("All"));
  d->mLevel2Widget.insert(BoDebug::KDEBUG_ERROR, error);
  d->mLevel2Widget.insert(BoDebug::KDEBUG_WARN, warning);
  d->mLevel2Widget.insert(BoDebug::KDEBUG_INFO, debug);

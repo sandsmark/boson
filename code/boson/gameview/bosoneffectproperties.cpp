@@ -28,7 +28,8 @@
 #include "../speciesdata.h"
 #include "../boshader.h"
 
-#include <ksimpleconfig.h>
+#include <KConfig>
+#include <KConfigGroup>
 #include <kglobal.h>
 #include <kstandarddirs.h>
 
@@ -94,7 +95,7 @@ void BosonEffectPropertiesManager::loadEffectProperties()
 
   BosonEffect::initStatic(path + "particles/");
 
-  KSimpleConfig cfg(fileName);
+  KConfig cfg(fileName, KConfig::SimpleConfig);
   QStringList effects = cfg.groupList();
   if(effects.isEmpty())
   {
@@ -134,7 +135,7 @@ void BosonEffectPropertiesManager::loadEffectProperties()
 }
 
 
-const BosonEffectProperties* BosonEffectPropertiesManager::effectProperties(unsigned long int id) const
+const BosonEffectProperties* BosonEffectPropertiesManager::effectProperties(quint32 id) const
 {
   if(id == 0)
   {
@@ -149,40 +150,40 @@ const BosonEffectProperties* BosonEffectPropertiesManager::effectProperties(unsi
   return mEffectProperties[id];
 }
 
-BosonEffectProperties* BosonEffectPropertiesManager::loadEffectProperties(KSimpleConfig* cfg, const QString& group)
+BosonEffectProperties* BosonEffectPropertiesManager::loadEffectProperties(KConfig* cfg, const QString& groupName)
 {
-  cfg->setGroup(group);
+  KConfigGroup group = cfg->group(groupName);
 
   // Find out effect's type
-  QString type = cfg->readEntry("Type", QString::null);
+  QString type = group.readEntry("Type", QString());
 
   // Loop until we have type
-  while(type == QString::null)
+  while(type.isNull())
   {
     // No type was given
     // Effect may be inheriting from another effect
-    QString inherits = cfg->readEntry("Inherits", QString::null);
-    if(inherits == QString::null)
+    QString inherits = group.readEntry("Inherits", QString());
+    if(inherits.isEmpty())
     {
       // These properties inherit nothing and type is still null, so we have an
       //  error.
-      boError() << k_funcinfo << "No type found for " << group << endl;
+      boError() << k_funcinfo << "No type found for " << groupName << endl;
       return 0;
     }
-    cfg->setGroup(inherits);
-    type = cfg->readEntry("Type", QString::null);
+    group = cfg->group(inherits);
+    type = group.readEntry("Type", QString());
   }
 
   // Create new properties object
   BosonEffectProperties* prop = newEffectProperties(type);
   if(!prop)
   {
-    boError() << k_funcinfo << "Couldn't load effect properties for group '" << group << "'" << endl;
+    boError() << k_funcinfo << "Couldn't load effect properties for group '" << groupName << "'" << endl;
     return 0;
   }
 
   // Load properties
-  prop->load(cfg, group);
+  prop->load(cfg, groupName);
   return prop;
 }
 
@@ -253,44 +254,44 @@ BosonEffectProperties::~BosonEffectProperties()
 {
 }
 
-bool BosonEffectProperties::load(KSimpleConfig* cfg, const QString& group, bool inherited)
+bool BosonEffectProperties::load(KConfig* cfg, const QString& groupName, bool inherited)
 {
-  // Set correct group
-  cfg->setGroup(group);
+  KConfigGroup group = cfg->group(groupName);
   // Unless we're loading inherited effect, load the id now (as the first thing)
   if(!inherited)
   {
-    mId = cfg->readUnsignedLongNumEntry("Id", 0);
+    mId = group.readEntry("Id", (quint32)0);
     if(mId == 0)
     {
-      boError(150) << k_funcinfo << "Invalid or missing id in group " << cfg->group() << endl;
+      boError(150) << k_funcinfo << "Invalid or missing id in group " << groupName << endl;
       return false;  // Loading failed
     }
   }
 
-  mDelay = (float)(cfg->readDoubleNumEntry("Delay", mDelay));
+  mDelay = group.readEntry("Delay", mDelay);
 
   // Load inherited properties, if any
-  QString inherits = cfg->readEntry("Inherits", QString::null);
+  QString inherits = group.readEntry("Inherits", QString());
   if(!inherits.isNull())
   {
     boDebug(150) << k_funcinfo << "Loading inhereted system from group " << inherits << endl;
     load(cfg, inherits, true);
-    cfg->setGroup(group);
   }
 
   return true;
 }
 
+#if 0
 Q3PtrList<BosonEffectProperties> BosonEffectProperties::loadEffectProperties(KSimpleConfig* cfg, QString key)
 {
   return loadEffectProperties(BosonConfig::readUnsignedLongNumList(cfg, key));
 }
+#endif
 
-Q3PtrList<BosonEffectProperties> BosonEffectProperties::loadEffectProperties(const Q3ValueList<unsigned long int>& ids)
+Q3PtrList<BosonEffectProperties> BosonEffectProperties::loadEffectProperties(const Q3ValueList<quint32>& ids)
 {
   Q3PtrList<BosonEffectProperties> props;
-  Q3ValueList<unsigned long int>::const_iterator it;
+  Q3ValueList<quint32>::const_iterator it;
   for(it = ids.begin(); it != ids.end(); it++)
   {
     props.append(boEffectPropertiesManager->effectProperties(*it));
@@ -371,17 +372,19 @@ void BosonEffectPropertiesFog::reset()
   mRadius = 0;
 }
 
-bool BosonEffectPropertiesFog::load(KSimpleConfig* cfg, const QString& group, bool inherited)
+bool BosonEffectPropertiesFog::load(KConfig* cfg, const QString& groupName, bool inherited)
 {
-  if(!BosonEffectProperties::load(cfg, group, inherited))
+  if(!BosonEffectProperties::load(cfg, groupName, inherited))
   {
     return false;
   }
 
-  mColor = BosonConfig::readBoVector4FloatEntry(cfg, "Color", mColor);
-  mStart = (float)(cfg->readDoubleNumEntry("Start", mStart));
-  mEnd = (float)(cfg->readDoubleNumEntry("End", mEnd));
-  mRadius = (float)(cfg->readDoubleNumEntry("Radius", mRadius));
+  KConfigGroup group = cfg->group(groupName);
+
+  mColor = BosonConfig::readBoVector4FloatEntry(&group, "Color", mColor);
+  mStart = group.readEntry("Start", mStart);
+  mEnd = group.readEntry("End", mEnd);
+  mRadius = group.readEntry("Radius", mRadius);
   return true;
 }
 
@@ -430,23 +433,25 @@ void BosonEffectPropertiesFade::reset()
   mDownscaleFactor = 0;
 }
 
-bool BosonEffectPropertiesFade::load(KSimpleConfig* cfg, const QString& group, bool inherited)
+bool BosonEffectPropertiesFade::load(KConfig* cfg, const QString& groupName, bool inherited)
 {
-  if(!BosonEffectProperties::load(cfg, group, inherited))
+  if(!BosonEffectProperties::load(cfg, groupName, inherited))
   {
     return false;
   }
 
-  mStartColor = BosonConfig::readBoVector4FloatEntry(cfg, "StartColor", mStartColor);
-  mEndColor = BosonConfig::readBoVector4FloatEntry(cfg, "EndColor", mEndColor);
-  mGeometry = BosonConfig::readBoVector4FixedEntry(cfg, "Geometry", mGeometry);
-  mTime = (float)(cfg->readDoubleNumEntry("Time", mTime));
-  int glblendfunc = Bo3dTools::string2GLBlendFunc(cfg->readEntry("BlendFunc", QString::null));
+  KConfigGroup group = cfg->group(groupName);
+
+  mStartColor = BosonConfig::readBoVector4FloatEntry(&group, "StartColor", mStartColor);
+  mEndColor = BosonConfig::readBoVector4FloatEntry(&group, "EndColor", mEndColor);
+  mGeometry = BosonConfig::readBoVector4FixedEntry(&group, "Geometry", mGeometry);
+  mTime = group.readEntry("Time", mTime);
+  int glblendfunc = Bo3dTools::string2GLBlendFunc(group.readEntry("BlendFunc", QString()));
   if(glblendfunc != GL_INVALID_ENUM)
   {
     mBlendFunc[1] = glblendfunc;
   }
-  glblendfunc = Bo3dTools::string2GLBlendFunc(cfg->readEntry("SrcBlendFunc", QString::null));
+  glblendfunc = Bo3dTools::string2GLBlendFunc(group.readEntry("SrcBlendFunc", QString()));
   if(glblendfunc != GL_INVALID_ENUM)
   {
     mBlendFunc[0] = glblendfunc;
@@ -459,7 +464,7 @@ bool BosonEffectPropertiesFade::load(KSimpleConfig* cfg, const QString& group, b
   }
 
   // Load the number of passes
-  mPasses = cfg->readNumEntry("Passes", mPasses);
+  mPasses = group.readEntry("Passes", (qint32)mPasses);
   if(mPasses < 0 || mPasses > 10)
   {
     boError() << k_funcinfo << "Passes count of out bounds: " << mPasses << ", resetting to 0" << endl;
@@ -482,13 +487,13 @@ bool BosonEffectPropertiesFade::load(KSimpleConfig* cfg, const QString& group, b
   }
 
   // And load pass-dependand values
-  mShaderFilename[0] = cfg->readEntry("Shader");
-  mDownscaleFactor[0] = cfg->readNumEntry("Downscale", 1);
+  mShaderFilename[0] = group.readEntry("Shader");
+  mDownscaleFactor[0] = group.readEntry("Downscale", (qint32)1);
 
   for(int i = 1; i < mPasses; i++)
   {
-    mShaderFilename[i] = cfg->readEntry(QString("Shader%1").arg(i+1));
-    mDownscaleFactor[i] = cfg->readNumEntry(QString("Downscale%1").arg(i+1), 1);
+    mShaderFilename[i] = group.readEntry(QString("Shader%1").arg(i+1), QString());
+    mDownscaleFactor[i] = group.readEntry(QString("Downscale%1").arg(i+1), (qint32)1);
   }
 
   // Load shaders
@@ -538,23 +543,25 @@ void BosonEffectPropertiesLight::reset()
   mLife = 0.0f;
 }
 
-bool BosonEffectPropertiesLight::load(KSimpleConfig* cfg, const QString& group, bool inherited)
+bool BosonEffectPropertiesLight::load(KConfig* cfg, const QString& groupName, bool inherited)
 {
-  if(!BosonEffectProperties::load(cfg, group, inherited))
+  if(!BosonEffectProperties::load(cfg, groupName, inherited))
   {
     return false;
   }
 
-  mStartAmbientColor = BosonConfig::readBoVector4FloatEntry(cfg, "StartAmbient", mStartAmbientColor);
-  mStartDiffuseColor = BosonConfig::readBoVector4FloatEntry(cfg, "StartDiffuse", mStartDiffuseColor);
-  mStartSpecularColor = BosonConfig::readBoVector4FloatEntry(cfg, "StartSpecular", mStartSpecularColor);
-  mEndAmbientColor = BosonConfig::readBoVector4FloatEntry(cfg, "EndAmbient", mEndAmbientColor);
-  mEndDiffuseColor = BosonConfig::readBoVector4FloatEntry(cfg, "EndDiffuse", mEndDiffuseColor);
-  mEndSpecularColor = BosonConfig::readBoVector4FloatEntry(cfg, "EndSpecular", mEndSpecularColor);
-  mStartAttenuation = BosonConfig::readBoVector3FloatEntry(cfg, "StartAttenuation", mStartAttenuation);
-  mEndAttenuation = BosonConfig::readBoVector3FloatEntry(cfg, "EndAttenuation", mEndAttenuation);
-  mPosition = BosonConfig::readBoVector3FixedEntry(cfg, "Position", mPosition);
-  mLife = (float)(cfg->readDoubleNumEntry("Life", mLife));
+  KConfigGroup group = cfg->group(groupName);
+
+  mStartAmbientColor = BosonConfig::readBoVector4FloatEntry(&group, "StartAmbient", mStartAmbientColor);
+  mStartDiffuseColor = BosonConfig::readBoVector4FloatEntry(&group, "StartDiffuse", mStartDiffuseColor);
+  mStartSpecularColor = BosonConfig::readBoVector4FloatEntry(&group, "StartSpecular", mStartSpecularColor);
+  mEndAmbientColor = BosonConfig::readBoVector4FloatEntry(&group, "EndAmbient", mEndAmbientColor);
+  mEndDiffuseColor = BosonConfig::readBoVector4FloatEntry(&group, "EndDiffuse", mEndDiffuseColor);
+  mEndSpecularColor = BosonConfig::readBoVector4FloatEntry(&group, "EndSpecular", mEndSpecularColor);
+  mStartAttenuation = BosonConfig::readBoVector3FloatEntry(&group, "StartAttenuation", mStartAttenuation);
+  mEndAttenuation = BosonConfig::readBoVector3FloatEntry(&group, "EndAttenuation", mEndAttenuation);
+  mPosition = BosonConfig::readBoVector3FixedEntry(&group, "Position", mPosition);
+  mLife = group.readEntry("Life", mLife);
   return true;
 }
 
@@ -586,18 +593,20 @@ void BosonEffectPropertiesBulletTrail::reset()
   mProbability = 1.0f;
 }
 
-bool BosonEffectPropertiesBulletTrail::load(KSimpleConfig* cfg, const QString& group, bool inherited)
+bool BosonEffectPropertiesBulletTrail::load(KConfig* cfg, const QString& groupName, bool inherited)
 {
-  if(!BosonEffectProperties::load(cfg, group, inherited))
+  if(!BosonEffectProperties::load(cfg, groupName, inherited))
   {
     return false;
   }
 
-  mColor = BosonConfig::readBoVector4FloatEntry(cfg, "Color", mColor);
-  mMinLength = (float)(cfg->readDoubleNumEntry("MinLength", mMinLength));
-  mMaxLength = (float)(cfg->readDoubleNumEntry("MaxLength", mMaxLength));
-  mWidth = (float)(cfg->readDoubleNumEntry("Width", mWidth));
-  mProbability = (float)(cfg->readDoubleNumEntry("Probability", mProbability));
+  KConfigGroup group = cfg->group(groupName);
+
+  mColor = BosonConfig::readBoVector4FloatEntry(&group, "Color", mColor);
+  mMinLength = group.readEntry("MinLength", mMinLength);
+  mMaxLength = group.readEntry("MaxLength", mMaxLength);
+  mWidth = group.readEntry("Width", mWidth);
+  mProbability = group.readEntry("Probability", mProbability);
 
   return true;
 }
@@ -633,17 +642,19 @@ void BosonEffectPropertiesCollection::reset()
   mEffectIds.clear();
 }
 
-bool BosonEffectPropertiesCollection::load(KSimpleConfig* cfg, const QString& group, bool inherited)
+bool BosonEffectPropertiesCollection::load(KConfig* cfg, const QString& groupName, bool inherited)
 {
   // FIXME: inheritance doesn't work here
   // TODO: maybe make inheritance so that every inheriting effect _appends_ it's
   //  ids to parent's ids, not replace them.
-  if(!BosonEffectProperties::load(cfg, group, inherited))
+  if(!BosonEffectProperties::load(cfg, groupName, inherited))
   {
     return false;
   }
 
-  mEffectIds = BosonConfig::readUnsignedLongNumList(cfg, "Effects");
+  KConfigGroup group = cfg->group(groupName);
+
+  mEffectIds = BosonConfig::readUnsignedLongNumList(&group, "Effects");
   // We can't add BosonEffectProperties objects to the list, because they might
   //  be not loaded yet. We'll load them in finishLoading()
 
@@ -652,7 +663,7 @@ bool BosonEffectPropertiesCollection::load(KSimpleConfig* cfg, const QString& gr
 
 bool BosonEffectPropertiesCollection::finishLoading(const BosonEffectPropertiesManager* manager)
 {
-  Q3ValueList<unsigned long int>::Iterator it;
+  Q3ValueList<quint32>::Iterator it;
   for(it = mEffectIds.begin(); it != mEffectIds.end(); it++)
   {
     mEffects.append(manager->effectProperties(*it));

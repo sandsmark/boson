@@ -27,7 +27,7 @@
 #include <Q3PtrList>
 
 class QImage;
-class KSimpleConfig;
+class KConfig;
 template<class T> class Q3PtrList;
 
 class PlayerIO;
@@ -44,7 +44,7 @@ class BoUfoImage;
 class BoAction
 {
   public:
-    BoAction(KSimpleConfig* cfg, const QString& name, SpeciesData* theme);
+    BoAction(KConfig* cfg, const QString& name, SpeciesData* theme);
     BoAction(const QString& name, BoUfoImage* image, const QString& text/*, hotkey*/);
 
     const QString& id() const { return mId; }
@@ -117,11 +117,11 @@ class BoSpecificAction
     void operator=(const BoSpecificAction& a);
 
     const BoAction* action() const  { return mAction; }
-    const QString& id() const
+    QString id() const
     {
       if (!mAction)
       {
-        return QString::null;
+        return QString();
       }
       return mAction->id();
     }
@@ -141,11 +141,11 @@ class BoSpecificAction
       }
       return mAction->image();
     }
-    const QString& text() const
+    QString text() const
     {
       if (!mAction)
       {
-        return QString::null;
+        return QString();
       }
       return mAction->text();
     }

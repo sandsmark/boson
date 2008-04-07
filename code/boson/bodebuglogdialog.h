@@ -32,7 +32,7 @@ class BoDebugLogWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	BoDebugLogWidget(QWidget* parent, const char* name = 0);
+	BoDebugLogWidget(QWidget* parent);
 	~BoDebugLogWidget();
 
 	void setMessages(const Q3PtrList<BoDebugMessage>& m);
@@ -49,7 +49,7 @@ class BoDebugLogDialog : public KPageDialog
 {
 	Q_OBJECT
 public:
-	BoDebugLogDialog(QWidget* parent, const char* name = 0);
+	BoDebugLogDialog(QWidget* parent);
 	~BoDebugLogDialog();
 
 public slots:

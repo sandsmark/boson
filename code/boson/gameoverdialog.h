@@ -19,7 +19,7 @@
 #ifndef GAMEOVERDIALOG_H
 #define GAMEOVERDIALOG_H
 
-#include <kdialogbase.h>
+#include <KDialog>
 //Added by qt3to4:
 #include <Q3Frame>
 #include <QLabel>
@@ -31,7 +31,7 @@ class Boson;
  * @short Dialog that displays who won/lost and statistics about the players
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class GameOverDialog : public KDialogBase
+class GameOverDialog : public KDialog
 {
 	Q_OBJECT
 public:

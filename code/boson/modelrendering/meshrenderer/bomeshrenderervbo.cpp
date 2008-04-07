@@ -145,7 +145,7 @@ void BoMeshRendererVBO::setModel(BosonModel* model)
  }
 }
 
-unsigned int BoMeshRendererVBO::render(const QColor* teamColor, BoMesh* mesh, RenderFlags flags)
+unsigned int BoMeshRendererVBO::render(const QColor& teamColor, BoMesh* mesh, RenderFlags flags)
 {
  // VBOs are rendered exactly like vertex arrays
  return BoMeshRendererVertexArray::render(teamColor, mesh, flags);

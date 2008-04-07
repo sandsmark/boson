@@ -30,6 +30,8 @@
 #include <klocale.h>
 #include <kmessagebox.h>
 #include <k3listview.h>
+#include <k3listbox.h>
+#include <KVBox>
 
 #include <qlabel.h>
 #include <q3hbox.h>
@@ -183,11 +185,12 @@ public:
 	QLabel* mCurrentFile;
 };
 
-BoInfoDialog::BoInfoDialog(QWidget* parent, bool modal)
-		: KDialogBase(Tabbed, i18n("BoInfo"), Ok, Ok, parent,
-		"boinfodialog", modal, true)
+BoInfoDialog::BoInfoDialog(QWidget* parent)
 {
  d = new BoInfoDialogPrivate;
+ setWindowTitle(KDialog::makeStandardCaption(i18n("BoInfo")));
+ setButtons(KDialog::Ok);
+ setDefaultButton(KDialog::Ok);
  if (!BoGlobal::boGlobal()) {
 	BO_NULL_ERROR(BoGlobal::boGlobal());
 	// don't return
@@ -215,7 +218,8 @@ BoInfoDialog::~BoInfoDialog()
 
 void BoInfoDialog::initBosonPage()
 {
- KVBox* vbox = addVBoxPage(i18n("&Boson"));
+ KVBox* vbox = new KVBox(0);
+ addPage(vbox, i18n("&Boson"));
  Q3HBox* hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Boson version string: "), hbox);
  d->mBosonVersionString = new QLabel(hbox);
@@ -226,7 +230,8 @@ void BoInfoDialog::initBosonPage()
 
 void BoInfoDialog::initQtPage()
 {
- KVBox* vbox = addVBoxPage(i18n("&Qt"));
+ KVBox* vbox = new KVBox(0);
+ addPage(vbox, i18n("&Qt"));
  Q3HBox* hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Runtime Qt version string: "), hbox);
  d->mRuntimeQtVersionString = new QLabel(hbox);
@@ -240,7 +245,8 @@ void BoInfoDialog::initQtPage()
 
 void BoInfoDialog::initKDEPage()
 {
- KVBox* vbox = addVBoxPage(i18n("&KDE"));
+ KVBox* vbox = new KVBox(0);
+ addPage(vbox, i18n("&KDE"));
  Q3HBox* hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Runtime KDE version string (valid for KDE >= 3.1 only): "), hbox);
  d->mRuntimeKDEVersionString = new QLabel(hbox);
@@ -257,7 +263,8 @@ void BoInfoDialog::initKDEPage()
 
 void BoInfoDialog::initOpenGLPage()
 {
- KVBox* vbox = addVBoxPage(i18n("&OpenGL"));
+ KVBox* vbox = new KVBox(0);
+ addPage(vbox, i18n("&OpenGL"));
  Q3HBox* hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Have OpenGL data:"), hbox);
  d->mOGHaveData = new QLabel(hbox);
@@ -308,47 +315,48 @@ void BoInfoDialog::initOpenGLPage()
 
 void BoInfoDialog::initXPage()
 {
- KVBox* vbox = addVBoxPage(i18n("&X"));
+ KVBox* vbox = new KVBox(0);
+ addPage(vbox, i18n("&X"));
  Q3HBox* hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Have X data:"), hbox);
  d->mXHaveData = new QLabel(hbox);
  hbox = new Q3HBox(vbox);
- (void)new QLabel(i18n(BoInfo::keyToName(BoInfo::XDisplayName)), hbox);
+ (void)new QLabel(BoInfo::keyToName(BoInfo::XDisplayName), hbox);
  d->mXDisplayName = new QLabel(hbox);
  hbox = new Q3HBox(vbox);
- (void)new QLabel(i18n(BoInfo::keyToName(BoInfo::XProtocolVersion)), hbox);
+ (void)new QLabel(BoInfo::keyToName(BoInfo::XProtocolVersion), hbox);
  d->mXProtocolVersion = new QLabel(hbox);
  hbox = new Q3HBox(vbox);
- (void)new QLabel(i18n(BoInfo::keyToName(BoInfo::XProtocolRevision)), hbox);
+ (void)new QLabel(BoInfo::keyToName(BoInfo::XProtocolRevision), hbox);
  d->mXProtocolRevision = new QLabel(hbox);
  hbox = new Q3HBox(vbox);
- (void)new QLabel(i18n(BoInfo::keyToName(BoInfo::XVendorString)), hbox);
+ (void)new QLabel(BoInfo::keyToName(BoInfo::XVendorString), hbox);
  d->mXVendorString = new QLabel(hbox);
  hbox = new Q3HBox(vbox);
- (void)new QLabel(i18n(BoInfo::keyToName(BoInfo::XVendorReleaseNumber)), hbox);
+ (void)new QLabel(BoInfo::keyToName(BoInfo::XVendorReleaseNumber), hbox);
  d->mXVendorReleaseNumber = new QLabel(hbox);
 
  // screen information
  hbox = new Q3HBox(vbox);
- (void)new QLabel(i18n(BoInfo::keyToName(BoInfo::XDefaultScreen)), hbox);
+ (void)new QLabel(BoInfo::keyToName(BoInfo::XDefaultScreen), hbox);
  d->mXDefaultScreen = new QLabel(hbox);
  hbox = new Q3HBox(vbox);
- (void)new QLabel(i18n(BoInfo::keyToName(BoInfo::XScreenCount)), hbox);
+ (void)new QLabel(BoInfo::keyToName(BoInfo::XScreenCount), hbox);
  d->mXScreenCount = new QLabel(hbox);
  hbox = new Q3HBox(vbox);
- (void)new QLabel(i18n(BoInfo::keyToName(BoInfo::XScreen)), hbox);
+ (void)new QLabel(BoInfo::keyToName(BoInfo::XScreen), hbox);
  d->mXScreen = new QLabel(hbox);
  hbox = new Q3HBox(vbox);
- (void)new QLabel(i18n(BoInfo::keyToName(BoInfo::XScreenWidth)), hbox);
+ (void)new QLabel(BoInfo::keyToName(BoInfo::XScreenWidth), hbox);
  d->mXScreenWidth = new QLabel(hbox);
  hbox = new Q3HBox(vbox);
- (void)new QLabel(i18n(BoInfo::keyToName(BoInfo::XScreenHeight)), hbox);
+ (void)new QLabel(BoInfo::keyToName(BoInfo::XScreenHeight), hbox);
  d->mXScreenHeight = new QLabel(hbox);
  hbox = new Q3HBox(vbox);
- (void)new QLabel(i18n(BoInfo::keyToName(BoInfo::XScreenWidthMM)), hbox);
+ (void)new QLabel(BoInfo::keyToName(BoInfo::XScreenWidthMM), hbox);
  d->mXScreenWidthMM = new QLabel(hbox);
  hbox = new Q3HBox(vbox);
- (void)new QLabel(i18n(BoInfo::keyToName(BoInfo::XScreenHeightMM)), hbox);
+ (void)new QLabel(BoInfo::keyToName(BoInfo::XScreenHeightMM), hbox);
  d->mXScreenHeightMM = new QLabel(hbox);
  // screen information (end)
 
@@ -360,7 +368,8 @@ void BoInfoDialog::initNVidiaPage()
  //     it's contents are based on how the NVidia driver looked like a long time
  //     ago - much of it is not valid anymore.
 #if 0
- KVBox* vbox = addVBoxPage(i18n("&NVidia"));
+ KVBox* vbox = new KVBox(0);
+ addPage(vbox, i18n("&NVidia"));
  (void)new QLabel(i18n("This page is relevant for users of the proprietary NVidia driver only. All errors listed here are actually GOOD for all other people."), vbox);
  d->mNVidiaErrors = new K3ListBox(vbox);
 #endif
@@ -368,7 +377,8 @@ void BoInfoDialog::initNVidiaPage()
 
 void BoInfoDialog::initOSPage()
 {
- KVBox* vbox = addVBoxPage(i18n("Operating &System"));
+ KVBox* vbox = new KVBox(0);
+ addPage(vbox, i18n("Operating &System"));
  Q3HBox* hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Recognized Operating system type:"), hbox);
  d->mOSType = new QLabel(hbox);
@@ -391,7 +401,8 @@ void BoInfoDialog::initOSPage()
 
 void BoInfoDialog::initLibsPage()
 {
- KVBox* vbox = addVBoxPage(i18n("&Libs"));
+ KVBox* vbox = new KVBox(0);
+ addPage(vbox, i18n("&Libs"));
  (void)new QLabel(i18n("This page is a side product of the NVidia page. Some data may be relevant if you have a problem."), vbox);
  d->mHaveLibs = new K3ListView(vbox);
  d->mHaveLibs->addColumn(i18n("Key"));
@@ -408,7 +419,8 @@ void BoInfoDialog::initLibsPage()
 
 void BoInfoDialog::initCompleteDataPage()
 {
- KVBox* vbox = addVBoxPage(i18n("&Complete Data"));
+ KVBox* vbox = new KVBox(0);
+ addPage(vbox, i18n("&Complete Data"));
  (void)new QLabel(i18n("All BoInfo data"), vbox);
  d->mCompleteData = new K3ListView(vbox);
  d->mCompleteData->addColumn(i18n("Key"));
@@ -418,7 +430,8 @@ void BoInfoDialog::initCompleteDataPage()
 
 void BoInfoDialog::initFilePage()
 {
- KVBox* vbox = addVBoxPage(i18n("&Files"));
+ KVBox* vbox = new KVBox(0);
+ addPage(vbox, i18n("&Files"));
  Q3HBox* hbox = new Q3HBox(vbox);
  (void)new QLabel(i18n("Current file:"), hbox);
  d->mCurrentFile = new QLabel(i18n("None"), hbox);

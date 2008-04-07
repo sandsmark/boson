@@ -87,14 +87,14 @@ signals:
 
 public slots:
 	void slotUpdate();
-	void slotUpdateProduction(unsigned long int id);
+	void slotUpdateProduction(quint32 id);
 	void slotUpdateProduction(Unit*);
 	void slotUpdateProductionOptions();
 	void slotUpdateSelection();
 	void slotSelectionChanged(BoSelection*);
 	void slotProduce(const BoSpecificAction&);
-	void slotConstructionCompleted(unsigned long int facilityId);
-	void slotUnitDestroyed(unsigned long int id);
+	void slotConstructionCompleted(quint32 facilityId);
+	void slotUnitDestroyed(quint32 id);
 
 	/**
 	 * Editor mode only. Emit @ref signalPlaceUnit.

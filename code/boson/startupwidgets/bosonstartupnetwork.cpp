@@ -32,6 +32,8 @@
 #include "bodebug.h"
 
 #include <kgame/kplayer.h>
+
+#include <QColor>
 //Added by qt3to4:
 #include <Q3PtrList>
 
@@ -79,10 +81,8 @@ void BosonStartupNetwork::setGame(Boson* game)
  connect(mGame, SIGNAL(destroyed()),
 		this, SLOT(slotUnsetKGame()));
 
- Q3PtrList<Player> list = mGame->allPlayerList();
- Q3PtrListIterator<Player> it(list);;
- for (; it.current(); ++it) {
-	slotPlayerJoinedGame(it.current());
+ foreach (Player* p, mGame->allPlayerList()) {
+	slotPlayerJoinedGame(p);
  }
 }
 
@@ -174,7 +174,7 @@ bool BosonStartupNetwork::sendNewGame(const QByteArray& data, bool editor)
  QByteArray compresseddata = qCompress(data);
 
  QByteArray buffer;
- QDataStream stream(buffer, QIODevice::WriteOnly);
+ QDataStream stream(&buffer, QIODevice::WriteOnly);
  if (editor) {
 	stream << (qint8)0;
  } else {
@@ -228,7 +228,7 @@ void BosonStartupNetwork::sendChangeTeamColor(Player* p, const QColor& color)
  BO_CHECK_NULL_RET(mGame);
  BO_CHECK_NULL_RET(p);
  QByteArray b;
- QDataStream stream(b, QIODevice::WriteOnly);
+ QDataStream stream(&b, QIODevice::WriteOnly);
  stream << (quint32)p->bosonId();
  stream << (quint32)color.rgb();
  mGame->sendMessage(b, BosonMessageIds::ChangeTeamColor);
@@ -239,7 +239,7 @@ void BosonStartupNetwork::sendChangeSpecies(Player* p, const QString& species, c
  BO_CHECK_NULL_RET(mGame);
  BO_CHECK_NULL_RET(p);
  QByteArray b;
- QDataStream stream(b, QIODevice::WriteOnly);
+ QDataStream stream(&b, QIODevice::WriteOnly);
  stream << (quint32)p->bosonId();
  stream << species;
  stream << (quint32)color.rgb();
@@ -251,7 +251,7 @@ void BosonStartupNetwork::sendChangeSide(Player* p, unsigned int sideId)
  BO_CHECK_NULL_RET(mGame);
  BO_CHECK_NULL_RET(p);
  QByteArray b;
- QDataStream stream(b, QIODevice::WriteOnly);
+ QDataStream stream(&b, QIODevice::WriteOnly);
  stream << (quint32)p->bosonId();
  stream << (quint32)sideId;
  mGame->sendMessage(b, BosonMessageIds::ChangeSide);
@@ -278,7 +278,7 @@ void BosonStartupNetwork::sendChangePlayField(const QString& identifier)
  }
  // a NULL identifier means "new map", for the start editor widget
  QByteArray buffer;
- QDataStream stream(buffer, QIODevice::WriteOnly);
+ QDataStream stream(&buffer, QIODevice::WriteOnly);
  // transmit the identifier/name so that the remote newgame dialogs will be able
  // to display the newly selected playfield
  stream << identifier;

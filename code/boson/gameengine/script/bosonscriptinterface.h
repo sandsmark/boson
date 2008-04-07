@@ -58,7 +58,7 @@ class BosonScriptInterface : public QObject
 {
   Q_OBJECT
   public:
-    BosonScriptInterface(QObject* parent = 0, const char* name = 0);
+    BosonScriptInterface(QObject* parent = 0);
     ~BosonScriptInterface();
 
     /*  Events  */

@@ -34,6 +34,7 @@
 #include "bodebug.h"
 #include "../gameengine/boson.h"
 #include "../defines.h"
+#include "../gameengine/player.h"
 
 #include <kmainwindow.h> // AB: urghs
 #include <kmessagebox.h>
@@ -88,15 +89,15 @@ void BoUfoStartupWidget::init()
  connect(d->mWidgetStack, SIGNAL(signalVisibleWidgetChanged(BoUfoWidget*)),
 		this, SLOT(slotVisibleWidgetChanged(BoUfoWidget*)));
 
- QImage backgroundImage(locate("data", "boson/pics/boson-startup-bg.png"));
- QImage logoImage(locate("data", "boson/pics/boson-startup-logo.png"));
+ QImage backgroundImage(KStandardDirs::locate("data", "boson/pics/boson-startup-bg.png"));
+ QImage logoImage(KStandardDirs::locate("data", "boson/pics/boson-startup-logo.png"));
 
  setBackgroundImage(backgroundImage);
  setOpaque(true);
 
  setLayoutClass(BoUfoWidget::UVBoxLayout);
  BoUfoLabel* logo = new BoUfoLabel();
- logo->setHorizontalAlignment(BoUfoWidget::Qt::AlignHCenter);
+ logo->setHorizontalAlignment(BoUfoWidget::AlignHCenter);
  logo->setIcon(logoImage);
 
  addSpacing(25);
@@ -480,6 +481,7 @@ void BoUfoStartupWidget::slotNetworkOptionsCancel()
 
 bool BoUfoStartupWidget::eventFilter(QObject* o, QEvent* e)
 {
+#if 0
  switch (e->type()) {
 	case QEvent::MouseButtonPress:
 		if (((QMouseEvent*)e)->button() == Qt::RightButton) {
@@ -504,6 +506,7 @@ bool BoUfoStartupWidget::eventFilter(QObject* o, QEvent* e)
 	default:
 		break;
  }
+#endif
  return BoUfoWidget::eventFilter(o, e);
 }
 

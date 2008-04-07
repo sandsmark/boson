@@ -145,7 +145,7 @@ void BoDebugConfigSwitches::clear()
 void BoDebugConfigSwitches::slotUpdate()
 {
  for (QMap<QString, BoUfoCheckBox*>::iterator it = d->mBooleanSwitches.begin(); it != d->mBooleanSwitches.end(); ++it) {
-	BoUfoCheckBox* check = it.data();
+	BoUfoCheckBox* check = it.value();
 	check->setChecked(boConfig->boolValue(it.key()));
  }
 }

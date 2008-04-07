@@ -33,8 +33,8 @@
 QString BoCheckInstallation::checkInstallation()
 {
  QStringList requiredFiles;
- requiredFiles.append(locate("data", "boson/pics/boson-startup-bg.png"));
- requiredFiles.append(locate("data", "boson/pics/boson-startup-logo.png"));
+ requiredFiles.append(KStandardDirs::locate("data", "boson/pics/boson-startup-bg.png"));
+ requiredFiles.append(KStandardDirs::locate("data", "boson/pics/boson-startup-logo.png"));
  for (QStringList::iterator it = requiredFiles.begin(); it != requiredFiles.end(); ++it) {
 	if (!KGlobal::dirs()->exists(*it)) {
 		return i18n("You seem not to have Boson data files installed!\n Please install data package of Boson and restart Boson.");

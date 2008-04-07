@@ -280,11 +280,14 @@ void KGameUnitDebugDataHandlerDisplay::displayDataHandler(KGamePropertyHandler* 
 	return;
  }
  BosonCustomPropertyXML propertyXML;
- Q3IntDict<KGamePropertyBase>& dict = dataHandler->dict();
- for (Q3IntDictIterator<KGamePropertyBase> it(dict); it.current(); ++it) {
-	QString name = dataHandler->propertyName(it.current()->id());
-	QString id = QString::number(it.current()->id());
-	QString value = propertyXML.propertyValue(it.current());
+ QMultiHash<int, KGamePropertyBase*>& dict = dataHandler->dict();
+
+ QHashIterator<int, KGamePropertyBase*> it(dict);
+ while (it.hasNext()) {
+	KGamePropertyBase* prop = it.next().value();
+	QString name = dataHandler->propertyName(prop->id());
+	QString id = QString::number(prop->id());
+	QString value = propertyXML.propertyValue(prop);
 	QListViewItemNumber* item = new QListViewItemNumber(mProperties);
 	if (name.isEmpty()) {
 		name = i18n("Unknown");
@@ -361,7 +364,7 @@ KGameUnitDebug::~KGameUnitDebug()
 
 void KGameUnitDebug::addPropertiesPage()
 {
- QSplitter* propertiesSplitter = new QSplitter(Vertical, d->mTabWidget);
+ QSplitter* propertiesSplitter = new QSplitter(Qt::Vertical, d->mTabWidget);
  QWidget* propertiesBox = new QWidget(propertiesSplitter);
  Q3VBoxLayout* propertiesLayout = new Q3VBoxLayout(propertiesBox);
  QLabel* propertiesTitle = new QLabel(i18n("Properties"), propertiesBox);
@@ -500,8 +503,8 @@ void KGameUnitDebug::updateProduction(BosonItem* item)
  Unit* unit = (Unit*)item;
  ProductionPlugin* production = (ProductionPlugin*)unit->plugin(UnitPlugin::Production);
  if (production) {
-	Q3ValueList<QPair<ProductionType, unsigned long int> > productions = production->productionList();
-	for (unsigned int i = 0; i < productions.count(); i++) {
+	Q3ValueList<QPair<ProductionType, quint32> > productions = production->productionList();
+	for (int i = 0; i < productions.count(); i++) {
 		Q3ListViewItem* item = new Q3ListViewItem(d->mProduction);
 		item->setText(0, QString::number(i+1));
 		item->setText(1, QString::number(productions[i].second));
