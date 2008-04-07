@@ -98,25 +98,27 @@ public:
 	KIntNumInput* mInitialZRotation;
 };
 
-BoEditTurretPropertiesDialog::BoEditTurretPropertiesDialog(QWidget* parent, bool modal)
-		: KDialogBase(Plain, i18n("Edit Turrets"), Ok | Cancel | Apply,
-		Ok, parent, "boeditturretpropertiesdialog", modal, true)
+BoEditTurretPropertiesDialog::BoEditTurretPropertiesDialog(QWidget* parent)
+		: KDialog(parent)
 {
+ setWindowTitle(KDialog::makeStandardCaption(i18n("Edit Turrets")));
+ setButtons(KDialog::Ok | KDialog::Cancel | KDialog::Apply);
+ setDefaultButton(KDialog::Ok);
  d = new BoEditTurretPropertiesDialogPrivate();
 
- Q3VBoxLayout* layout = new Q3VBoxLayout(plainPage());
- d->mInitialZRotation = new KIntNumInput(plainPage());
+ Q3VBoxLayout* layout = new Q3VBoxLayout(mainWidget());
+ d->mInitialZRotation = new KIntNumInput(mainWidget());
  d->mInitialZRotation->setRange(0, 360, 1, true);
  d->mInitialZRotation->setLabel(i18n("Initial Z rotation"));
  layout->addWidget(d->mInitialZRotation);
- QLabel* meshesLabel = new QLabel(i18n("Turret Meshes:"), plainPage());
- d->mTurretMeshes = new QLineEdit(plainPage());
+ QLabel* meshesLabel = new QLabel(i18n("Turret Meshes:"), mainWidget());
+ d->mTurretMeshes = new QLineEdit(mainWidget());
  connect(d->mTurretMeshes, SIGNAL(textChanged(const QString&)),
 		this, SLOT(slotLineEditChanged()));
  layout->addWidget(meshesLabel);
  layout->addWidget(d->mTurretMeshes);
 
- d->mTurretMeshesListView = new BoCheckListView(plainPage());
+ d->mTurretMeshesListView = new BoCheckListView(mainWidget());
  d->mTurretMeshesListView->setRootIsDecorated(true);
  d->mTurretMeshesListView->addColumn("foo1");
  d->mTurretMeshesListView->addColumn("foo2");
@@ -135,7 +137,8 @@ void BoEditTurretPropertiesDialog::setModelFile(const QString& fileName)
  boDebug() << k_funcinfo << endl;
  d->mTurretMeshesListView->setEnabled(false);
  d->mTurretMeshesListView->hide();
- Lib3dsFile* file = lib3ds_file_load(fileName);
+ QByteArray tmp = fileName.toLatin1();
+ Lib3dsFile* file = lib3ds_file_load(tmp.constData());
  if (!file) {
 	boDebug() << k_funcinfo << "could not load model file " << fileName << endl;
 	return;

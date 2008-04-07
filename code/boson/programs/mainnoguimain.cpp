@@ -22,12 +22,11 @@
 #include <config.h>
 #include "../boversion.h"
 #include "bodebug.h"
-#include "bodebugdcopiface.h"
 #include "../bosonconfig.h"
 #include "../boglobal.h"
 #include "../bocheckinstallation.h"
 #include "../boapplication.h"
-#include "../gameengine/boeventloop.h"
+//#include "../gameengine/boeventloop.h"
 
 #include <kaboutdata.h>
 #include <kcmdlineargs.h>
@@ -39,24 +38,10 @@
 #include <Q3CString>
 #include <Q3ValueList>
 
-static const char *description =
-    I18N_NOOP("Boson without GUI");
+static KLocalizedString description =
+    ki18n("Boson without GUI");
 
 static const char *version = BOSON_VERSION_STRING;
-
-static KCmdLineOptions options[] =
-{
-    { "load", I18N_NOOP("Skip Welcome Widget and display the Load Game screen"), 0 },
-    { "playfield <identifier>", I18N_NOOP("Playfield identifier for newgame/start editor widget"), 0 },
-    { "computerplayers <count>", I18N_NOOP("Add <count> computer players to the game. Default is 1."), "1" },
-    { "computerspecies <species>", I18N_NOOP("Comma separated list of species identifiers - one species per computer player."), 0 },
-    { "networkplayers <count>", I18N_NOOP("Wait for <count> players to enter the game from network. Default is 0."), "0" },
-    { "port <number>", I18N_NOOP("Port to listen on for network players"), QString("%1").arg(BOSON_PORT) },
-    { "aidelay <delay>", I18N_NOOP("Set AI delay (in seconds). The less it is, the faster AI will send it's units"), 0 },
-    { "noai", I18N_NOOP("Disable AI"), 0 },
-    { "connectto <host:port>" I18N_NOOP("Connect to a server"), 0 },
-    { 0, 0, 0 }
-};
 
 static bool parseArgs(MainNoGUIStartOptions* options, KCmdLineArgs* args);
 static bool parseAddComputerArgs(MainNoGUIStartOptions* options, KCmdLineArgs* args);
@@ -67,26 +52,38 @@ static void postBosonConfigInit();
 int main(int argc, char **argv)
 {
  KAboutData about("boson",
-		I18N_NOOP("BosonNoGUI"),
+		QByteArray(),
+		ki18n("BosonNoGUI"),
 		version,
 		description,
 		KAboutData::License_GPL,
-		"(C) 1999-2000,2001-2006 The Boson team",
-		0,
+		ki18n("(C) 1999-2000,2001-2006 The Boson team"),
+		KLocalizedString(),
 		"http://boson.eu.org");
- about.addAuthor("Thomas Capricelli",
-		I18N_NOOP("Initial Game Design & Coding"),
+ about.addAuthor(ki18n("Thomas Capricelli"),
+		ki18n("Initial Game Design & Coding"),
 		"orzel@freehackers.org",
 		"http://orzel.freehackers.org");
- about.addAuthor("Andreas Beckermann",
-		I18N_NOOP("Coding & Current Maintainer"),
+ about.addAuthor(ki18n("Andreas Beckermann"),
+		ki18n("Coding & Current Maintainer"),
 		"b_mann@gmx.de");
- about.addAuthor("Rivo Laks",
-		I18N_NOOP("Coding & Homepage Redesign"),
+ about.addAuthor(ki18n("Rivo Laks"),
+		ki18n("Coding & Homepage Redesign"),
 		"rivolaks@hot.ee");
- about.addAuthor("Felix Seeger",
-		I18N_NOOP("Documentation"),
+ about.addAuthor(ki18n("Felix Seeger"),
+		ki18n("Documentation"),
 		"felix.seeger@gmx.de");
+
+ KCmdLineOptions options;
+ options.add("load", ki18n("Skip Welcome Widget and display the Load Game screen"));
+ options.add("playfield <identifier>", ki18n("Playfield identifier for newgame/start editor widget"), "0");
+ options.add("computerplayers <count>", ki18n("Add <count> computer players to the game. Default is 1."), "1");
+ options.add("computerspecies <species>", ki18n("Comma separated list of species identifiers - one species per computer player."));
+ options.add("networkplayers <count>", ki18n("Wait for <count> players to enter the game from network. Default is 0."), "0");
+ options.add("port <number>", ki18n("Port to listen on for network players"), QString("%1").arg(BOSON_PORT).toLatin1());
+ options.add("aidelay <delay>", ki18n("Set AI delay (in seconds). The less it is, the faster AI will send it's units"));
+ options.add("noai", ki18n("Disable AI"));
+ options.add("connectto <host:port>", ki18n("Connect to a server"));
 
  // first tell BoGlobal that we need to do extra stuff after BosonConfig's
  // initialization
@@ -99,8 +96,10 @@ int main(int argc, char **argv)
  KApplication::disableAutoDcopRegistration();
 #endif
 
+#if 0
  BoEventLoop eventLoop(0, "main event loop");
- BoApplication app(argv0, false, false);
+#endif
+ BoApplication app(argv0, false);
  KGlobal::locale()->insertCatalog("libkdegames");
 
  // register ourselves as a dcop client
@@ -116,13 +115,6 @@ int main(int argc, char **argv)
 	return 1;
  }
 
- BoDebugDCOPIface* iface = 0;
-#if !BOSON_LINK_STATIC
- // AB: if we build a static binary, we do not allow DCOP connections, so no
- // need to construct this.
- iface = new BoDebugDCOPIface;
-#endif
-
  MainNoGUI* main = new MainNoGUI();
  if (!main->init()) {
 	boError() << k_funcinfo << "init failed" << endl;
@@ -132,22 +124,20 @@ int main(int argc, char **argv)
 
  KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
 
- MainNoGUIStartOptions options;
+ MainNoGUIStartOptions mainOptions;
 
- if (!parseArgs(&options, args)) {
+ if (!parseArgs(&mainOptions, args)) {
 	return 1;
  }
  args->clear();
 
- if (!main->startGame(options)) {
+ if (!main->startGame(mainOptions)) {
 	boError() << k_funcinfo << "unable to start the game" << endl;
 	return 1;
  }
 
  boDebug() << "starting main loop" << endl;
  int ret = app.exec();
-
- delete iface;
 
  return ret;
 }
@@ -302,10 +292,10 @@ static bool parseAddComputerArgs(MainNoGUIStartOptions* options, KCmdLineArgs* a
 bool parsePlayFieldArgs(MainNoGUIStartOptions* options, KCmdLineArgs* args)
 {
  if (!args) {
-	return QByteArray();
+	return false;
  }
  if (!options) {
-	return QByteArray();
+	return false;
  }
  QString identifier;
  if (args->isSet("playfield")) {

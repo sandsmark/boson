@@ -19,9 +19,8 @@
 #ifndef BOMODELPIXMAPS_H
 #define BOMODELPIXMAPS_H
 
-#include "bodebugdcopiface.h"
 #include "bo3dtools.h"
-#include "bosonglwidget.h"
+#include <QGLWidget>
 
 #include <kmainwindow.h>
 
@@ -40,6 +39,7 @@ class KCmdLineArgs;
 class QPushButton;
 class QLabel;
 class Q3GridLayout;
+class QLineEdit;
 
 class BoTextureCopyright : public QWidget
 {
@@ -111,7 +111,7 @@ private:
 };
 
 class BoModelPixmapsGLWidgetPrivate;
-class BoModelPixmapsGLWidget : public BosonGLWidget
+class BoModelPixmapsGLWidget : public QGLWidget
 {
 	Q_OBJECT
 public:
@@ -179,7 +179,6 @@ protected:
 
 private:
 	BoModelPixmapsPrivate* d;
-	BoDebugDCOPIface* mIface;
 	BoModelPixmapsGLWidget* mGLWidget;
 	BoPixmapRenderer* mPixmapRenderer;
 
@@ -191,6 +190,16 @@ private:
 	Q3PtrList<BoTextureCopyright> mTextureCopyright;
 };
 
+
+#include "ui_bomodelpixmapsgui.h"
+class BoModelPixmapsGUI : public QWidget, public Ui::BoModelPixmapsGUI
+{
+	Q_OBJECT
+public:
+	BoModelPixmapsGUI(QWidget* parent) : QWidget(parent)
+	{
+	}
+};
 
 
 #endif

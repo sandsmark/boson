@@ -37,40 +37,36 @@
 //Added by qt3to4:
 #include <Q3CString>
 
-static const char *description =
-    I18N_NOOP("Boson file converter");
+static KLocalizedString description =
+    ki18n("Boson file converter");
 
 static const char *version = BOSON_VERSION_STRING;
-
-static KCmdLineOptions options[] =
-{
-    { "+input", I18N_NOOP("Input .bpf file"), 0 },
-    { "+output", I18N_NOOP("Output .bpf file"), 0 },
-    { 0, 0, 0 }
-};
 
 int main(int argc, char **argv)
 {
  KAboutData about("bofileconverter",
-		I18N_NOOP("BoFileConverter"),
+		QByteArray(),
+		ki18n("BoFileConverter"),
 		version,
 		description,
 		KAboutData::License_GPL,
-		"(C) 2006 Andreas Beckermann",
-		0,
+		ki18n("(C) 2006 Andreas Beckermann"),
+		KLocalizedString(),
 		"http://boson.eu.org");
- about.addAuthor("Andreas Beckermann",
-		I18N_NOOP("Coding & Current Maintainer"),
+ about.addAuthor(ki18n("Andreas Beckermann"),
+		ki18n("Coding & Current Maintainer"),
 		"b_mann@gmx.de");
+
+ KCmdLineOptions options;
+ options.add("+input", ki18n("Input .bpf file"));
+ options.add("+output", ki18n("Output .bpf file"));
+
 
  Q3CString argv0(argv[0]);
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
-#if BOSON_LINK_STATIC
- KApplication::disableAutoDcopRegistration();
-#endif
 
- BoApplication app(argv0, false, false);
+ BoApplication app(argv0, false);
 
  KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
 

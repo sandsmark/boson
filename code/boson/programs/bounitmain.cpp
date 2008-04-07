@@ -20,7 +20,6 @@
 #include "bouniteditor.h"
 
 #include "../bomemory/bodummymemory.h"
-#include "bodebugdcopiface.h"
 #include "boversion.h"
 #include "boapplication.h"
 #include "bosonconfig.h"
@@ -35,36 +34,31 @@
 
 static void postBosonConfigInit();
 
-static const char *description =
-    I18N_NOOP("Unit Editor for Boson");
+static KLocalizedString description =
+    ki18n("Unit Editor for Boson");
 
 static const char *version = BOSON_VERSION_STRING;
-
-static KCmdLineOptions options[] =
-{
-    { 0, 0, 0 }
-};
 
 int main(int argc, char **argv)
 {
  KAboutData about("bounit",
-		I18N_NOOP("Boson Unit Editor"),
+		QByteArray(),
+		ki18n("Boson Unit Editor"),
 		version,
 		description,
 		KAboutData::License_GPL,
-		"(C) 1999-2000,2001-2005 The Boson team",
-		0,
+		ki18n("(C) 1999-2000,2001-2005 The Boson team"),
+		KLocalizedString(),
 		"http://boson.eu.org");
- about.addAuthor("Thomas Capricelli", I18N_NOOP("Initial Game Design & Coding"), "orzel@freehackers.org", "http://orzel.freehackers.org");
- about.addAuthor("Benjamin Adler", I18N_NOOP("Graphics & Homepage Design"), "benadler@bigfoot.de");
- about.addAuthor( "Andreas Beckermann", I18N_NOOP("Coding & Current Maintainer"), "b_mann@gmx.de" );
- about.addAuthor( "Rivo Laks", I18N_NOOP("Design & Coding"), "rivolaks@hot.ee" );
+ about.addAuthor(ki18n("Thomas Capricelli"), ki18n("Initial Game Design & Coding"), "orzel@freehackers.org", "http://orzel.freehackers.org");
+ about.addAuthor(ki18n("Benjamin Adler"), ki18n("Graphics & Homepage Design"), "benadler@bigfoot.de");
+ about.addAuthor(ki18n("Andreas Beckermann"), ki18n("Coding & Current Maintainer"), "b_mann@gmx.de");
+ about.addAuthor(ki18n("Rivo Laks"), ki18n("Design & Coding"), "rivolaks@hot.ee");
 
  BosonConfig::setPostInitFunction(&postBosonConfigInit);
 
  Q3CString argv0(argv[0]);
  KCmdLineArgs::init(argc, argv, &about);
- KCmdLineArgs::addCmdLineOptions(options);
  BoApplication app(argv0);
 
  KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
@@ -72,10 +66,8 @@ int main(int argc, char **argv)
  app.setMainWidget(dlg);
  dlg->show();
 
- BoDebugDCOPIface* iface = new BoDebugDCOPIface();
  args->clear();
  int r = app.exec();
- delete iface;
  delete dlg;
  return r;
 }

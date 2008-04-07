@@ -19,7 +19,6 @@
 #ifndef BORENDERMAIN_H
 #define BORENDERMAIN_H
 
-#include "bodebugdcopiface.h"
 #include "bosonufoglwidget.h"
 #include <boufo/boufocustomwidget.h>
 #include "bo3dtools.h"
@@ -300,7 +299,6 @@ public:
 private:
 	BoRenderGLWidget* mGLWidget;
 	QTimer* mUpdateTimer;
-	BoDebugDCOPIface* mIface;
 };
 
 

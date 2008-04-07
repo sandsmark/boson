@@ -33,6 +33,7 @@ class BoEventManager;
 class BosonPlayerListManager;
 class BosonCanvas;
 class Unit;
+class QColor;
 
 #define MY_VERIFY(x) \
 	if (!(x)) { \

@@ -19,7 +19,6 @@
 
 #include "bosonprofilingdialog.h"
 
-#include "bodebugdcopiface.h"
 #include "boversion.h"
 #include "boapplication.h"
 
@@ -29,28 +28,26 @@
 //Added by qt3to4:
 #include <Q3CString>
 
-static const char *description =
-    I18N_NOOP("Profiling Data reader for Boson");
+static KLocalizedString description =
+    ki18n("Profiling Data reader for Boson");
 
 static const char *version = BOSON_VERSION_STRING;
-
-static KCmdLineOptions options[] =
-{
-    { "+[FILE]", I18N_NOOP("Profiling file to open."), 0},
-    { 0, 0, 0 }
-};
 
 int main(int argc, char **argv)
 {
  KAboutData about("boprofiling",
-		I18N_NOOP("Boson Profiling Reader"),
+		QByteArray(),
+		ki18n("Boson Profiling Reader"),
 		version,
 		description,
 		KAboutData::License_GPL,
-		"(C) 2002 The Boson team",
-		0,
+		ki18n("(C) 2002 The Boson team"),
+		KLocalizedString(),
 		"http://boson.eu.org");
- about.addAuthor( "Andreas Beckermann", I18N_NOOP("Coding & Current Maintainer"), "b_mann@gmx.de" );
+ about.addAuthor( ki18n("Andreas Beckermann"), ki18n("Coding & Current Maintainer"), "b_mann@gmx.de" );
+
+ KCmdLineOptions options;
+ options.add("+[FILE]", ki18n("Profiling file to open."));
 
  Q3CString argv0(argv[0]);
  KCmdLineArgs::init(argc, argv, &about);
@@ -77,10 +74,8 @@ int main(int argc, char **argv)
 	}
  }
 
- BoDebugDCOPIface* iface = new BoDebugDCOPIface();
  args->clear();
  int r = app.exec();
- delete iface;
  return r;
 }
 

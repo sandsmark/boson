@@ -68,7 +68,7 @@
 #include <kaction.h>
 #include <kmenu.h>
 #include <kstandarddirs.h>
-#include <kdialogbase.h>
+#include <KDialog>
 #include <kcolordialog.h>
 #include <kmessagebox.h>
 
@@ -96,45 +96,10 @@
 #define BORENDER_DEFAULT_LIGHT_ENABLED true
 #define BORENDER_DEFAULT_MATERIALS_ENABLED true
 
-static const char *description =
-    I18N_NOOP("Rendering tester for Boson");
+static KLocalizedString description =
+    ki18n("Rendering tester for Boson");
 
 static const char *version = BOSON_VERSION_STRING;
-
-static KCmdLineOptions options[] =
-{
-    { "m", 0, 0 },
-    { "maximized", I18N_NOOP("Show maximized"), 0 },
-    { "s", 0, 0 },
-    { "species <identifier>", I18N_NOOP("Species Theme identifier"), 0 },
-    { "u", 0, 0 },
-    { "unit <unit>", I18N_NOOP("Unit"), 0 },
-    { "i", 0, 0 },
-    { "unit-id <typeid>", I18N_NOOP("Unit Type ID"), 0 },
-    { "o", 0, 0 },
-    { "object <file>", I18N_NOOP("Object"), 0 },
-    { "cx", 0, 0 },
-    { "camera-x <number>", I18N_NOOP("X-Position of the camera"), 0 },
-    { "cy", 0, 0 },
-    { "camera-y <number>", I18N_NOOP("Y-Position of the camera"), 0 },
-    { "cz", 0, 0 },
-    { "camera-z <number>", I18N_NOOP("Z-Position of the camera"), 0 },
-    { "rx", 0, 0 },
-    { "rotate-x <number>", I18N_NOOP("Rotation around the X-axis"), 0 },
-    { "ry", 0, 0 },
-    { "rotate-y <number>", I18N_NOOP("Rotation around the Y-axis"), 0 },
-    { "rz", 0, 0 },
-    { "rotate-z <number>", I18N_NOOP("Rotation around the Z-axis"), 0 },
-    { "lookAtCenter", I18N_NOOP("Rotate the camera so, that it looks at the center, i.e. (0,0,0)"), 0 },
-    { "fovy <number>", I18N_NOOP("Field of view (zooming)"), "60.0" },
-    { "f", 0, 0 },
-    { "frame <number>", I18N_NOOP("Initially displayed frame"), 0 },
-    { "l", 0, 0 },
-    { "lod <number>", I18N_NOOP("Initially displayed LOD"), 0 },
-    { "indirect", I18N_NOOP("Use Indirect rendering (sloooow!!). debugging only."), 0 },
-    { "pixmap <filename>", I18N_NOOP("Render to pixmap."), "" },
-    { 0, 0, 0 }
-};
 
 void postBosonConfigInit();
 
@@ -162,7 +127,7 @@ public:
 };
 
 BoRenderGLWidget::BoRenderGLWidget(QWidget* parent, bool direct)
-	: BosonUfoGLWidget(parent, "borenderglwidget", direct)
+	: BosonUfoGLWidget(parent, direct)
 {
  d = new BoRenderGLWidgetPrivate();
 }
@@ -172,7 +137,7 @@ void BoRenderGLWidget::initWidget()
  d->mMaterialWidget = 0;
  d->mSpecies.setAutoDelete(true);
  QStringList list = SpeciesTheme::availableSpecies();
- for (unsigned int i = 0; i < list.count(); i++) {
+ for (int i = 0; i < list.count(); i++) {
 	QString dir = list[i];
 	dir = dir.left(dir.length() - QString("index.species").length());
 	SpeciesTheme* s = new SpeciesTheme();
@@ -182,7 +147,7 @@ void BoRenderGLWidget::initWidget()
 	s->readUnitConfigs();
  }
 
- initGL();
+ glInit();
 }
 
 BoRenderGLWidget::~BoRenderGLWidget()
@@ -536,7 +501,7 @@ void BoRenderGLWidget::initUfoAction()
 
 	Q3ValueList<const UnitProperties*> units = s->allUnits();
 	QStringList list;
-	for (unsigned int j = 0; j < units.count(); j++) {
+	for (int j = 0; j < units.count(); j++) {
 		list.append(units[j]->name());
 	}
 	selectUnit->setItems(list);
@@ -555,35 +520,35 @@ void BoRenderGLWidget::initUfoAction()
  (void)new BoUfoAction(i18n("Quit"), KShortcut(),
 		kapp, SLOT(closeAllWindows()),
 		actionCollection, "file_quit");
- (void)new BoUfoAction(i18n("Vertex point size..."), 0,
+ (void)new BoUfoAction(i18n("Vertex point size..."), KShortcut(),
 		this, SLOT(slotChangeVertexPointSize()),
 		actionCollection, "options_vertex_point_size");
- (void)new BoUfoAction(i18n("Grid unit size..."), 0,
+ (void)new BoUfoAction(i18n("Grid unit size..."), KShortcut(),
 		this, SLOT(slotChangeGridUnitSize()),
 		actionCollection, "options_grid_unit_size");
- (void)new BoUfoAction(i18n("Background color..."), 0,
+ (void)new BoUfoAction(i18n("Background color..."), KShortcut(),
 		this, SLOT(slotChangeBackgroundColor()),
 		actionCollection, "options_background_color");
- (void)new BoUfoAction(i18n("Light..."), 0,
+ (void)new BoUfoAction(i18n("Light..."), KShortcut(),
 		this, SLOT(slotShowLightWidget()),
 		actionCollection, "options_light"); // AB: actually thisis NOT a setting
- (void)new BoUfoAction(i18n("Materials..."), 0,
+ (void)new BoUfoAction(i18n("Materials..."), KShortcut(),
 		this, SLOT(slotShowMaterialsWidget()),
 		actionCollection, "options_materials"); // AB: actually this is NOT a setting
- (void)new BoUfoAction(i18n("Font..."), 0,
+ (void)new BoUfoAction(i18n("Font..."), KShortcut(),
 		this, SLOT(slotShowChangeFont()),
 		actionCollection, "options_font"); // AB: actually this is NOT a setting
 
 
- (void)new BoUfoAction(i18n("Debug &Models"), 0,
+ (void)new BoUfoAction(i18n("Debug &Models"), KShortcut(),
 		this, SLOT(slotDebugModels()),
 		actionCollection, "debug_models");
 #ifdef BOSON_USE_BOMEMORY
- (void)new BoUfoAction(i18n("Debug M&emory"), 0,
+ (void)new BoUfoAction(i18n("Debug M&emory"), KShortcut(),
 		this, SLOT(slotDebugMemory()),
 		actionCollection, "debug_memory");
 #endif
- (void)new BoUfoAction(i18n("Debug &Species"), 0,
+ (void)new BoUfoAction(i18n("Debug &Species"), KShortcut(),
 		this, SLOT(slotDebugSpecies()),
 		actionCollection, "debug_species");
  (void)new BoUfoAction(i18n("Show OpenGL states"), KShortcut(),
@@ -597,7 +562,7 @@ void BoRenderGLWidget::initUfoAction()
 		actionCollection, "debug_lazy_reload_meshrenderer");
 
 
- if (!actionCollection->createGUI(locate("data", "boson/borenderui.rc"))) {
+ if (!actionCollection->createGUI(KStandardDirs::locate("data", "boson/borenderui.rc"))) {
 	boError() << k_funcinfo << "createGUI() failed" << endl;
  }
 }
@@ -681,7 +646,7 @@ void BoRenderGLWidget::slotEditTurretProperties()
 	KMessageBox::information(this, i18n("You need to load a model first"));
 	return;
  }
- BoEditTurretPropertiesDialog* dialog = new BoEditTurretPropertiesDialog(this, false);
+ BoEditTurretPropertiesDialog* dialog = new BoEditTurretPropertiesDialog(this);
  connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
  dialog->setModelFile(d->mModelDisplay->model()->file());
  dialog->setTurretMeshes(d->mModelDisplay->turretMeshes());
@@ -735,11 +700,11 @@ void BoRenderGLWidget::slotChangeBackgroundColor()
 
 void BoRenderGLWidget::slotDebugModels()
 {
- KDialogBase* dialog = new KDialogBase(KDialogBase::Plain, i18n("Debug Models"),
-		KDialogBase::Cancel, KDialogBase::Cancel, 0,
-		"debugmodelsdialog", false, true);
+ KDialog* dialog = new KDialog(0);
+ dialog->setWindowTitle(KDialog::makeStandardCaption(i18n("Debug Models")));
+ dialog->setButtons(KDialog::Cancel);
  connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
- QWidget* w = dialog->plainPage();
+ QWidget* w = dialog->mainWidget();
  Q3VBoxLayout* l = new Q3VBoxLayout(w);
  KGame3DSModelDebug* models = new KGame3DSModelDebug(w);
  l->addWidget(models);
@@ -773,7 +738,7 @@ void BoRenderGLWidget::slotDebugModels()
 	// objects
 	QStringList objectFiles;
 	QStringList objects = theme->allObjects(&objectFiles);
-	for (unsigned int i = 0; i < objects.count(); i++) {
+	for (int i = 0; i < objects.count(); i++) {
 		QString file = theme->themePath() + QString::fromLatin1("objects/") + objectFiles[i];
 		models->addFile(file, objects[i]);
 	}
@@ -788,11 +753,11 @@ void BoRenderGLWidget::slotDebugModels()
 
 void BoRenderGLWidget::slotDebugSpecies()
 {
- KDialogBase* dialog = new KDialogBase(KDialogBase::Plain, i18n("Debug Species"),
-		KDialogBase::Cancel, KDialogBase::Cancel, 0,
-		"debugspeciesdialog", false, true);
+ KDialog* dialog = new KDialog(0);
+ dialog->setWindowTitle(KDialog::makeStandardCaption(i18n("Debug Species")));
+ dialog->setButtons(KDialog::Cancel);
  connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
- QWidget* w = dialog->plainPage();
+ QWidget* w = dialog->mainWidget();
  Q3VBoxLayout* l = new Q3VBoxLayout(w);
  KGameSpeciesDebug* species = new KGameSpeciesDebug(w);
  l->addWidget(species);
@@ -821,7 +786,7 @@ void BoRenderGLWidget::slotShowLightWidget()
 {
  if (!d->mLightWidget) {
 	d->mLightWidget = new BoLightCameraWidget1(0, true);
-	d->mLightWidget->setLight(d->mModelDisplay->light(), context());
+	d->mLightWidget->setLight(d->mModelDisplay->light(), const_cast<QGLContext*>(context()));
  }
  d->mLightWidget->show();
 }
@@ -852,7 +817,8 @@ void BoRenderGLWidget::slotReloadModelTextures()
 void BoRenderGLWidget::slotShowGLStates()
 {
  boDebug() << k_funcinfo << endl;
- BoGLStateWidget* w = new BoGLStateWidget(0, 0, WDestructiveClose);
+ BoGLStateWidget* w = new BoGLStateWidget(0);
+ w->setAttribute(Qt::WA_DeleteOnClose);
  w->show();
 }
 
@@ -1560,7 +1526,7 @@ void ModelDisplay::slotWheelEvent(QWheelEvent* e)
  }
  e->accept();
  float delta = e->delta() / 120;
- if (e->orientation() == Horizontal) {
+ if (e->orientation() == Qt::Horizontal) {
  } else {
  }
  BoVector3Float lookAt = camera()->lookAt();
@@ -1660,7 +1626,6 @@ RenderMain::RenderMain() : KMainWindow()
  mGLWidget->setFocusPolicy(Qt::StrongFocus);
 
  setCentralWidget(w);
- mIface = new BoDebugDCOPIface();
 
  mUpdateTimer = new QTimer(this);
  connect(mUpdateTimer, SIGNAL(timeout()), mGLWidget, SLOT(slotUpdateGL()));
@@ -1671,7 +1636,6 @@ RenderMain::~RenderMain()
 {
  boConfig->save(false);
  delete mUpdateTimer;
- delete mIface;
 }
 
 bool RenderMain::parseCmdLineArgs(KCmdLineArgs* args)
@@ -1709,14 +1673,47 @@ bool RenderMain::parseCmdLineArgs(KCmdLineArgs* args)
 int main(int argc, char **argv)
 {
  KAboutData about("borender",
-		I18N_NOOP("Boson Rendering tester"),
+		QByteArray(),
+		ki18n("Boson Rendering tester"),
 		version,
 		description,
 		KAboutData::License_GPL,
-		"(C) 2002-2005 The Boson team",
-		0,
+		ki18n("(C) 2002-2005 The Boson team"),
+		KLocalizedString(),
 		"http://boson.eu.org");
- about.addAuthor( "Andreas Beckermann", I18N_NOOP("Coding & Current Maintainer"), "b_mann@gmx.de" );
+ about.addAuthor( ki18n("Andreas Beckermann"), ki18n("Coding & Current Maintainer"), "b_mann@gmx.de" );
+
+ KCmdLineOptions options;
+ options.add("m");
+ options.add("maximized", ki18n("Show maximized"));
+ options.add("s");
+ options.add("species <identifier>", ki18n("Species Theme identifier"));
+ options.add("u");
+ options.add("unit <unit>", ki18n("Unit"));
+ options.add("i");
+ options.add("unit-id <typeid>", ki18n("Unit Type ID"));
+ options.add("o");
+ options.add("object <file>", ki18n("Object"));
+ options.add("cx");
+ options.add("camera-x <number>", ki18n("X-Position of the camera"));
+ options.add("cy");
+ options.add("camera-y <number>", ki18n("Y-Position of the camera"));
+ options.add("cz");
+ options.add("camera-z <number>", ki18n("Z-Position of the camera"));
+ options.add("rx");
+ options.add("rotate-x <number>", ki18n("Rotation around the X-axis"));
+ options.add("ry");
+ options.add("rotate-y <number>", ki18n("Rotation around the Y-axis"));
+ options.add("rz");
+ options.add("rotate-z <number>", ki18n("Rotation around the Z-axis"));
+ options.add("lookAtCenter", ki18n("Rotate the camera so, that it looks at the center, i.e. (0,0,0)"));
+ options.add("fovy <number>", ki18n("Field of view (zooming)"), "60.0");
+ options.add("f");
+ options.add("frame <number>", ki18n("Initially displayed frame"));
+ options.add("l");
+ options.add("lod <number>", ki18n("Initially displayed LOD"));
+ options.add("indirect", ki18n("Use Indirect rendering (sloooow!!). debugging only."));
+ options.add("pixmap <filename>", ki18n("Render to pixmap."));
 
  // we need to do extra stuff after BosonConfig's initialization
  BosonConfig::setPostInitFunction(&postBosonConfigInit);

@@ -37,7 +37,6 @@
 #include "../bosonviewdata.h"
 #include "../bomaterial.h"
 #include "../bolight.h"
-#include "bomodelpixmapsgui.h"
 #ifdef BOSON_USE_BOMEMORY
 #include "../../bomemory/bomemorydialog.h"
 #endif
@@ -78,20 +77,10 @@
 #define NEAR 0.125
 #define FAR 64.0
 
-static const char *description =
-    I18N_NOOP("Model Pixmaps for Boson");
+static KLocalizedString description =
+    ki18n("Model Pixmaps for Boson");
 
 static const char *version = BOSON_VERSION_STRING;
-
-static KCmdLineOptions options[] =
-{
-    { "package", I18N_NOOP("Automatically package all files loaded from cmd line"), 0 },
-    { "+[files]", I18N_NOOP("Files for --package"), 0 },
-    { "xrotation <rotation>", I18N_NOOP("Initial X rotation"), 0 },
-    { "yrotation <rotation>", I18N_NOOP("Initial Y rotation"), 0 },
-    { "zrotation <rotation>", I18N_NOOP("Initial Z rotation"), 0 },
-    { 0, 0, 0 }
-};
 
 void postBosonConfigInit();
 
@@ -181,7 +170,7 @@ public:
 };
 
 BoModelPixmapsGLWidget::BoModelPixmapsGLWidget(QWidget* parent)
-	: BosonGLWidget(parent, "bomodelpixmapsglwidget", false)
+	: QGLWidget(QGLFormat(QGL::IndirectRendering), parent)
 {
  d = new BoModelPixmapsGLWidgetPrivate();
 
@@ -196,7 +185,7 @@ BoModelPixmapsGLWidget::BoModelPixmapsGLWidget(QWidget* parent)
 
 void BoModelPixmapsGLWidget::initWidget()
 {
- initGL();
+ glInit();
 }
 
 BoModelPixmapsGLWidget::~BoModelPixmapsGLWidget()
@@ -369,7 +358,7 @@ const BoMatrix& BoModelPixmapsGLWidget::baseProjectionMatrix() const
 
 void BoModelPixmapsGLWidget::resizeGL(int width, int height)
 {
- BosonGLWidget::resizeGL(width, height);
+ QGLWidget::resizeGL(width, height);
  updateBaseProjectionMatrix();
 }
 
@@ -469,8 +458,6 @@ BoModelPixmaps::BoModelPixmaps()
  mGLWidget->initWidget();
  mGLWidget->hide();
 
- mIface = new BoDebugDCOPIface();
-
  boConfig->addDynamicEntry(new BoConfigStringEntry(boConfig, "TexturePath", ""));
 
  d->mGUI = new BoModelPixmapsGUI(this);
@@ -511,7 +498,6 @@ BoModelPixmaps::~BoModelPixmaps()
  mTextureCopyright.clear();
  delete mPixmapRenderer;
  delete mGLWidget;
- delete mIface;
  delete d;
 }
 
@@ -574,13 +560,13 @@ void BoModelPixmaps::selectModelFile(const QString& file)
  QFileInfo fileInfo(mModelFileName);
  QString copyrightFile = fileInfo.dirPath(true) + "/" + fileInfo.baseName() + ".copyright";
  if (QFile::exists(copyrightFile)) {
-	KSimpleConfig conf(copyrightFile);
+	KConfig conf(copyrightFile, KConfig::SimpleConfig);
 	if (!conf.hasGroup("Copyright")) {
 		boWarning() << k_funcinfo << "no Copyright group found in file " << copyrightFile << endl;
 	} else {
-		conf.setGroup("Copyright");
-		d->mGUI->mModelAuthor->setText(conf.readEntry("Author"));
-		d->mGUI->mModelLicense->setText(conf.readEntry("License"));
+		KConfigGroup group = conf.group("Copyright");
+		d->mGUI->mModelAuthor->setText(group.readEntry("Author", QString()));
+		d->mGUI->mModelLicense->setText(group.readEntry("License", QString()));
 	}
  } else {
 	boDebug() << k_funcinfo << "no .copyright file for model " << mModelFileName << endl;
@@ -669,7 +655,7 @@ void BoModelPixmaps::reset()
  mGLWidget->resetModel();
  d->mGUI->mTexturesFoundList->clear();
  d->mGUI->mTexturesNotFoundList->clear();
- for (unsigned int i = 0; i < mModelPixmapLabels.count(); i++) {
+ for (int i = 0; i < mModelPixmapLabels.count(); i++) {
 	mModelPixmapLabels[i]->setPixmap(QPixmap());
  }
  mTextureCopyright.setAutoDelete(true);
@@ -742,7 +728,7 @@ void BoModelPixmaps::retrievePixmaps()
  upList.append(BoVector3Float(0.0f, 0.0f, 50.0f));
  namesList.append("left");
 
- for (unsigned int i = 0; i < namesList.count(); i++) {
+ for (int i = 0; i < namesList.count(); i++) {
 	if (namesList.contains(namesList[i]) > 1) {
 		boError() << k_funcinfo << "name " << namesList[i] << " used more than once" << endl;
 		return;
@@ -782,7 +768,7 @@ void BoModelPixmaps::retrievePixmaps()
  unifyModelMatrix.rotate(rotY, 0.0f, 1.0f, 0.0f);
  unifyModelMatrix.rotate(rotZ, 0.0f, 0.0f, 1.0f);
 
- for (unsigned int i = 0; i < cameraPosList.count(); i++) {
+ for (int i = 0; i < cameraPosList.count(); i++) {
 	BoVector3Float cameraPos_ = center + cameraPosList[i] * size;
 	BoVector3Float lookAt_ = center + lookAtList[i];
 	BoVector3Float up_ = upList[i];
@@ -909,13 +895,13 @@ void BoModelPixmaps::addTextureCopyright(const QString& file)
  QFileInfo copyrightFileInfo(copyrightFile);
  if (copyrightFileInfo.exists()) {
 	boDebug() << k_funcinfo << "found .copyright file for texture " << textureFileInfo.fileName() << endl;
-	KSimpleConfig conf(copyrightFile);
+	KConfig conf(copyrightFile, KConfig::SimpleConfig);
 	if (!conf.hasGroup("Copyright")) {
 		boWarning() << k_funcinfo << "no Copyright group found in file " << copyrightFile << endl;
 	} else {
-		conf.setGroup("Copyright");
-		copyrightWidget->setAuthor(conf.readEntry("Author"));
-		copyrightWidget->setLicense(conf.readEntry("License"));
+		KConfigGroup group = conf.group("Copyright");
+		copyrightWidget->setAuthor(group.readEntry("Author", QString()));
+		copyrightWidget->setLicense(group.readEntry("License", QString()));
 	}
  } else {
 	boDebug() << k_funcinfo << "no .copyright file for texture " << textureFileInfo.fileName() << endl;
@@ -993,7 +979,8 @@ void BoModelPixmaps::packageIt(const QString& fileName)
 	KMessageBox::sorry(this, i18n("Could not open %1 for reading").arg(file.name()));
 	return;
  }
- tar.writeFile(mainDir + QFileInfo(file).fileName(), user, group, file.size(), file.readAll());
+ QByteArray fileData = file.readAll();
+ tar.writeFile(mainDir + QFileInfo(file).fileName(), user, group, fileData.data(), fileData.size());
  file.close();
 
  QByteArray modelCopyrightData;
@@ -1014,7 +1001,7 @@ void BoModelPixmaps::packageIt(const QString& fileName)
  }
  modelCopyrightStream << "\n";
  modelCopyrightStream << "\n";
- tar.writeFile(mainDir + QFileInfo(file).baseName() + ".copyright", user, group, modelCopyrightData.size(), modelCopyrightData);
+ tar.writeFile(mainDir + QFileInfo(file).baseName() + ".copyright", user, group, modelCopyrightData.data(), modelCopyrightData.size());
 
  QStringList textureLicenses;
  for (Q3PtrListIterator<BoTextureCopyright> it(mTextureCopyright); it.current(); ++it) {
@@ -1024,7 +1011,8 @@ void BoModelPixmaps::packageIt(const QString& fileName)
 		KMessageBox::sorry(this, i18n("Could not open %1 for reading").arg(file.name()));
 		return;
 	}
-	tar.writeFile(mainDir + "textures/" + QFileInfo(file).fileName(), user, group, file.size(), file.readAll());
+	QByteArray fileData = file.readAll();
+	tar.writeFile(mainDir + "textures/" + QFileInfo(file).fileName(), user, group, fileData.data(), fileData.size());
 	file.close();
 
 	QByteArray copyright;
@@ -1052,7 +1040,7 @@ void BoModelPixmaps::packageIt(const QString& fileName)
 	}
 	s << "\n";
 	s << "\n";
-	tar.writeFile(mainDir + "textures/" + QFileInfo(file).baseName() + ".copyright", user, group, copyright.size(), copyright);
+	tar.writeFile(mainDir + "textures/" + QFileInfo(file).baseName() + ".copyright", user, group, copyright.data(), copyright.size());
  }
 
  for (Q3PtrListIterator<BoModelPixmapCollection> it(mModelPixmaps); it.current(); ++it) {
@@ -1061,7 +1049,7 @@ void BoModelPixmaps::packageIt(const QString& fileName)
 	QPixmap thumb = it.current()->thumbnail();
 
 	QByteArray pixmapData;
-	QBuffer pixmapBuffer(pixmapData);
+	QBuffer pixmapBuffer(&pixmapData);
 	pixmapBuffer.open(QIODevice::WriteOnly);
 	if (!p.save(&pixmapBuffer, "JPEG", 75)) {
 		KMessageBox::sorry(this, i18n("An image could not be saved"));
@@ -1070,7 +1058,7 @@ void BoModelPixmaps::packageIt(const QString& fileName)
 	pixmapBuffer.close();
 
 	QByteArray thumbnailData;
-	QBuffer thumbnailBuffer(thumbnailData);
+	QBuffer thumbnailBuffer(&thumbnailData);
 	thumbnailBuffer.open(QIODevice::WriteOnly);
 	if (!thumb.save(&thumbnailBuffer, "JPEG", 75)) {
 		KMessageBox::sorry(this, i18n("A thumbnail could not be saved"));
@@ -1078,8 +1066,8 @@ void BoModelPixmaps::packageIt(const QString& fileName)
 	}
 	thumbnailBuffer.close();
 
-	tar.writeFile(mainDir + "images/" + name + ".jpg", user, group, pixmapData.size(), pixmapData);
-	tar.writeFile(mainDir + "thumbnails/" + name + ".jpg", user, group, thumbnailData.size(), thumbnailData);
+	tar.writeFile(mainDir + "images/" + name + ".jpg", user, group, pixmapData.data(), pixmapData.size());
+	tar.writeFile(mainDir + "thumbnails/" + name + ".jpg", user, group, thumbnailData.data(), thumbnailData.size());
  }
 
  QByteArray summaryData;
@@ -1095,7 +1083,7 @@ void BoModelPixmaps::packageIt(const QString& fileName)
  summary << "Texture licenses: " << textureLicenses.join(",") << "\n";
  summary << "\n";
 
- tar.writeFile(mainDir + "summary.txt", user, group, summaryData.size(), summaryData);
+ tar.writeFile(mainDir + "summary.txt", user, group, summaryData.data(), summaryData.size());
 
  tar.close();
 }
@@ -1123,14 +1111,22 @@ void BoModelPixmaps::displayLabels(int count)
 int main(int argc, char **argv)
 {
  KAboutData about("bomodelpixmaps",
-		I18N_NOOP("Boson Model Pixmaps"),
+		QByteArray(),
+		ki18n("Boson Model Pixmaps"),
 		version,
 		description,
 		KAboutData::License_GPL,
-		"(C) 2005 Andreas Beckermann",
-		0,
+		ki18n("(C) 2005 Andreas Beckermann"),
+		KLocalizedString(),
 		"http://boson.eu.org");
- about.addAuthor( "Andreas Beckermann", I18N_NOOP("Coding & Current Maintainer"), "b_mann@gmx.de" );
+ about.addAuthor( ki18n("Andreas Beckermann"), ki18n("Coding & Current Maintainer"), "b_mann@gmx.de" );
+
+ KCmdLineOptions options;
+ options.add("package", ki18n("Automatically package all files loaded from cmd line"));
+ options.add("+[files]", ki18n("Files for --package"));
+ options.add("xrotation <rotation>", ki18n("Initial X rotation"));
+ options.add("yrotation <rotation>", ki18n("Initial Y rotation"));
+ options.add("zrotation <rotation>", ki18n("Initial Z rotation"));
 
  // we need to do extra stuff after BosonConfig's initialization
  BosonConfig::setPostInitFunction(&postBosonConfigInit);
@@ -1153,7 +1149,7 @@ int main(int argc, char **argv)
 
  if (args->isSet("package")) {
 	for (int i = 0; i < args->count(); i++) {
-		main->selectModelFile(QFile::decodeName(args->arg(i)));
+		main->selectModelFile(QFile::decodeName(args->arg(i).toLatin1()));
 		QString file = QFileInfo(args->arg(i)).baseName() + ".tar.gz";
 		main->packageIt(file);
 	}

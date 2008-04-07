@@ -7,7 +7,6 @@ include_directories(
 
 set(bodebug_sources
 	bodebug.cpp
-	bodebuglog.cpp
 )
 
 boson_add_library(bodebug STATIC ${bodebug_sources})

@@ -21,14 +21,13 @@
 #include "info/boinfodialog.h"
 
 #include "../bomemory/bodummymemory.h"
-#include "bodebugdcopiface.h"
 #include "bodebug.h"
 #include "boversion.h"
 #include "boapplication.h"
 #include "bogl.h"
 
 // we need this to initialize the GLX context.
-#include "bosonglwidget.h"
+#include <QGLWidget>
 
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
@@ -36,28 +35,26 @@
 //Added by qt3to4:
 #include <Q3CString>
 
-static const char *description =
-    I18N_NOOP("BoInfo reader for Boson");
+static KLocalizedString description =
+    ki18n("BoInfo reader for Boson");
 
 static const char *version = BOSON_VERSION_STRING;
-
-static KCmdLineOptions options[] =
-{
-    { "+[FILE]", I18N_NOOP("BoInfo file to open."), 0},
-    { 0, 0, 0 }
-};
 
 int main(int argc, char **argv)
 {
  KAboutData about("boinfo",
-		I18N_NOOP("Boson Info file Reader"),
+		QByteArray(),
+		ki18n("Boson Info file Reader"),
 		version,
 		description,
 		KAboutData::License_GPL,
-		"(C) 2003-2005 The Boson team",
-		0,
+		ki18n("(C) 2003-2005 The Boson team"),
+		KLocalizedString(),
 		"http://boson.eu.org");
- about.addAuthor( "Andreas Beckermann", I18N_NOOP("Coding & Current Maintainer"), "b_mann@gmx.de" );
+ about.addAuthor( ki18n("Andreas Beckermann"), ki18n("Coding & Current Maintainer"), "b_mann@gmx.de" );
+
+ KCmdLineOptions options;
+ options.add("+[FILE]", ki18n("BoInfo file to open."));
 
  Q3CString argv0(argv[0]);
  KCmdLineArgs::init(argc, argv, &about);
@@ -70,7 +67,7 @@ int main(int argc, char **argv)
  KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
  QObject::connect(kapp, SIGNAL(lastWindowClosed()), kapp, SLOT(quit()));
 
- BosonGLWidget* glWidget = new BosonGLWidget(0);
+ QGLWidget* glWidget = new QGLWidget();
  glWidget->hide();
  glWidget->makeCurrent();
  BoGL::bogl()->initialize();
@@ -93,10 +90,8 @@ int main(int argc, char **argv)
  }
  */
 
- BoDebugDCOPIface* iface = new BoDebugDCOPIface();
  args->clear();
  int r = app.exec();
- delete iface;
  delete glWidget;
  return r;
 }

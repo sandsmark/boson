@@ -23,7 +23,7 @@
 #include "../bomemory/bodummymemory.h"
 #include "boufo/boufoaction.h"
 #include "bodebug.h"
-#include "bodebuglogdialog.h"
+//#include "bodebuglogdialog.h"
 #include "bosonprofiling.h"
 #include "bosonprofilingdialog.h"
 #include "bosonconfig.h"
@@ -332,6 +332,7 @@ void BosonMainWidgetMenuInput::slotDebugRequestIdName(int msgid, bool , QString&
 
 void BosonMainWidgetMenuInput::slotBoDebugLogDialog()
 {
+#if 0
  BoDebugLogDialog* dialog = new BoDebugLogDialog(0);
  connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
  dialog->slotUpdate();
@@ -340,6 +341,10 @@ void BosonMainWidgetMenuInput::slotBoDebugLogDialog()
  BoUfoDebugLogDialog* dialog = new BoUfoDebugLogDialog(ufoManager());
  dialog->slotUpdate();
  dialog->show();
+#endif
+#else
+#warning FIXME: BoDebugLog is disabled
+ boWarning() << k_funcinfo << "FIXME: BoDebugLog is disabled";
 #endif
 }
 

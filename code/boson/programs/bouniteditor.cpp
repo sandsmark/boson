@@ -69,7 +69,7 @@ void EditorUnitProperties::setName(const QString& n)
  d->mName = n;
 }
 
-void EditorUnitProperties::setRequirements(Q3ValueList<unsigned long int> requirements)
+void EditorUnitProperties::setRequirements(Q3ValueList<quint32> requirements)
 {
  d->mRequirements = requirements;
 }
@@ -165,12 +165,12 @@ void EditorUnitProperties::addSound(int event, QString filename)
  d->mSounds.insert(event, filename);
 }
 
-void EditorUnitProperties::setDestroyedEffectIds(Q3ValueList<unsigned long int> ids)
+void EditorUnitProperties::setDestroyedEffectIds(Q3ValueList<quint32> ids)
 {
  d->mDestroyedEffectIds = ids;
 }
 
-void EditorUnitProperties::setConstructedEffectIds(Q3ValueList<unsigned long int> ids)
+void EditorUnitProperties::setConstructedEffectIds(Q3ValueList<quint32> ids)
 {
  d->mConstructedEffectIds = ids;
 }
@@ -235,36 +235,36 @@ void EditorUnitProperties::setHitPoint(const BoVector3Fixed& hitpoint)
 bool EditorUnitProperties::saveUnitType(const QString& fileName)
 {
  d->mUnitPath = fileName.left(fileName.length() - QString("index.unit").length());
- KSimpleConfig conf(fileName);
- conf.setGroup(QString::fromLatin1("Boson Unit"));
+ KConfig conf(fileName, KConfig::SimpleConfig);
+ KConfigGroup group = conf.group(QString::fromLatin1("Boson Unit"));
 
- conf.writeEntry("Id", typeId());
- conf.writeEntry("TerrainType", (int)mTerrain);
- conf.writeEntry("UnitWidth", (double)mUnitWidth);
- conf.writeEntry("UnitHeight", (double)mUnitHeight);
- conf.writeEntry("UnitDepth", (double)mUnitDepth);
- conf.writeEntry("Name", d->mName);
- conf.writeEntry("Health", ulongBaseValue("Health", "MaxValue", 100));
- conf.writeEntry("MineralCost", ulongBaseValue("MineralCost"));
- conf.writeEntry("OilCost", ulongBaseValue("OilCost"));
- conf.writeEntry("SightRange", ulongBaseValue("SightRange"));
+ group.writeEntry("Id", typeId());
+ group.writeEntry("TerrainType", (int)mTerrain);
+ group.writeEntry("UnitWidth", (double)mUnitWidth);
+ group.writeEntry("UnitHeight", (double)mUnitHeight);
+ group.writeEntry("UnitDepth", (double)mUnitDepth);
+ group.writeEntry("Name", d->mName);
+ group.writeEntry("Health", ulongBaseValue("Health", "MaxValue", 100));
+ group.writeEntry("MineralCost", ulongBaseValue("MineralCost"));
+ group.writeEntry("OilCost", ulongBaseValue("OilCost"));
+ group.writeEntry("SightRange", ulongBaseValue("SightRange"));
  // This is converted from advance calls to seconds
- conf.writeEntry("ProductionTime", ulongBaseValue("ProductionTime") / 20.0f);
- conf.writeEntry("Shields", ulongBaseValue("Shields"));
- conf.writeEntry("Armor", ulongBaseValue("Armor"));
- conf.writeEntry("SupportMiniMap", mSupportMiniMap);
- conf.writeEntry("IsFacility", isFacility());
- BosonConfig::writeUnsignedLongNumList(&conf, "Requirements", d->mRequirements);
- conf.writeEntry("ExplodingDamage", mExplodingDamage);
- conf.writeEntry("ExplodingDamageRange", (double)mExplodingDamageRange);
+ group.writeEntry("ProductionTime", ulongBaseValue("ProductionTime") / 20.0f);
+ group.writeEntry("Shields", ulongBaseValue("Shields"));
+ group.writeEntry("Armor", ulongBaseValue("Armor"));
+ group.writeEntry("SupportMiniMap", mSupportMiniMap);
+ group.writeEntry("IsFacility", isFacility());
+ BosonConfig::writeUnsignedLongNumList(&group, "Requirements", d->mRequirements);
+ group.writeEntry("ExplodingDamage", mExplodingDamage);
+ group.writeEntry("ExplodingDamageRange", (double)mExplodingDamageRange);
  BoVector3Fixed tmpHitPoint(d->mHitPoint);
- BosonConfig::writeEntry(&conf, "HitPoint", d->mHitPoint);
- conf.writeEntry("Producer", mProducer);
- conf.writeEntry("PowerGenerated", ulongBaseValue("PowerGenerated"));
- conf.writeEntry("PowerConsumed", ulongBaseValue("PowerConsumed"));
+ BosonConfig::writeEntry(&group, "HitPoint", d->mHitPoint);
+ group.writeEntry("Producer", mProducer);
+ group.writeEntry("PowerGenerated", ulongBaseValue("PowerGenerated"));
+ group.writeEntry("PowerConsumed", ulongBaseValue("PowerConsumed"));
 
- BosonConfig::writeUnsignedLongNumList(&conf, "DestroyedEffects", d->mDestroyedEffectIds);
- BosonConfig::writeUnsignedLongNumList(&conf, "ConstructedEffects", d->mConstructedEffectIds);
+ BosonConfig::writeUnsignedLongNumList(&group, "DestroyedEffects", d->mDestroyedEffectIds);
+ BosonConfig::writeUnsignedLongNumList(&group, "ConstructedEffects", d->mConstructedEffectIds);
 
  if (isFacility()) {
 	saveFacilityProperties(&conf);
@@ -279,28 +279,28 @@ bool EditorUnitProperties::saveUnitType(const QString& fileName)
  return true;
 }
 
-bool EditorUnitProperties::saveMobileProperties(KSimpleConfig* conf)
+bool EditorUnitProperties::saveMobileProperties(KConfig* conf)
 {
- conf->setGroup("Boson Mobile Unit");
+ KConfigGroup group = conf->group("Boson Mobile Unit");
  // We multiply speeds with 20 because speeds in config files are cells/second,
  //  but here we have cells/advance call
- conf->writeEntry("Speed", bofixedBaseValue("Speed") * 20.0f);
- conf->writeEntry("AccelerationSpeed", (double)bofixedBaseValue("AccelerationSpeed") * 20.0f * 20.0f);
- conf->writeEntry("DecelerationSpeed", (double)bofixedBaseValue("DecelerationSpeed") * 20.0f * 20.0f);
- conf->writeEntry("RotationSpeed", mRotationSpeed * 20.0f);
- conf->writeEntry("CanGoOnLand", mCanGoOnLand);
- conf->writeEntry("CanGoOnWater", mCanGoOnWater);
- conf->writeEntry("CrushDamage", (unsigned long int)mCrushDamage);
- conf->writeEntry("MaxSlope", (double)mMaxSlope);
- conf->writeEntry("WaterDepth", (double)mWaterDepth);
- conf->writeEntry("PreferredAltitude", (double)mPreferredAltitude);
+ group.writeEntry("Speed", (float)(bofixedBaseValue("Speed") * 20.0f));
+ group.writeEntry("AccelerationSpeed", (double)bofixedBaseValue("AccelerationSpeed") * 20.0f * 20.0f);
+ group.writeEntry("DecelerationSpeed", (double)bofixedBaseValue("DecelerationSpeed") * 20.0f * 20.0f);
+ group.writeEntry("RotationSpeed", (float)(mRotationSpeed * 20.0f));
+ group.writeEntry("CanGoOnLand", mCanGoOnLand);
+ group.writeEntry("CanGoOnWater", mCanGoOnWater);
+ group.writeEntry("CrushDamage", (quint32)mCrushDamage);
+ group.writeEntry("MaxSlope", (double)mMaxSlope);
+ group.writeEntry("WaterDepth", (double)mWaterDepth);
+ group.writeEntry("PreferredAltitude", (double)mPreferredAltitude);
  return true;
 }
 
-bool EditorUnitProperties::saveFacilityProperties(KSimpleConfig* conf)
+bool EditorUnitProperties::saveFacilityProperties(KConfig* conf)
 {
- conf->setGroup("Boson Facility");
- conf->writeEntry("ConstructionSteps", mConstructionFrames);
+ KConfigGroup group = conf->group("Boson Facility");
+ group.writeEntry("ConstructionSteps", mConstructionFrames);
  return true;
 }
 
@@ -323,36 +323,36 @@ bool EditorUnitProperties::saveAllPluginProperties(KConfig* conf)
 	}
 	++it;
  }
- conf->setGroup("Boson Unit");
- conf->writeEntry("Weapons", weaponcounter);
+ KConfigGroup group = conf->group("Boson Unit");
+ group.writeEntry("Weapons", weaponcounter);
  return true;
 }
 
-bool EditorUnitProperties::saveTextureNames(KSimpleConfig* conf)
+bool EditorUnitProperties::saveTextureNames(KConfig* conf)
 {
  if (d->mTextureNames.count() == 0) {
 	return true;
  }
- conf->setGroup("Textures");
+ KConfigGroup group = conf->group("Textures");
  QMap<QString, QString>::Iterator it;
  QStringList textures;
  for (it = d->mTextureNames.begin(); it != d->mTextureNames.end(); ++it) {
 	textures.append(it.key());
-	conf->writeEntry(it.key(), it.data());
+	group.writeEntry(it.key(), it.data());
  }
- conf->writeEntry("Textures", textures);
+ group.writeEntry("Textures", textures);
  return true;
 }
 
-bool EditorUnitProperties::saveSoundNames(KSimpleConfig* conf)
+bool EditorUnitProperties::saveSoundNames(KConfig* conf)
 {
- conf->setGroup("Sounds");
- conf->writeEntry("OrderMove", d->mSounds[SoundOrderMove]);
- conf->writeEntry("OrderAttack", d->mSounds[SoundOrderAttack]);
- conf->writeEntry("OrderSelect", d->mSounds[SoundOrderSelect]);
- conf->writeEntry("ReportProduced", d->mSounds[SoundReportProduced]);
- conf->writeEntry("ReportDestroyed", d->mSounds[SoundReportDestroyed]);
- conf->writeEntry("ReportUnderAttack", d->mSounds[SoundReportUnderAttack]);
+ KConfigGroup group = conf->group("Sounds");
+ group.writeEntry("OrderMove", d->mSounds[SoundOrderMove]);
+ group.writeEntry("OrderAttack", d->mSounds[SoundOrderAttack]);
+ group.writeEntry("OrderSelect", d->mSounds[SoundOrderSelect]);
+ group.writeEntry("ReportProduced", d->mSounds[SoundReportProduced]);
+ group.writeEntry("ReportDestroyed", d->mSounds[SoundReportDestroyed]);
+ group.writeEntry("ReportUnderAttack", d->mSounds[SoundReportUnderAttack]);
  return true;
 }
 
@@ -383,11 +383,11 @@ public:
 	{ mProperties->mAccelerationSpeed = speed; }
 	void setModelFileName(const QString& file)
 	{ mProperties->mModelFileName = file; }
-	void setShootEffectIds(const Q3ValueList<unsigned long int>& ids)
+	void setShootEffectIds(const Q3ValueList<quint32>& ids)
 	{ mProperties->mShootEffectIds = ids; }
-	void setFlyEffectIds(const Q3ValueList<unsigned long int>& ids)
+	void setFlyEffectIds(const Q3ValueList<quint32>& ids)
 	{ mProperties->mFlyEffectIds = ids; }
-	void setHitEffectIds(const Q3ValueList<unsigned long int>& ids)
+	void setHitEffectIds(const Q3ValueList<quint32>& ids)
 	{ mProperties->mHitEffectIds = ids; }
 	void setOffset(BoVector3Fixed o)
 	{ mProperties->mOffset = o; }
@@ -405,7 +405,7 @@ public:
 	void setStartAngle(bofixed a)
 	{ mProperties->mStartAngle = a; }
 
-	bool insertULongWeaponBaseValue(unsigned long int v, const QString& name, const QString& type = "MaxValue")
+	bool insertULongWeaponBaseValue(quint32 v, const QString& name, const QString& type = "MaxValue")
 	{
 		return mProperties->insertULongWeaponBaseValue(v, name, type);
 	}
@@ -441,7 +441,7 @@ public:
 		mProperties = p;
 	}
 
-	void setProducerList(const Q3ValueList<unsigned long int>& list)
+	void setProducerList(const Q3ValueList<quint32>& list)
 	{
 		mProperties->mProducerList = list;
 	}
@@ -508,10 +508,10 @@ private:
 
 
 
-static QString listToString(const Q3ValueList<unsigned long int>& list)
+static QString listToString(const Q3ValueList<quint32>& list)
 {
  QString str;
- Q3ValueList<unsigned long int>::const_iterator it;
+ Q3ValueList<quint32>::const_iterator it;
  for(it = list.begin(); it != list.end(); ++it) {
 	str = str + "," + QString::number(*it);
  }
@@ -521,9 +521,9 @@ static QString listToString(const Q3ValueList<unsigned long int>& list)
  return str;
 }
 
-static Q3ValueList<unsigned long int> stringToList(const QString& str)
+static Q3ValueList<quint32> stringToList(const QString& str)
 {
- Q3ValueList<unsigned long int> list;
+ Q3ValueList<quint32> list;
  QStringList strlist = QStringList::split(",", str);
  QStringList::iterator it;
  for(it = strlist.begin(); it != strlist.end(); ++it) {
@@ -534,7 +534,7 @@ static Q3ValueList<unsigned long int> stringToList(const QString& str)
 
 
 BoUnitEditor::BoUnitEditor(QWidget* parent)
-	: BoUnitEditorBase(parent)
+	: QWidget(parent)
 {
  init();
 }
@@ -542,9 +542,9 @@ BoUnitEditor::BoUnitEditor(QWidget* parent)
 BoUnitEditor::~BoUnitEditor()
 {
  // Save config
- KConfig* cfg = KGlobal::config();
- cfg->setGroup("Boson Unit Editor");
- cfg->writeEntry("SearchPaths", mSearchPaths->currentPaths());
+ KSharedPtr<KSharedConfig> config = KGlobal::config();
+ KConfigGroup group = config.data()->group("Boson Unit Editor");
+ group.writeEntry("SearchPaths", mSearchPaths->currentPaths());
 
  delete mSearchPaths;
 }
@@ -565,9 +565,9 @@ void BoUnitEditor::init()
  connect(mSearchPaths->mOkButton, SIGNAL(clicked()), this, SLOT(slotHideSearchPaths()));
  mSearchPaths->hide();
  // Load search paths
- KConfig* cfg = KGlobal::config();
- cfg->setGroup("Boson Unit Editor");
- QStringList paths = cfg->readListEntry("SearchPaths");
+ KSharedPtr<KSharedConfig> config = KGlobal::config();
+ KConfigGroup group = config.data()->group("Boson Unit Editor");
+ QStringList paths = group.readEntry("SearchPaths", QStringList());
  mSearchPaths->slotSetPaths(paths);
  // Load known units
  loadUnitsList();
@@ -785,10 +785,10 @@ void BoUnitEditor::loadUnitsList()
  }
 
  for (QStringList::Iterator it = units.begin(); it != units.end(); ++it) {
-	KSimpleConfig cfg(*it + "/index.unit");
-	cfg.setGroup("Boson Unit");
-	QString name = cfg.readEntry("Name", i18n("Unknown"));
-	int id = cfg.readLongNumEntry("Id", 0);
+	KConfig cfg(*it + "/index.unit", KConfig::SimpleConfig);
+	KConfigGroup group = cfg.group("Boson Unit");
+	QString name = group.readEntry("Name", i18n("Unknown"));
+	int id = group.readEntry("Id", (int)0);
 	mUsedIds.append(id);
 
 	mUnits.insert(pos, *it);

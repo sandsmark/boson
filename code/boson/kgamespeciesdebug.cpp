@@ -70,9 +70,9 @@ protected:
 		if (!mSpecies) {
 			return models;
 		}
-		Q3ValueList<unsigned long int> units = mSpecies->allFacilities();
+		Q3ValueList<quint32> units = mSpecies->allFacilities();
 		units += mSpecies->allMobiles();
-		Q3ValueList<unsigned long int>::Iterator it;
+		Q3ValueList<quint32>::Iterator it;
 		for (it = units.begin(); it != units.end(); ++it) {
 			if (boViewData->speciesData(mSpecies)->unitModel(*it)) {
 				models.append(boViewData->speciesData(mSpecies)->unitModel(*it));
@@ -375,15 +375,15 @@ void KGameSpeciesDebug::loadSpecies()
  for (it = species.begin(); it != species.end(); ++it) {
 	SpeciesTheme* s = new SpeciesTheme();
 	s->setThemePath((*it).left((*it).length() - QString::fromLatin1("index.desktop").length()));
-	s->setTeamColor(red); // dummy color
+	s->setTeamColor(Qt::red); // dummy color
 	boViewData->addSpeciesTheme(s);
 	SpeciesData* speciesData = boViewData->speciesData(s);
 	speciesData->loadObjects(s->teamColor());
 	speciesData->loadActions();
 	s->readUnitConfigs();
-	Q3ValueList<unsigned long int> units = s->allFacilities();
+	Q3ValueList<quint32> units = s->allFacilities();
 	units += s->allMobiles();
-	Q3ValueList<unsigned long int>::Iterator unitsIt;
+	Q3ValueList<quint32>::Iterator unitsIt;
 	for (unitsIt = units.begin(); unitsIt != units.end(); ++unitsIt) {
 		const UnitProperties* prop = s->unitProperties(*unitsIt);
 		speciesData->loadUnit(prop, s->teamColor());

@@ -58,6 +58,7 @@
 //#warning TODO: BoDebugLog support
 
 
+#if 0
 // TODO: must be ported to Qt4, if we want to use signals. do we?
 //#warning TODO: port BoDebug for signals?
 #include <qobject.h>
@@ -132,6 +133,7 @@ private:
   BoDebugPrivate* d;
   static bool mUseAreas;
 };
+#endif
 
 #if 0
 // AB: when you remove this #if 0, remove it from the .cpp as well (next to

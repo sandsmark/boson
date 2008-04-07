@@ -20,7 +20,7 @@
 #ifndef BOUNITEDITOR_H
 #define BOUNITEDITOR_H
 
-#include "bouniteditorbase.h"
+#include "ui_bouniteditorbase.h"
 
 #include "bosonweapon.h"
 #include "unitproperties.h"
@@ -29,6 +29,7 @@
 #include <Q3PtrList>
 
 class BoUnitEditor;
+class BosonSearchPathsWidget;
 class BosonWeaponPropertiesEditor;
 
 class EditorUnitProperties : public UnitProperties
@@ -42,7 +43,7 @@ public:
 	// Methods to set values. They are only meant to be used by unit
 	//  editor. Don't use them unless you know what you are doing
 	void setName(const QString& name);
-	void setTypeId(unsigned long int id)  { mTypeId = id; }
+	void setTypeId(quint32 id)  { mTypeId = id; }
 	void setIsFacility(bool f) { mIsFacility = f; }
 	void setUnitWidth(bofixed unitWidth)  { mUnitWidth = unitWidth; }
 	void setUnitHeight(bofixed unitHeight)  { mUnitHeight = unitHeight; }
@@ -51,9 +52,9 @@ public:
 	void setProducer(unsigned int producer)  { mProducer = producer; }
 	void setTerrainType(TerrainType terrain)  { mTerrain = terrain; }
 	void setSupportMiniMap(bool supportMiniMap)  { mSupportMiniMap = supportMiniMap; }
-	void setRequirements(Q3ValueList<unsigned long int> requirements);
-	void setDestroyedEffectIds(Q3ValueList<unsigned long int> ids);
-	void setConstructedEffectIds(Q3ValueList<unsigned long int> ids);
+	void setRequirements(Q3ValueList<quint32> requirements);
+	void setDestroyedEffectIds(Q3ValueList<quint32> ids);
+	void setConstructedEffectIds(Q3ValueList<quint32> ids);
 	void setExplodingDamageRange(bofixed range)  { mExplodingDamageRange = range; }
 	void setExplodingDamage(long int damage)  { mExplodingDamage = damage; }
 	void setHitPoint(const BoVector3Fixed& hitpoint);
@@ -87,11 +88,11 @@ public:
 	bool saveUnitType(const QString& fileName);
 
 private:
-	bool saveMobileProperties(KSimpleConfig* conf);
-	bool saveFacilityProperties(KSimpleConfig* conf);
+	bool saveMobileProperties(KConfig* conf);
+	bool saveFacilityProperties(KConfig* conf);
 	bool saveAllPluginProperties(KConfig* conf);
-	bool saveTextureNames(KSimpleConfig* conf);
-	bool saveSoundNames(KSimpleConfig* conf);
+	bool saveTextureNames(KConfig* conf);
+	bool saveSoundNames(KConfig* conf);
 };
 
 
@@ -216,7 +217,7 @@ private:
 };
 
 
-class BoUnitEditor : public BoUnitEditorBase
+class BoUnitEditor : public QWidget, public Ui::BoUnitEditorBase
 {
 	Q_OBJECT
 public:

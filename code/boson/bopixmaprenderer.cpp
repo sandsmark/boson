@@ -37,8 +37,8 @@ public:
 	}
 	Q3ValueList<QPixmap> mPixmaps;
 	QPixmap mPixmap;
-	BoContext* mContext;
-	BoContext* mOldContext;
+	QGLContext* mContext;
+	QGLContext* mOldContext;
 };
 
 BoPixmapRenderer::BoPixmapRenderer()
@@ -61,7 +61,7 @@ void BoPixmapRenderer::setWidget(QGLWidget* w, int width, int height)
  }
  d->mPixmap.resize(width, height);
 
- d->mOldContext = mGLWidget->context();
+ d->mOldContext = const_cast<QGLContext*>(mGLWidget->context());
  if (d->mOldContext) {
 	d->mOldContext->doneCurrent();
  }
@@ -72,8 +72,7 @@ void BoPixmapRenderer::setWidget(QGLWidget* w, int width, int height)
  }
 
  boDebug() << "new context" << endl;
- d->mContext = new BoContext(&d->mPixmap);
- d->mContext->create(false, false); // neither direct, nor double buffered
+ d->mContext = new QGLContext(QGLFormat(QGL::IndirectRendering | QGL::SingleBuffer), &d->mPixmap);
  boDebug() << "make context current" << endl;
  d->mContext->makeCurrent();
  boDebug() << "context current done" << endl;
@@ -88,10 +87,15 @@ void BoPixmapRenderer::setWidget(QGLWidget* w, int width, int height)
 	d->mContext = 0;
  }
 
+#if 0
  // the new context is a full drop-in replacement of the old context. all
  // context commands in BosonBigDisplayBase will be directed to the new context,
  // without any code changes.
  mGLWidget->switchContext(d->mContext);
+#else
+#warning FIXME: switchContext() not available
+ boError() << k_funcinfo << "Qt4 has no switchContext()." << endl;
+#endif
 
  mGLWidget->resize(width, height);
 }
@@ -103,7 +107,11 @@ BoPixmapRenderer::~BoPixmapRenderer()
  }
  delete d->mContext;
  if (mGLWidget && d->mOldContext) {
+#if 0
 	mGLWidget->switchContext(d->mOldContext);
+#else
+	boWarning() << k_funcinfo << "Qt4 has no switchContext()" << endl;
+#endif
  }
  delete d;
 }
@@ -115,7 +123,7 @@ QPixmap BoPixmapRenderer::getPixmap(bool store)
 	return QPixmap();
  }
  startPixmap();
- mGLWidget->slotUpdateGL();
+ mGLWidget->updateGL();
  return pixmapDone(store);
 }
 
@@ -161,7 +169,7 @@ unsigned int BoPixmapRenderer::frameCount() const
 
 QPixmap BoPixmapRenderer::frame(unsigned int i) const
 {
- if (i >= d->mPixmaps.count()) {
+ if (i >= (unsigned int)d->mPixmaps.count()) {
 	return QPixmap();
  }
  return d->mPixmaps[i];

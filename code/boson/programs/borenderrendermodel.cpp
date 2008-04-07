@@ -33,6 +33,8 @@
 
 #include <q3valuevector.h>
 #include <qtimer.h>
+#include <QPoint>
+#include <QColor>
 
 #include <math.h>
 #include <stdlib.h>
@@ -291,14 +293,14 @@ void BoRenderRenderModel::renderModel(int mode)
 		glRotatef(mModelRotationX, 1.0f, 0.0f, 0.0f);
 		glRotatef(mModelRotationY, 0.0f, 1.0f, 0.0f);
 
-		f->renderFrame(itemMatrices, 0, false, Default, mode);
+		f->renderFrame(itemMatrices, QColor(), false, Default, mode);
 
 		startTransparentFrameRendering();
 		if (mode == GL_SELECT) {
 			glDisable(GL_BLEND);
 			glDisable(GL_TEXTURE_2D);
 		}
-		f->renderFrame(itemMatrices, 0, true, Default, mode);
+		f->renderFrame(itemMatrices, QColor(), true, Default, mode);
 		stopTransparentFrameRendering();
 
 		glPopMatrix();

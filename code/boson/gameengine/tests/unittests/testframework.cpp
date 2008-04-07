@@ -122,27 +122,26 @@ SpeciesTheme* TestFrameWork::createAndLoadDummySpeciesTheme(const QColor& teamCo
  const int unitCount = 5;
 
  KTempDir speciesDir_("/tmp/");
- speciesDir_.setAutoDelete(true); // AB: deletes the dir recursively (implemented using ::system("/bin/rm -rf"))
+ speciesDir_.setAutoRemove(true); // AB: deletes the dir recursively (implemented using ::system("/bin/rm -rf"))
 
- QDir* speciesDir = speciesDir_.qDir();
- if (!speciesDir) {
+ QDir speciesDir(speciesDir_.name());
+ if (!speciesDir.exists()) {
 	return 0;
  }
- std::auto_ptr<QDir> speciesDirDeleter(speciesDir);
 
- if (!speciesDir->mkdir("units")) {
+ if (!speciesDir.mkdir("units")) {
 	return false;
  }
- QDir unitsDir(speciesDir->absoluteFilePath("units"));
+ QDir unitsDir(speciesDir.absoluteFilePath("units"));
 
  SpeciesTheme* theme = new SpeciesTheme();
  theme->setThemePath(speciesDir_.name());
  theme->setTeamColor(teamColor);
 
- QFile technologies(speciesDir->absoluteFilePath("index.technologies"));
+ QFile technologies(speciesDir.absoluteFilePath("index.technologies"));
  // open && close once, to write an empty file
  if (!technologies.open(QIODevice::WriteOnly)) {
-	boError() << k_funcinfo << "could not write technologies file " << technologies.name() << endl;
+	boError() << k_funcinfo << "could not write technologies file " << technologies.fileName() << endl;
 	return false;
  }
  technologies.close();
@@ -151,7 +150,7 @@ SpeciesTheme* TestFrameWork::createAndLoadDummySpeciesTheme(const QColor& teamCo
 	if (!unitsDir.mkdir(QString("unit_%1").arg(i))) {
 		return false;
 	}
-	QFile file(speciesDir->absoluteFilePath(QString("units/unit_%1/index.unit").arg(i)));
+	QFile file(speciesDir.absoluteFilePath(QString("units/unit_%1/index.unit").arg(i)));
 	if (!file.open(QIODevice::WriteOnly)) {
 		return false;
 	}
@@ -223,8 +222,8 @@ CanvasContainer::CanvasContainer()
 
 CanvasContainer::~CanvasContainer()
 {
- for (Q3PtrListIterator<Player> it(mPlayerListManager->allPlayerList()); it.current(); ++it) {
-	delete it.current();
+ foreach (Player* p, mPlayerListManager->allPlayerList()) {
+	delete p;
  }
  delete mCanvas;
  delete mPlayField;
@@ -263,7 +262,7 @@ Unit* CanvasContainer::createNewUnitAtTopLeftPos(unsigned int unitType, const Bo
 	return 0;
  }
  return static_cast<Unit*>(mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType,
-		mPlayerListManager->gamePlayerList().getFirst(),
+		mPlayerListManager->gamePlayerList().first(),
 		ItemType(unitType),
 		pos));
 }
@@ -276,7 +275,7 @@ bool CanvasContainer::createPlayers(unsigned int count)
 
 bool CanvasContainer::createPlayers(unsigned int count, BosonPlayerListManager* playerListManager, BosonPlayField* playField)
 {
- Q3PtrList<KPlayer> players;
+ QList<KPlayer*> players;
  for (unsigned int i = 0; i < count; i++) {
 	SpeciesTheme* theme = TestFrameWork::createAndLoadDummySpeciesTheme(QColor(i * 10, 0, 0));
 	if (!theme) {
@@ -366,8 +365,8 @@ bool BosonContainer::createPlayers(unsigned int count)
  // only once it is received, systemAddPlayer() is called.
  // -> this will never be received, because (atm?) we dont have an event loop in
  //    the tests (and dont want any).
- for (Q3PtrListIterator<Player> it(mBoson->playerListManager()->allPlayerList()); it.current(); ++it) {
-	it.current()->setGame(mBoson);
+ foreach (Player* p, mBoson->playerListManager()->allPlayerList()) {
+	p->setGame(mBoson);
  }
 
  return ret;
@@ -379,7 +378,7 @@ Unit* BosonContainer::createNewUnitAtTopLeftPos(unsigned int unitType, const BoV
 	return 0;
  }
  return static_cast<Unit*>(mCanvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType,
-		mPlayerListManager->gamePlayerList().getFirst(),
+		mPlayerListManager->gamePlayerList().first(),
 		ItemType(unitType),
 		pos));
 }

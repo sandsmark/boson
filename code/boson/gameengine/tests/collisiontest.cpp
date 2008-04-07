@@ -21,7 +21,6 @@
 #include "unittests/testframework.h" // FIXME: maybe move out of the unittests dir?
 #include "boversion.h"
 #include "bodebug.h"
-#include "bodebugdcopiface.h"
 #include "boglobal.h"
 #include "bosondata.h"
 #include "bosoncanvas.h"
@@ -46,36 +45,28 @@
 
 static const char *version = BOSON_VERSION_STRING;
 
-static KCmdLineOptions options[] =
-{
-    { 0, 0, 0 }
-};
-
 static bool start();
 static bool createPlayers(unsigned int count, BosonPlayField*, BosonPlayerListManager*);
 static bool createAndAddUnit(const BoVector3Fixed& pos, BosonCanvas* canvas, BosonPlayerListManager* playerListManager);
 
 int main(int argc, char **argv)
 {
- BoDebug::disableAreas(); // dont load bodebug.areas
+// BoDebug::disableAreas(); // dont load bodebug.areas
  KAboutData about("bosontest",
-		I18N_NOOP("BosonTest"),
+		QByteArray(),
+		ki18n("BosonTest"),
 		version);
- about.addAuthor("Andreas Beckermann",
-		I18N_NOOP("Coding & Current Maintainer"),
+ about.addAuthor(ki18n("Andreas Beckermann"),
+		ki18n("Coding & Current Maintainer"),
 		"b_mann@gmx.de");
 
  Q3CString argv0(argv[0]);
  KCmdLineArgs::init(argc, argv, &about);
- KCmdLineArgs::addCmdLineOptions(options);
-#if BOSON_LINK_STATIC
- KApplication::disableAutoDcopRegistration();
-#endif
 
  BoGlobal::initStatic();
  BoGlobal::boGlobal()->initGlobalObjects();
 
- KInstance instance(&about);
+ KComponentData instance(&about);
 
  if (!start()) {
 	return 1;
@@ -185,7 +176,7 @@ bool start()
 
 bool createPlayers(unsigned int count, BosonPlayField* playField, BosonPlayerListManager* playerListManager)
 {
- Q3PtrList<KPlayer> players;
+ QList<KPlayer*> players;
  for (unsigned int i = 0; i < count; i++) {
 	SpeciesTheme* theme = TestFrameWork::createAndLoadDummySpeciesTheme(QColor(i * 10, 0, 0));
 	if (!theme) {
@@ -220,7 +211,7 @@ bool createAndAddUnit(const BoVector3Fixed& pos, BosonCanvas* canvas, BosonPlaye
 {
  const int unitType = 1; // UnitProperties ID
  canvas->createNewItemAtTopLeftPos(RTTI::UnitStart + unitType,
-		playerListManager->gamePlayerList().getFirst(),
+		playerListManager->gamePlayerList().first(),
 		ItemType(unitType),
 		pos);
 

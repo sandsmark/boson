@@ -20,7 +20,7 @@
 #ifndef BOSONSEARCHPATHSWIDGET_H
 #define BOSONSEARCHPATHSWIDGET_H
 
-#include "bosonsearchpathswidgetbase.h"
+#include "ui_bosonsearchpathswidgetbase.h"
 
 #include "bofiledialog.h"
 
@@ -28,8 +28,9 @@
 #include <kdebug.h>
 
 #include <qdir.h>
+#include <QWidget>
 
-class BosonSearchPathsWidget : public BosonSearchPathsWidgetBase
+class BosonSearchPathsWidget : public QWidget, public Ui::BosonSearchPathsWidgetBase
 {
 	Q_OBJECT
 public:

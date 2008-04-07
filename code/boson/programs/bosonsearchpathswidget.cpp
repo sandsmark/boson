@@ -31,7 +31,7 @@
 #include <q3listbox.h>
 
 BosonSearchPathsWidget::BosonSearchPathsWidget(QWidget* parent)
-	: BosonSearchPathsWidgetBase(parent)
+	: QWidget(parent)
 {
  init();
 }

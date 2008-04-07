@@ -25,9 +25,7 @@
 #include "bosoncursor.h"
 #include "bosonconfig.h"
 #include "global.h"
-#include "bosonglwidget.h"
 #include "bodebug.h"
-#include "bodebugdcopiface.h"
 #include "boversion.h"
 #include "boapplication.h"
 #include "boglobal.h"
@@ -49,24 +47,18 @@
 
 static void postBosonConfigInit();
 
-static const char *description =
-    I18N_NOOP("Cursor Editor for Boson");
+static KLocalizedString description =
+    ki18n("Cursor Editor for Boson");
 
 static const char *version = BOSON_VERSION_STRING;
 
-static KCmdLineOptions options[] =
-{
-    { 0, 0, 0 }
-};
-
-CursorPreview::CursorPreview(QWidget* parent) : BosonGLWidget(parent)
+CursorPreview::CursorPreview(QWidget* parent) : QGLWidget(parent)
 {
  mCursor = new BosonKDECursor;
  setMinimumSize(200, 200);
  setMouseTracking(true);
  mUpdateTimer = new QTimer(this);
  connect(mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdateGL()));
- mIface = new BoDebugDCOPIface();
 }
 
 CursorPreview::~CursorPreview()
@@ -186,19 +178,19 @@ void CursorPreview::mouseMoveEvent(QMouseEvent* )
 int main(int argc, char **argv)
 {
  KAboutData about("bocursor",
-		I18N_NOOP("Boson Cursor Editor"),
+		QByteArray(),
+		ki18n("Boson Cursor Editor"),
 		version,
 		description,
 		KAboutData::License_GPL,
-		"(C) 2002-2005 The Boson team",
-		0,
+		ki18n("(C) 2002-2005 The Boson team"),
+		KLocalizedString(),
 		"http://boson.eu.org");
- about.addAuthor( "Andreas Beckermann", I18N_NOOP("Design & Coding"), "b_mann@gmx.de" );
+ about.addAuthor( ki18n("Andreas Beckermann"), ki18n("Design & Coding"), "b_mann@gmx.de" );
  BosonConfig::setPostInitFunction(&postBosonConfigInit);
 
  Q3CString argv0(argv[0]);
  KCmdLineArgs::init(argc, argv, &about);
- KCmdLineArgs::addCmdLineOptions(options);
 
  BoApplication app(argv0);
 
@@ -225,9 +217,7 @@ int main(int argc, char **argv)
 
  boTextureManager->initOpenGL();
 
- BoDebugDCOPIface* iface = new BoDebugDCOPIface();
  int r = app.exec();
- delete iface;
  delete editor;
  delete preview;
  delete w;
