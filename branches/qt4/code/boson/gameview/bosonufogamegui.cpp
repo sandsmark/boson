@@ -48,7 +48,7 @@
 #include "../bosonfpscounter.h"
 #include "../info/boinfo.h"
 #include "../info/bocurrentinfo.h"
-#include <bodebuglog.h>
+//#include <bodebuglog.h>
 #include "bodebug.h"
 
 #include <klocale.h>
@@ -324,6 +324,7 @@ BosonUfoGameGUI::BosonUfoGameGUI(const BoMatrix& modelview, const BoMatrix& proj
  BoUfoLabel::setDefaultForegroundColor(defaultColor);
 
 
+#if 0
  BoDebugLog* debugLog = BoDebugLog::debugLog();
  if (debugLog) {
 	connect(debugLog, SIGNAL(signalError(const BoDebugMessage&)),
@@ -338,6 +339,10 @@ BosonUfoGameGUI::BosonUfoGameGUI(const BoMatrix& modelview, const BoMatrix& proj
 	debugLog->setEmitSignal(BoDebug::KDEBUG_ERROR, true);
 	debugLog->setEmitSignal(BoDebug::KDEBUG_WARN, true);
  }
+#else
+#warning FIXME: BoDebugLog is disabled
+ boWarning() << k_funcinfo << "FIXME: BoDebugLog is disabled";
+#endif
 }
 
 BosonUfoGameGUI::~BosonUfoGameGUI()
@@ -954,6 +959,7 @@ void BosonUfoGameGUI::addChatMessage(const QString& message)
 
 void BosonUfoGameGUI::slotBoDebugOutput(const BoDebugMessage& m)
 {
+#if 0
  QString area = m.areaName();
  QString message = m.message();
  if (!message.isEmpty() && message[message.length() - 1] == '\n') {
@@ -964,10 +970,15 @@ void BosonUfoGameGUI::slotBoDebugOutput(const BoDebugMessage& m)
 	from = i18n("DEBUG (%1): ").arg(area);
  }
  d->mUfoDebugDisplay->addMessage(i18n("%1: %2").arg(from).arg(message));
+#else
+#warning FIXME: BoDebugLog is disabled
+ boWarning() << k_funcinfo << "FIXME: BoDebugLog is disabled";
+#endif
 }
 
 void BosonUfoGameGUI::slotBoDebugWarning(const BoDebugMessage& m)
 {
+#if 0
  QString area = m.areaName();
  QString message = m.message();
  if (!message.isEmpty() && message[message.length() - 1] == '\n') {
@@ -978,10 +989,15 @@ void BosonUfoGameGUI::slotBoDebugWarning(const BoDebugMessage& m)
 	from = i18n("WARNING(%1): ").arg(area);
  }
  d->mUfoErrorDisplay->addMessage(i18n("%1: %2").arg(from).arg(message));
+#else
+#warning FIXME: BoDebugLog is disabled
+ boWarning() << k_funcinfo << "FIXME: BoDebugLog is disabled";
+#endif
 }
 
 void BosonUfoGameGUI::slotBoDebugError(const BoDebugMessage& m)
 {
+#if 0
  QString area = m.areaName();
  QString message = m.message();
  if (!message.isEmpty() && message[message.length() - 1] == '\n') {
@@ -992,6 +1008,10 @@ void BosonUfoGameGUI::slotBoDebugError(const BoDebugMessage& m)
 	from = i18n("ERROR(%1): ").arg(area);
  }
  d->mUfoErrorDisplay->addMessage(i18n("%1: %2").arg(from).arg(message));
+#else
+#warning FIXME: BoDebugLog is disabled
+ boWarning() << k_funcinfo << "FIXME: BoDebugLog is disabled";
+#endif
 }
 
 

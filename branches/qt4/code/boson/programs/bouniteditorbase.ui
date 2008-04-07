@@ -3939,7 +3939,6 @@ You must specify list of numbers separated by commas, e.g. 1001,3001</string>
   <customwidget>
    <class>KIntNumInput</class>
    <extends>QWidget</extends>
-   <header>kintnuminput.h</header>
   </customwidget>
   <customwidget>
    <class>KLineEdit</class>
@@ -3949,12 +3948,10 @@ You must specify list of numbers separated by commas, e.g. 1001,3001</string>
   <customwidget>
    <class>KDoubleNumInput</class>
    <extends>QWidget</extends>
-   <header>kdoublenuminput.h</header>
   </customwidget>
   <customwidget>
    <class>KIntSpinBox</class>
    <extends>QWidget</extends>
-   <header>kintspinbox.h</header>
   </customwidget>
  </customwidgets>
  <includes>

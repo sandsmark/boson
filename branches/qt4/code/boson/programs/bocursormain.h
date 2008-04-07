@@ -19,17 +19,17 @@
 #ifndef BOCURSORMAIN_H
 #define BOCURSORMAIN_H
 
-#include "bosonglwidget.h"
+#include <bogl.h>
+#include <QGLWidget>
 //Added by qt3to4:
 #include <QMouseEvent>
 
 class BosonCursor;
-class BoDebugDCOPIface;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class CursorPreview : public BosonGLWidget
+class CursorPreview : public QGLWidget
 {
 	Q_OBJECT
 public:
@@ -52,7 +52,6 @@ protected:
 private:
 	BosonCursor* mCursor;
 	QTimer* mUpdateTimer;
-	BoDebugDCOPIface* mIface;
 };
 
 #endif

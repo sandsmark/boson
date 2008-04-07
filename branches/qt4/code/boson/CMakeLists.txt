@@ -251,7 +251,7 @@ set(bosonmainlib_SRCS
 	bosonprofilingdialog.cpp
 	bpfdescriptiondialog.cpp
 	boglstatewidget.cpp
-	bodebuglogdialog.cpp
+	#bodebuglogdialog.cpp
 	bofullscreen.cpp
 	bocamera.cpp
 	boautocamera.cpp

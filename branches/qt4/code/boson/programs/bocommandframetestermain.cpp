@@ -21,7 +21,6 @@
 #include "bocommandframetestermain.moc"
 
 #include "../../bomemory/bodummymemory.h"
-#include "bodebugdcopiface.h"
 #include "bodebug.h"
 #include "../boversion.h"
 #include "../boapplication.h"
@@ -301,10 +300,8 @@ int main(int argc, char **argv)
  top->init();
  top->show();
 
- BoDebugDCOPIface* iface = new BoDebugDCOPIface();
  args->clear();
  int r = app.exec();
- delete iface;
  delete top;
  return r;
 }

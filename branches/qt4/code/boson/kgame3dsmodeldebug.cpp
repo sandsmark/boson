@@ -568,24 +568,24 @@ BoNodeTracksWidget::BoNodeTracksWidget(QWidget* parent) : QWidget(parent)
  Q3Grid* grid = new Q3Grid(2, this);
  l->addWidget(grid);
  mPosition = new QPushButton(i18n("Position track"), grid);
- mPosition->setToggleButton(true);
+ mPosition->setCheckable(true);
  mPositionLabel = new QLabel(grid);
 
  mRotation = new QPushButton(i18n("Rotation track"), grid);
- QToolTip::add(mRotation, i18n("Note: the .3ds file stores the axis and the angle values only. Not the actual quaternion"));
- mRotation->setToggleButton(true);
+ mRotation->setToolTip(i18n("Note: the .3ds file stores the axis and the angle values only. Not the actual quaternion"));
+ mRotation->setCheckable(true);
  mRotationLabel = new QLabel(grid);
 
  mScale = new QPushButton(i18n("Scale track"), grid);
- mScale->setToggleButton(true);
+ mScale->setCheckable(true);
  mScaleLabel = new QLabel(grid);
 
  mMorph = new QPushButton(i18n("Morph track"), grid);
- mMorph->setToggleButton(true);
+ mMorph->setCheckable(true);
  mMorphLabel = new QLabel(grid);
 
  mHide = new QPushButton(i18n("Hide track"), grid);
- mHide->setToggleButton(true);
+ mHide->setCheckable(true);
  mHideLabel = new QLabel(grid);
 
  mButton2Track.insert(mPosition, mPositionTrack);
@@ -624,12 +624,12 @@ void BoNodeTracksWidget::slotButtonToggled(bool on)
  recursive = true;
 
  // set all off, then re-enable b
- mPosition->setOn(false);
- mRotation->setOn(false);
- mScale->setOn(false);
- mMorph->setOn(false);
- mHide->setOn(false);
- b->setOn(true);
+ mPosition->setChecked(false);
+ mRotation->setChecked(false);
+ mScale->setChecked(false);
+ mMorph->setChecked(false);
+ mHide->setChecked(false);
+ b->setChecked(true);
 
  emit signalDisplayTrack(track);
 
@@ -660,23 +660,23 @@ void BoNodeTracksWidget::setNodeObjectData(Lib3dsObjectData* d)
  mHideLabel->setText(i18n("Flag: %1 Key Number: %2").arg(mHideTrack->flags()).arg(mHideTrack->keyCount()));
  mMorphLabel->setText(i18n("Flag: %1 Key Number: %2").arg(mMorphTrack->flags()).arg(mMorphTrack->keyCount()));
 
- if (mPosition->isOn()) {
+ if (mPosition->isChecked()) {
 	mPosition->toggle();
 	mPosition->toggle();
  }
- if (mRotation->isOn()) {
+ if (mRotation->isChecked()) {
 	mRotation->toggle();
 	mRotation->toggle();
  }
- if (mScale->isOn()) {
+ if (mScale->isChecked()) {
 	mScale->toggle();
 	mScale->toggle();
  }
- if (mHide->isOn()) {
+ if (mHide->isChecked()) {
 	mHide->toggle();
 	mHide->toggle();
  }
- if (mMorph->isOn()) {
+ if (mMorph->isChecked()) {
 	mMorph->toggle();
 	mMorph->toggle();
  }
@@ -1242,37 +1242,37 @@ private:
 	int bosonNormalColumn;
 };
 
-BoNodeObjectDataWidget::BoNodeObjectDataWidget(QWidget* parent) : QWidget(parent, "nodeobjectdatawidget")
+BoNodeObjectDataWidget::BoNodeObjectDataWidget(QWidget* parent) : QWidget(parent)
 {
  mLayout = new Q3VBoxLayout(this);
 
  mPivot = (QLabel*)addWidget(i18n("Pivot"), new QLabel(this));
- QToolTip::add(mPivot, i18n("The pivot point of the node"));
+ mPivot->setToolTip(i18n("The pivot point of the node"));
 
  mInstance = (QLabel*)addWidget(i18n("Instance"), new QLabel(this));
- QToolTip::add(mInstance, i18n("dunno what this is"));
+ mInstance->setToolTip(i18n("dunno what this is"));
 
  mBBoxMin = (QLabel*)addWidget(i18n("bbox_min"), new QLabel(this));
- QToolTip::add(mBBoxMin, i18n("Most probably this is the min point of the bounding box"));
+ mBBoxMin->setToolTip(i18n("Most probably this is the min point of the bounding box"));
  mBBoxMax = (QLabel*)addWidget(i18n("bbox_max"), new QLabel(this));
- QToolTip::add(mBBoxMax, i18n("Most probably this is the max point of the bounding box"));
+ mBBoxMax->setToolTip(i18n("Most probably this is the max point of the bounding box"));
 
  mPos = (QLabel*)addWidget(i18n("Position"), new QLabel(this));
- QToolTip::add(mPos, i18n("The position of the node in this frame. The matrix of the node has already been translated by this value."));
+ mPos->setToolTip(i18n("The position of the node in this frame. The matrix of the node has already been translated by this value."));
  mRot = (QLabel*)addWidget(i18n("Rotation (quat)"), new QLabel(this));
- QToolTip::add(mRot, i18n("The rotation of the node in this frame. The matrix of the node has already been rotated by this value. These 4 values (the quaternion) are the actually stored values."));
+ mRot->setToolTip(i18n("The rotation of the node in this frame. The matrix of the node has already been rotated by this value. These 4 values (the quaternion) are the actually stored values."));
 #if 0
  mRotAngle = (QLabel*)addWidget(i18n("Axis Rotation (x,y,z) -> degree)"), new QLabel(this));
- QToolTip::add(mRotAngle, i18n("The rotation in readable angles, calculated from the quaternion.\nFirst you see the axis (x,y,z) that is rotated around and then the angle."));
+ mRotAngle->setToolTip(i18n("The rotation in readable angles, calculated from the quaternion.\nFirst you see the axis (x,y,z) that is rotated around and then the angle."));
 #endif
  mRotX = (QLabel*)addWidget(i18n("X Rotation"), new QLabel(this));
  mRotY = (QLabel*)addWidget(i18n("Y Rotation"), new QLabel(this));
  mRotZ = (QLabel*)addWidget(i18n("Z Rotation"), new QLabel(this));
- QToolTip::add(mRotX, i18n("The rotation in readable angles, calculated from the quaternion.\n"));
- QToolTip::add(mRotY, i18n("The rotation in readable angles, calculated from the quaternion.\n"));
- QToolTip::add(mRotZ, i18n("The rotation in readable angles, calculated from the quaternion.\n"));
+ mRotX->setToolTip(i18n("The rotation in readable angles, calculated from the quaternion.\n"));
+ mRotY->setToolTip(i18n("The rotation in readable angles, calculated from the quaternion.\n"));
+ mRotZ->setToolTip(i18n("The rotation in readable angles, calculated from the quaternion.\n"));
  mScl = (QLabel*)addWidget(i18n("Scale"), new QLabel(this));
- QToolTip::add(mScl, i18n("The scale factor of the node in this frame. The matrix of the node has already been scaled by this value."));
+ mScl->setToolTip(i18n("The scale factor of the node in this frame. The matrix of the node has already been scaled by this value."));
 
  mMorphSmooth = (QLabel*)addWidget(i18n("morph_smooth"), new QLabel(this));
  mMorph = (QLabel*)addWidget(i18n("morph"), new QLabel(this));
@@ -1353,10 +1353,10 @@ void BoNodeObjectDataWidget::setNodeObjectData(Lib3dsObjectData* d)
 
 QWidget* BoNodeObjectDataWidget::addWidget(const QString& label, QWidget* w)
 {
- QWidget* box = new QWidget(this, "widgetbox");
- w->reparent(box, QPoint(0,0)); // ugly, but useful
+ QWidget* box = new QWidget(this);
+ w->setParent(box); // ugly, but useful
  Q3HBoxLayout* l = new Q3HBoxLayout(box);
- l->addWidget(new QLabel(label, box, "label"));
+ l->addWidget(new QLabel(label, box));
  l->addWidget(w);
  mLayout->addWidget(box);
 
@@ -1378,6 +1378,7 @@ BoListView::~BoListView()
 
 void BoListView::allowHide(int column)
 {
+#if 0
  if (!mPopup) {
 	header()->setClickEnabled(true);
 	header()->installEventFilter(this);
@@ -1397,10 +1398,12 @@ void BoListView::allowHide(int column)
 
 	boDebug() << k_funcinfo << columnText(column) << "==" << column << endl;
  }
+#endif
 }
 
 void BoListView::slotToggleHideColumn(int id)
 {
+#if 0
  boDebug() << k_funcinfo << id << endl;
  if (!mPopup) {
 	boWarning() << k_funcinfo << "NULL popup menu" << endl;
@@ -1417,10 +1420,12 @@ void BoListView::slotToggleHideColumn(int id)
  } else {
 	addColumn("test1");
  }
+#endif
 }
 
 bool BoListView::eventFilter(QObject* o, QEvent* e)
 {
+ #if 0
  // shamelessy stolen from KMail :)
  if (mPopup && (e->type() == QEvent::MouseButtonPress &&
 		static_cast<QMouseEvent*>(e)->button() == Qt::RightButton &&
@@ -1428,6 +1433,7 @@ bool BoListView::eventFilter(QObject* o, QEvent* e)
 	mPopup->popup( static_cast<QMouseEvent*>(e)->globalPos() );
 	return true;
  }
+#endif
  return K3ListView::eventFilter(o, e);
 }
 
@@ -1518,7 +1524,7 @@ public:
 	Lib3dsFile* m3ds;
 };
 
-KGame3DSModelDebug::KGame3DSModelDebug(QWidget* parent) : QWidget(parent, "KGame3DSModelDebug")
+KGame3DSModelDebug::KGame3DSModelDebug(QWidget* parent) : QWidget(parent)
 {
  d = new KGame3DSModelDebugPrivate;
  init();
@@ -1614,7 +1620,7 @@ void KGame3DSModelDebug::initMeshPage()
  Q3HBox* faces = new Q3HBox(modelInfo);
  (void)new QLabel(i18n("Total Mesh Faces: "), faces);
  d->mMeshFacesCountLabel = new QLabel(faces);
- QToolTip::add(d->mMeshFacesCountLabel, i18n("This is the total number of faces in (different) meshes. Note that every mesh can appear several times in a model, so this number is <em>not</em> the total number of faces in the model!"));
+ d->mMeshFacesCountLabel->setToolTip(i18n("This is the total number of faces in (different) meshes. Note that every mesh can appear several times in a model, so this number is <em>not</em> the total number of faces in the model!"));
  Q3HBox* vertices = new Q3HBox(modelInfo);
  (void)new QLabel(i18n("Total Mesh Vertices (Faces * 3): "), vertices);
  d->mMeshVertexCountLabel = new QLabel(vertices);
@@ -1630,16 +1636,16 @@ void KGame3DSModelDebug::initMeshPage()
  d->mUseLib3dsCoordinates = new QCheckBox(i18n("Display lib3ds coordinates of points"), faceView);
  d->mUseLib3dsCoordinates->setChecked(true);
  connect(d->mUseLib3dsCoordinates, SIGNAL(toggled(bool)), this, SLOT(slotUseLib3dsCoordinates(bool)));
- QToolTip::add(d->mUseLib3dsCoordinates, i18n("Display the coordinates of the points of a face as they appear in a .3ds file. If unchecked display them as they get rendered (i.e. in mesh coordinates)."));
+ d->mUseLib3dsCoordinates->setToolTip(i18n("Display the coordinates of the points of a face as they appear in a .3ds file. If unchecked display them as they get rendered (i.e. in mesh coordinates)."));
  d->mShowPointIndices = new QCheckBox(i18n("Show point indices instead of coordinates"), faceView);
  d->mShowPointIndices->setChecked(false);
  connect(d->mShowPointIndices, SIGNAL(toggled(bool)), this, SLOT(slotShowPointIndices(bool)));
- QToolTip::add(d->mShowPointIndices, i18n("Display the index of the point in the vertex pool (of the mesh), not the coordinates"));
+ d->mShowPointIndices->setToolTip(i18n("Display the index of the point in the vertex pool (of the mesh), not the coordinates"));
  d->mHideConnectableWidgets = new QCheckBox(i18n("Hide \"connectable\" widgets"), faceView);
  d->mHideConnectableWidgets->setChecked(true);
  connect(d->mHideConnectableWidgets, SIGNAL(toggled(bool)), this, SLOT(slotHideConnectableWidgets(bool)));
  slotHideConnectableWidgets(d->mHideConnectableWidgets->isChecked());
- QToolTip::add(d->mHideConnectableWidgets, i18n("The \"connectable\" widgets show which faces of a mesh are connectable to a certain face. This is important to make GL_TRIANGLE_STRIPs, but the code used here is obsolete."));
+ d->mHideConnectableWidgets->setToolTip(i18n("The \"connectable\" widgets show which faces of a mesh are connectable to a certain face. This is important to make GL_TRIANGLE_STRIPs, but the code used here is obsolete."));
 #if !ALLOW_FACE_CONNECTIONS
  d->mHideConnectableWidgets->hide();
 #endif
@@ -1657,10 +1663,10 @@ void KGame3DSModelDebug::initMeshPage()
  Q3VBox* matrixBox = new Q3VBox(splitter);
  Q3VGroupBox* meshMatrixBox = new Q3VGroupBox(i18n("Mesh Matrix"), matrixBox);
  d->mMeshMatrix = new BoMatrixWidget(meshMatrixBox);
- QToolTip::add(d->mMeshMatrix, i18n("This is the mesh matrix (i.e. mesh->matrix in a lib3ds mesh)."));
+ d->mMeshMatrix->setToolTip(i18n("This is the mesh matrix (i.e. mesh->matrix in a lib3ds mesh)."));
  Q3VGroupBox* invMeshMatrixBox = new Q3VGroupBox(i18n("Inv Mesh Matrix"), matrixBox);
  d->mInvMeshMatrix = new BoMatrixWidget(invMeshMatrixBox);
- QToolTip::add(d->mInvMeshMatrix, i18n("This is the inverse of the mesh matrix."));
+ d->mInvMeshMatrix->setToolTip(i18n("This is the inverse of the mesh matrix."));
 
  d->mTabWidget->addTab(d->mMeshPage, i18n("&Meshes"));
 }
@@ -1691,9 +1697,9 @@ void KGame3DSModelDebug::initNodePage()
  d->mNodeFacesCountLabel = new QLabel(faces);
  Q3HBox* vertices = new Q3HBox(nodesInfo);
  (void)new QLabel(i18n("Node Vertices (Faces * 3): "), vertices);
- QToolTip::add(d->mNodeFacesCountLabel, i18n("This is the total number of faces in <em>all</em> nodes and therefore the total number of rendered faces."));
+ d->mNodeFacesCountLabel->setToolTip(i18n("This is the total number of faces in <em>all</em> nodes and therefore the total number of rendered faces."));
  d->mNodeVertexCountLabel = new QLabel(vertices);
- QToolTip::add(d->mNodeVertexCountLabel, i18n("The actual number of vertices in the nodes. This is the same as the faces number above, multiplied by 3 (a face/triangle has always 3 points)."));
+ d->mNodeVertexCountLabel->setToolTip(i18n("The actual number of vertices in the nodes. This is the same as the faces number above, multiplied by 3 (a face/triangle has always 3 points)."));
 
  d->mNodeObjectData = new BoNodeObjectDataWidget(splitter);
 
@@ -1735,7 +1741,7 @@ void KGame3DSModelDebug::addFile(const QString& file, const QString& _name)
  unsigned int i = d->mModelBox->count();
  QString name = _name.isEmpty() ? QString::number(i) : _name;
  d->mModelFiles.insert(i, file);
- d->mModelBox->insertItem(name);
+ d->mModelBox->addItem(name);
 }
 
 void KGame3DSModelDebug::addFiles(const QString& _dir)
@@ -1743,19 +1749,19 @@ void KGame3DSModelDebug::addFiles(const QString& _dir)
  QStringList allDirs;
  QStringList allFiles;
  allDirs.append(_dir);
- for (unsigned int i = 0; i < allDirs.count(); i++) {
+ for (int i = 0; i < allDirs.count(); i++) {
 	QDir dir(allDirs[i]);
 	QStringList dirs = dir.entryList(QDir::Dirs | QDir::Readable | QDir::Executable);
-	dirs.remove(".");
-	dirs.remove("..");
-	for (unsigned int j = 0; j < dirs.count(); j++) {
+	dirs.removeAll(".");
+	dirs.removeAll("..");
+	for (int j = 0; j < dirs.count(); j++) {
 		if (allDirs.contains(dirs[j]) == 0) {
 			allDirs.append(dir.absoluteFilePath(dirs[j]));
 		}
 	}
 
-	QStringList files = dir.entryList(QString::fromLatin1("*.3ds"), QDir::Files | QDir::Readable);
-	for (unsigned int j = 0; j < files.count(); j++) {
+	QStringList files = dir.entryList(QStringList() << QString::fromLatin1("*.3ds"), QDir::Files | QDir::Readable);
+	for (int j = 0; j < files.count(); j++) {
 		if (allFiles.contains(files[j]) == 0) {
 			allFiles.append(dir.absoluteFilePath(files[j]));
 		}
@@ -1765,13 +1771,13 @@ void KGame3DSModelDebug::addFiles(const QString& _dir)
  // throw away any files that we know already
  QMap<int, QString>::Iterator it;
  for (it = d->mModelFiles.begin(); it != d->mModelFiles.end(); ++it) {
-	if (allFiles.contains(it.data()) != 0) {
-		allFiles.remove(it.data());
+	if (allFiles.contains(it.value()) != 0) {
+		allFiles.removeAll(it.value());
 	}
  }
 
  // add remaining files
- for (unsigned int i = 0; i < allFiles.count(); i++) {
+ for (int i = 0; i < allFiles.count(); i++) {
 	addFile(allFiles[i], allFiles[i]);
  }
 }
@@ -1800,7 +1806,8 @@ void KGame3DSModelDebug::slotUpdate()
 	d->m3ds = 0;
  }
  d->mCurrentItem = d->mModelBox->currentItem();
- d->m3ds = lib3ds_file_load(d->mModelFiles[d->mCurrentItem]);
+ QByteArray tmp = d->mModelFiles[d->mCurrentItem].toLatin1();
+ d->m3ds = lib3ds_file_load(tmp.data());
 
  updateMaterialPage();
  updateMeshPage();
@@ -1913,9 +1920,9 @@ void KGame3DSModelDebug::slotConstructMeshList()
 	int indices = 0;
 	for (unsigned int i = 0; i < mesh->faces; i++) {
 		Lib3dsFace* f = &mesh->faceL[i];
-		indices = qMax(indices, f->points[0]);
-		indices = qMax(indices, f->points[1]);
-		indices = qMax(indices, f->points[2]);
+		indices = qMax(indices, (int)f->points[0]);
+		indices = qMax(indices, (int)f->points[1]);
+		indices = qMax(indices, (int)f->points[2]);
 	}
 	item->setText(6, QString::number(indices));
 	unsigned int instances = 0;

@@ -11,6 +11,8 @@ include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
 )
 
+add_definitions(-DQT3_SUPPORT)
+
 
 ################ boson #################
 
@@ -44,7 +46,9 @@ boson_add_executable(boson-no-gui ${bosonNoGUI_SRCS})
 boson_target_link_libraries(boson-no-gui
 	gameengine
 	common
-	${QT_AND_KDECORE_KDEUI_KIO_LIBS}
+	${QT_QT3SUPPORT_LIBRARY}
+	${KDE4_KDE3SUPPORT_LIBS}
+	${KDE4_KDEUI_LIBS}
 	${LIB_BOMEMORY}
 )
 
@@ -64,7 +68,9 @@ boson_target_link_libraries(bounit
 	gameengine
 	common
 	bosoninfo
-	${QT_AND_KDECORE_KDEUI_KIO_LIBS}
+	${QT_QT3SUPPORT_LIBRARY}
+	${KDE4_KDE3SUPPORT_LIBS}
+	${KDE4_KDEUI_LIBS}
 	${X11_XMU_LIB}
 	${LIB_BOMEMORY}
 )
@@ -98,7 +104,6 @@ boson_target_link_libraries(borender
 set(bocursor_SRCS
 	../bosoncursor.cpp
 	../botexture.cpp
-	../bosonglwidget.cpp
 
 	bocursormain.cpp
 	bosoncursoreditor.cpp
@@ -107,7 +112,10 @@ boson_add_executable(bocursor ${bocursor_SRCS})
 boson_target_link_libraries(bocursor
 	common
 	bosoninfo
-	${QT_AND_KDECORE_KDEUI_KIO_LIBS}
+	${QT_QT3SUPPORT_LIBRARY}
+	${KDE4_KDE3SUPPORT_LIBS}
+	${QT_QTOPENGL_LIBRARY}
+	${KDE4_KDEUI_LIBS}
 	${X11_XMU_LIB}
 	${LIB_BOMEMORY}
 )
@@ -132,14 +140,16 @@ boson_target_link_libraries(bomodelpixmaps
 
 ################ boinfo #################
 set(boinfo_SRCS
-	../bosonglwidget.cpp
 	boinfomain.cpp
 )
 boson_add_executable(boinfo ${boinfo_SRCS})
 boson_target_link_libraries(boinfo
 	bosoninfo
 	common
-	${QT_AND_KDECORE_KDEUI_KIO_LIBS}
+	${QT_QT3SUPPORT_LIBRARY}
+	${KDE4_KDE3SUPPORT_LIBS}
+	${QT_QTOPENGL_LIBRARY}
+	${KDE4_KDEUI_LIBS}
 	${X11_XMU_LIB}
 	${LIB_BOMEMORY}
 )
@@ -155,7 +165,10 @@ boson_add_executable(bo3dsdebug ${bo3dsdebug_SRCS})
 boson_target_link_libraries(bo3dsdebug
 	common
 	boufo
-	${QT_AND_KDECORE_KDEUI_KIO_LIBS}
+	${QT_QT3SUPPORT_LIBRARY}
+	${QT_QTOPENGL_LIBRARY}
+	${KDE4_KDE3SUPPORT_LIBS}
+	${KDE4_KDEUI_LIBS}
 	${LIB3DS_LIBRARY}
 	${LIB_BOMEMORY}
 )
@@ -170,7 +183,9 @@ boson_target_link_libraries(boconditioneditor
 	gameengine
 	common
 	boufo
-	${QT_AND_KDECORE_KDEUI_KIO_LIBS}
+	${QT_QT3SUPPORT_LIBRARY}
+	${KDE4_KDE3SUPPORT_LIBS}
+	${KDE4_KDEUI_LIBS}
 	${LIB_BOMEMORY}
 )
 
@@ -185,7 +200,9 @@ kde4_add_ui_files(boprofiling_SRCS
 boson_add_executable(boprofiling ${boprofiling_SRCS})
 boson_target_link_libraries(boprofiling
 	common
-	${QT_AND_KDECORE_KDEUI_KIO_LIBS}
+	${QT_QT3SUPPORT_LIBRARY}
+	${KDE4_KDE3SUPPORT_LIBS}
+	${KDE4_KDEUI_LIBS}
 	${X11_XMU_LIB}
 	${LIB_BOMEMORY}
 )
@@ -226,7 +243,9 @@ boson_add_executable(bofileconverter ${bofileconverter_SRCS})
 boson_target_link_libraries(bofileconverter
 	gameengine
 	common
-	${QT_AND_KDECORE_KDEUI_KIO_LIBS}
+	${QT_QT3SUPPORT_LIBRARY}
+	${KDE4_KDE3SUPPORT_LIBS}
+	${KDE4_KDEUI_LIBS}
 	${LIB_BOMEMORY}
 )
 
@@ -238,7 +257,9 @@ boson_add_executable(bocreatepreview ${bocreatepreview_SRCS})
 boson_target_link_libraries(bocreatepreview
 	gameengine
 	common
-	${QT_AND_KDECORE_KDEUI_KIO_LIBS}
+	${QT_QT3SUPPORT_LIBRARY}
+	${KDE4_KDE3SUPPORT_LIBS}
+	${KDE4_KDEUI_LIBS}
 	${LIB_BOMEMORY}
 )
 

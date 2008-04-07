@@ -216,7 +216,7 @@ bool MainNoGUI::startGame(const MainNoGUIStartOptions& options)
 	return 1;
  }
  QByteArray buffer;
- QDataStream stream(buffer, QIODevice::WriteOnly);
+ QDataStream stream(&buffer, QIODevice::WriteOnly);
  stream << (qint8)1; // game mode (not editor)
  stream << qCompress(gameData);
  d->mStartGame->mPlayField = buffer;
@@ -278,7 +278,7 @@ bool MainNoGUI::addComputerPlayersToGame(const MainNoGUIStartOptions& options, u
  if (ios.count() != species.count()) {
 	return false;
  }
- for (unsigned int i = 0; i < species.count(); i++) {
+ for (int i = 0; i < species.count(); i++) {
 	Player* p = new Player();
 	p->loadTheme(SpeciesTheme::speciesDirectory(species[i]), QColor(255,( 255 / BOSON_MAX_PLAYERS) * i, 0));
 

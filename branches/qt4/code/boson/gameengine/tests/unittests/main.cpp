@@ -21,7 +21,6 @@
 #include <config.h>
 #include "boversion.h"
 #include "bodebug.h"
-#include "bodebugdcopiface.h"
 #include "bosonconfig.h"
 #include "boapplication.h"
 #include "gameengine/boeventloop.h"
@@ -43,26 +42,21 @@
 
 static const char *version = BOSON_VERSION_STRING;
 
-static KCmdLineOptions options[] =
-{
-    { 0, 0, 0 }
-};
-
 static bool startTests();
 
 int main(int argc, char **argv)
 {
- BoDebug::disableAreas(); // dont load bodebug.areas
+// BoDebug::disableAreas(); // dont load bodebug.areas
  KAboutData about("bosontests",
-		I18N_NOOP("BosonTests"),
+		QByteArray(),
+		ki18n("BosonTests"),
 		version);
- about.addAuthor("Andreas Beckermann",
-		I18N_NOOP("Coding & Current Maintainer"),
+ about.addAuthor(ki18n("Andreas Beckermann"),
+		ki18n("Coding & Current Maintainer"),
 		"b_mann@gmx.de");
 
  Q3CString argv0(argv[0]);
  KCmdLineArgs::init(argc, argv, &about);
- KCmdLineArgs::addCmdLineOptions(options);
 #if BOSON_LINK_STATIC
  KApplication::disableAutoDcopRegistration();
 #endif
@@ -70,7 +64,7 @@ int main(int argc, char **argv)
  BoGlobal::initStatic();
  BoGlobal::boGlobal()->initGlobalObjects();
 
- KInstance instance(&about);
+ KComponentData instance(&about);
 
  if (!startTests()) {
 	boDebug() << "tests FAILED" << endl;

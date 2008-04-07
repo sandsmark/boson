@@ -21,7 +21,6 @@
 #include "boconditioneditormain.moc"
 
 #include "../bomemory/bodummymemory.h"
-#include "bodebugdcopiface.h"
 #include "bodebug.h"
 #include "boversion.h"
 #include "boapplication.h"
@@ -47,28 +46,26 @@
 #include <Q3ValueList>
 #include <Q3VBoxLayout>
 
-static const char *description =
-    I18N_NOOP("BoCondition editor for Boson");
+static KLocalizedString description =
+    ki18n("BoCondition editor for Boson");
 
 static const char *version = BOSON_VERSION_STRING;
-
-static KCmdLineOptions options[] =
-{
-    { "+[FILE]", I18N_NOOP(".bpf or .bsg file to open."), 0},
-    { 0, 0, 0 }
-};
 
 int main(int argc, char **argv)
 {
  KAboutData about("boconditioneditor",
-		I18N_NOOP("Boson condition editor"),
+		QByteArray(),
+		ki18n(("Boson condition editor")),
 		version,
 		description,
 		KAboutData::License_GPL,
-		"(C) 2005 Andreas Beckermann",
-		0,
+		ki18n("(C) 2005 Andreas Beckermann"),
+		KLocalizedString(),
 		"http://boson.eu.org");
- about.addAuthor( "Andreas Beckermann", I18N_NOOP("Coding & Current Maintainer"), "b_mann@gmx.de" );
+ about.addAuthor(ki18n("Andreas Beckermann"), ki18n("Coding & Current Maintainer"), "b_mann@gmx.de" );
+
+ KCmdLineOptions options;
+ options.add("+[FILE]", ki18n(".bpf or .bsg file to open."));
 
  Q3CString argv0(argv[0]);
  KCmdLineArgs::init(argc, argv, &about);
@@ -91,10 +88,8 @@ int main(int argc, char **argv)
 	w->slotLoadFile(file);
  }
 
- BoDebugDCOPIface* iface = new BoDebugDCOPIface();
  args->clear();
  int r = app.exec();
- delete iface;
  return r;
 }
 
@@ -144,7 +139,7 @@ BoConditionEditorMain::~BoConditionEditorMain()
 
 void BoConditionEditorMain::slotSelectFile()
 {
- QString file = KFileDialog::getOpenFileName(QString::null, "*.bpf *.bsg", this);
+ QString file = KFileDialog::getOpenFileName(QString(), "*.bpf *.bsg", this);
  if (file.isEmpty()) {
 	return;
  }
@@ -373,7 +368,7 @@ bool BoConditionEditorMain::parsePlayerIds(const KArchiveFile* file)
 
 void BoConditionEditorMain::slotSelectSaveFile()
 {
- QString file = KFileDialog::getSaveFileName(QString::null, "*.bpf *.bsg", this);
+ QString file = KFileDialog::getSaveFileName(QString(), "*.bpf *.bsg", this);
  if (file.isEmpty()) {
 	return;
  }
@@ -470,13 +465,13 @@ bool BoConditionEditorMain::saveFile(KTar* save, const QString& path, const KArc
 				}
 			}
 
-			QString xml = doc.toString();
-			if (!save->writeFile(fullName, from->user(), from->group(), xml.length(), xml.data())) {
+			QByteArray xml = doc.toByteArray();
+			if (!save->writeFile(fullName, from->user(), from->group(), xml.data(), xml.length())) {
 				boError() << k_funcinfo << "could not save " << fullName << endl;
 				return false;
 			}
 		} else {
-			if (!save->writeFile(fullName, from->user(), from->group(), f->size(), f->data())) {
+			if (!save->writeFile(fullName, from->user(), from->group(), f->data(), f->size())) {
 				boError() << k_funcinfo << "could not save " << fullName << endl;
 				return false;
 			}

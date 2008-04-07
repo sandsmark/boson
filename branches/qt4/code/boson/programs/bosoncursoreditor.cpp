@@ -26,7 +26,8 @@
 #include "bodebug.h"
 #include "bofiledialog.h"
 
-#include <ksimpleconfig.h>
+#include <KConfig>
+#include <KConfigGroup>
 #include <klocale.h>
 #include <knuminput.h>
 #include <kstandarddirs.h>
@@ -96,24 +97,24 @@ SpriteConfig::~SpriteConfig()
 void SpriteConfig::load(const QString& file)
 {
  boDebug() << k_funcinfo << file << endl;
- KSimpleConfig cfg(file);
+ KConfig cfg(file, KConfig::SimpleConfig);
  if (!cfg.hasGroup("Boson Cursor")) {
 	boError() << k_funcinfo << file << " has no Boson Cursor group" << endl;
 	return;
  }
- cfg.setGroup("Boson Cursor");
- unsigned int hotspotX = cfg.readUnsignedNumEntry("HotspotX", 0);
- unsigned int hotspotY = cfg.readUnsignedNumEntry("HotspotY", 0);
- QString prefix = cfg.readEntry("FilePrefix", QString("Cursor-"));
- bool animated = cfg.readBoolEntry("IsAnimated", false);
+ KConfigGroup group = cfg.group("Boson Cursor");
+ unsigned int hotspotX = group.readEntry("HotspotX", (unsigned int)0);
+ unsigned int hotspotY = group.readEntry("HotspotY", (unsigned int)0);
+ QString prefix = group.readEntry("FilePrefix", QString("Cursor-"));
+ bool animated = group.readEntry("IsAnimated", false);
  unsigned int speed = 0;
  unsigned int frames = 1;
  int rotateDegree = 0;
  if (animated) {
-	cfg.setGroup("Animation");
-	speed = cfg.readUnsignedNumEntry("Speed", 0);
-	frames = cfg.readUnsignedNumEntry("FrameCount", 1);
-	rotateDegree = cfg.readNumEntry("RotateDegree", 0);
+	KConfigGroup animationGroup = cfg.group("Animation");
+	speed = animationGroup.readEntry("Speed", (unsigned int)0);
+	frames = animationGroup.readEntry("FrameCount", (unsigned int)1);
+	rotateDegree = animationGroup.readEntry("RotateDegree", (int)0);
  }
  mHotspotX->setValue(hotspotX);
  mHotspotY->setValue(hotspotY);
@@ -128,17 +129,17 @@ void SpriteConfig::load(const QString& file)
 void SpriteConfig::save(const QString& file)
 {
  boDebug() << k_funcinfo << file << endl;
- KSimpleConfig cfg(file);
- cfg.setGroup("Boson Cursor");
- cfg.writeEntry("HotspotX", (unsigned int)mHotspotX->value());
- cfg.writeEntry("HotspotY", (unsigned int)mHotspotY->value());
- cfg.writeEntry("FilePrefix", mFilePrefix->text());
- cfg.writeEntry("IsAnimated", mIsAnimated->isChecked());
+ KConfig cfg(file, KConfig::SimpleConfig);
+ KConfigGroup group = cfg.group("Boson Cursor");
+ group.writeEntry("HotspotX", (unsigned int)mHotspotX->value());
+ group.writeEntry("HotspotY", (unsigned int)mHotspotY->value());
+ group.writeEntry("FilePrefix", mFilePrefix->text());
+ group.writeEntry("IsAnimated", mIsAnimated->isChecked());
  if (mIsAnimated->isChecked()) {
-	cfg.setGroup("Animation");
-	cfg.writeEntry("Speed", (unsigned int)mAnimationSpeed->value());
-	cfg.writeEntry("FrameCount", (unsigned int)mFrameCount->value());
-	cfg.writeEntry("RotateDegree", (int)mRotateDegree->value());
+	KConfigGroup animationGroup = cfg.group("Animation");
+	animationGroup.writeEntry("Speed", (unsigned int)mAnimationSpeed->value());
+	animationGroup.writeEntry("FrameCount", (unsigned int)mFrameCount->value());
+	animationGroup.writeEntry("RotateDegree", (int)mRotateDegree->value());
  }
 }
 
@@ -212,7 +213,7 @@ QStringList BosonCursorEditor::findCursorThemes(const QString& directory)
  subdirs.remove(QString::fromLatin1("."));
  subdirs.remove(QString::fromLatin1("..")); // umm.. iirc there was a function to do this automatically... can't remember it :(
  QStringList list;
- for (unsigned int i = 0; i < subdirs.count(); i++) {
+ for (int i = 0; i < subdirs.count(); i++) {
 	QString path = dir.absPath() + QString::fromLatin1("/") + subdirs[i];
 	if (QFile::exists(path + QString::fromLatin1("/index.cursor"))) {
 		list.append(path);
@@ -279,7 +280,7 @@ void BosonCursorEditor::addType(const QString& theme, const QString& type)
  mCursorTypes.append(path + type);
 
  QString name = type;
- KSimpleConfig cfg(path + type + QString::fromLatin1("/index.cursor"));
+ KConfig cfg(path + type + QString::fromLatin1("/index.cursor"), KConfig::SimpleConfig);
  if (!cfg.hasGroup("Boson Cursor")) {
 	boWarning() << k_funcinfo << "Invalid index.cursor file for " << path + type << endl;
 	name += QString::fromLatin1(" (Invalid index.cursor)");
@@ -338,12 +339,12 @@ void BosonCursorEditor::changeBaseDirectory(const QString& dir)
  mCursorTypes.clear();
  mBaseDirectory->setText(dir);
  for (int i = 0; i < (int)themes.count(); i++) {
-	KSimpleConfig cfg(themes[i] + QString::fromLatin1("/index.cursor"));
+	KConfig cfg(themes[i] + QString::fromLatin1("/index.cursor"), KConfig::SimpleConfig);
 	if (!cfg.hasGroup("Boson Cursor")) {
 		boWarning() << "invalid cursor " << themes[i] << endl;
 	} else {
-		cfg.setGroup("Boson Cursor");
-		QString name = cfg.readEntry("Name", i18n("Unknown"));
+		KConfigGroup group = cfg.group("Boson Cursor");
+		QString name = group.readEntry("Name", i18n("Unknown"));
 		mCursorTheme->insertItem(name);
 		mCursorThemes.append(themes[i]);
 	}

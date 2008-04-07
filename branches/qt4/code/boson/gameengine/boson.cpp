@@ -455,6 +455,7 @@ bool BoGameLogSaver::saveNetworkLog()
 
 bool BoGameLogSaver::saveBoDebugLog()
 {
+#if 0
  BoDebugLog* debugLog = BoDebugLog::debugLog();
  if (!debugLog) {
 	BO_NULL_ERROR(debugLog);
@@ -497,6 +498,10 @@ bool BoGameLogSaver::saveBoDebugLog()
  }
 
  log.close();
+#else
+#warning FIXME: BoDebugLog is disabled
+ boWarning() << k_funcinfo << "FIXME: BoDebugLog is disabled";
+#endif
  return true;
 }
 

@@ -19,7 +19,7 @@
 #ifndef BOEDITTURRETPROPERTIESDIALOG_H
 #define BOEDITTURRETPROPERTIESDIALOG_H
 
-#include <kdialogbase.h>
+#include <KDialog>
 #include <q3listview.h>
 
 #include <lib3ds/types.h>
@@ -31,11 +31,11 @@ class BoEditTurretPropertiesDialogPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BoEditTurretPropertiesDialog : public KDialogBase
+class BoEditTurretPropertiesDialog : public KDialog
 {
 	Q_OBJECT
 public:
-	BoEditTurretPropertiesDialog(QWidget* parent, bool modal = false);
+	BoEditTurretPropertiesDialog(QWidget* parent);
 	~BoEditTurretPropertiesDialog();
 
 	void setModelFile(const QString& file);
