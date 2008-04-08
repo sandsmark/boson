@@ -41,7 +41,9 @@
 //#define CHECK_ENEMIES_ONLY_AT_WAYPOINT
 
 
-Q3ValueVector<BoVector2Fixed> UnitMover::mCellIntersectionTable[11][11];
+const int mCellIntersectionTableWidth = 11;
+const int mCellIntersectionTableHeight = 11;
+Q3ValueVector<BoVector2Fixed> UnitMover::mCellIntersectionTable[mCellIntersectionTableWidth][mCellIntersectionTableHeight];
 
 
 UnitMover::UnitMover(Unit* u)
@@ -124,8 +126,8 @@ void UnitMover::initCellIntersectionTable()
  //  would be on if it would move from (0; 0) to a certain point in straight
  //  line
  // This code is entirely taken from TA Spring project
- for(int y = 0; y < 11; y++) {
-	for(int x = 0; x < 11; x++) {
+ for(int y = 0; y < mCellIntersectionTableHeight; y++) {
+	for(int x = 0; x < mCellIntersectionTableWidth; x++) {
 		BoVector2Fixed start(0.5, 0.5);
 		BoVector2Fixed to(x - 5 + 0.5, y - 5 + 0.5);
 
@@ -795,7 +797,6 @@ void UnitMoverLand::advanceMoveInternal5(unsigned int)
 	return;
  }
 
- BO_CHECK_NULL_RET(mNextWaypointIntersections);
  if (unit()->pathPointCount() == 0) {
 	// This is allowed and means that unit will stop after this advance call
 	return;
@@ -805,6 +806,7 @@ void UnitMoverLand::advanceMoveInternal5(unsigned int)
 	// Probably unit stopped to attack other units
 	return;
  }
+ BO_CHECK_NULL_RET(mNextWaypointIntersections);
 
  // Check if we need to wait
  // Find the next cell we'll be on
@@ -915,11 +917,16 @@ void UnitMoverLand::currentPathPointChanged(int unitx, int unity)
  if (unitProperties()->isAircraft()) {
 	return;
  }
- int xindex = (int)unit()->currentPathPoint().x() - unitx + 5;
- int yindex = (int)unit()->currentPathPoint().y() - unity + 5;
- mNextWaypointIntersectionsXOffset = unitx;
- mNextWaypointIntersectionsYOffset = unity;
- mNextWaypointIntersections = &mCellIntersectionTable[xindex][yindex];
+ mNextWaypointIntersections = 0;
+ if (pathPointCount() > 0) {
+	int xindex = (int)unit()->currentPathPoint().x() - unitx + 5;
+	int yindex = (int)unit()->currentPathPoint().y() - unity + 5;
+	mNextWaypointIntersectionsXOffset = unitx;
+	mNextWaypointIntersectionsYOffset = unity;
+	if (xindex >= 0 && yindex >= 0 && xindex < mCellIntersectionTableWidth && yindex < mCellIntersectionTableHeight) {
+		mNextWaypointIntersections = &mCellIntersectionTable[xindex][yindex];
+	}
+ }
 }
 
 int UnitMoverLand::selectNextPathPoint(int xpos, int ypos)

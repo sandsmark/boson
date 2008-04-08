@@ -1375,6 +1375,9 @@ unsigned int Unit::pathPointCount() const
 
 const BoVector2Fixed& Unit::currentPathPoint()
 {
+ if (d->mPathPoints.isEmpty()) {
+	boError() << k_funcinfo << "currentPathPoint() must not be called if pathPointCount()==0!";
+ }
  return d->mPathPoints.first();
 }
 
