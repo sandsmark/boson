@@ -172,6 +172,7 @@ SpeciesTheme* TestFrameWork::createAndLoadDummySpeciesTheme(const QColor& teamCo
 		stream << "Producer=2\n";
 		stream << "\n";
 		stream << "[Boson Facility]\n";
+		stream << "Dummy = This entry is here just to prevent KConfig from deleting this group";
 	} else if (id == 3) {
 		// id==3 is a factory that produces mobile units
 		stream << "IsFacility=true\n";
