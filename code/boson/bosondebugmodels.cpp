@@ -79,7 +79,7 @@ void BosonDebugModels::slotUpdate()
 	item->setText(2, memoryString(indexArrayMemory));
  }
 
- mModelCount->setText(i18n("%1").arg(models.count()));
+ mModelCount->setText(i18n("%1", models.count()));
  mPointArrayMemorySum->setText(memoryString(pointArrayMemorySum));
  mIndexArrayMemorySum->setText(memoryString(indexArrayMemorySum));
 }
@@ -91,11 +91,11 @@ QString BosonDebugModels::memoryString(long int bytes) const
 	return string;
  }
  if (bytes < 1024) {
-	string = i18n("%1 B").arg(bytes);
+	string = i18n("%1 B", bytes);
  } else if (bytes < 1024 * 1024) {
-	string = i18n("%1 KB").arg(((float)bytes) / 1024.0f);
+	string = i18n("%1 KB", ((float)bytes) / 1024.0f);
  } else {
-	string = i18n("%1 MB").arg(((float)bytes) / (1024.0f * 1024.0f));
+	string = i18n("%1 MB", ((float)bytes) / (1024.0f * 1024.0f));
  }
  return string;
 }

@@ -172,7 +172,7 @@ void KGameCellDebug::slotUpdateCell(Q3ListViewItem* item)
 	if (RTTI::isUnit((*it)->rtti())) {
 		i->setText(0, QString::number(((Unit*)*it)->id()));
 	} else {
-		i->setText(0, i18n("No unit - rtti=%1").arg((*it)->rtti()));
+		i->setText(0, i18n("No unit - rtti=%1", (*it)->rtti()));
 	}
  }
  

@@ -2548,24 +2548,24 @@ void BosonGameView::slotGameOver()
 			localLost = true;
 		}
 		if (loser.isEmpty()) {
-			loser = i18n("%1").arg(io->name());
+			loser = i18n("%1", io->name());
 		} else {
-			loser = i18n("%1, %1").arg(loser).arg(io->name());
+			loser = i18n("%1, %1", loser, io->name());
 		}
 	} else if (io->hasWon()) {
 		if (io == localPlayerIO()) {
 			localWon = true;
 		}
 		if (winner.isEmpty()) {
-			winner = i18n("%1").arg(io->name());
+			winner = i18n("%1", io->name());
 		} else {
-			winner = i18n("%1, %1").arg(winner).arg(io->name());
+			winner = i18n("%1, %1", winner, io->name());
 		}
 	} else {
 		if (rest.isEmpty()) {
-			rest = i18n("%1").arg(io->name());
+			rest = i18n("%1", io->name());
 		} else {
-			rest = i18n("%1, %1").arg(rest).arg(io->name());
+			rest = i18n("%1, %1", rest, io->name());
 		}
 	}
  }
@@ -2585,15 +2585,15 @@ void BosonGameView::slotGameOver()
 	local = i18n("You can't decide whether to win or to lose hm? Booring!");
  }
  if (!rest.isEmpty()) {
-	rest = i18n("Neither winner nor loser: %1").arg(rest);
+	rest = i18n("Neither winner nor loser: %1", rest);
  }
  KMessageBox::information(0,
 		i18n("The game is over.\n"
 		"Winner: %1\nLoser: %2\n"
 		"%3\n"
 		"\n%4\n"
-		"This messagebox means that the developers have been too lazy to implement a nice gameover dialog. Sorry about this, but you didn't help, so it's your fault!")
-		.arg(winner).arg(loser).arg(rest).arg(local),
+		"This messagebox means that the developers have been too lazy to implement a nice gameover dialog. Sorry about this, but you didn't help, so it's your fault!",
+		 winner, loser, rest, local),
 		i18n("Game is over"));
 
  QTimer::singleShot(0, this, SIGNAL(signalEndGame()));

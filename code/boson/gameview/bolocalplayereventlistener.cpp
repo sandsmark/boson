@@ -82,7 +82,7 @@ void BoLocalPlayerEventListener::processEvent(const BoEvent* event)
 	}
 	if (prop->isFacility()) {
 		boGame->slotAddChatSystemMessage(
-				i18n("A %1 has been produced - place it on the map to start the construction!").arg(prop->name()),
+				i18n("A %1 has been produced - place it on the map to start the construction!", prop->name()),
 				playerIO()->player());
 	} else {
 		// actually it has been placed already, but who cares
@@ -90,7 +90,7 @@ void BoLocalPlayerEventListener::processEvent(const BoEvent* event)
 		// --> this way we dont say something wrong when placing
 		// the unit failed
 		boGame->slotAddChatSystemMessage(
-				i18n("A %1 has been produced and will be placed on the map now").arg(prop->name()),
+				i18n("A %1 has been produced and will be placed on the map now", prop->name()),
 				playerIO()->player());
 	}
  } else if (event->name() == "LostMinimap") {

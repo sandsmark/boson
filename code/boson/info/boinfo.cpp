@@ -410,7 +410,7 @@ QString BoInfo::keyToName(int key)
 	return QString::null;
  }
  if (key > CompileOffset) {
-	return i18n("Compilation %1").arg(keyToName(key - CompileOffset));
+	return i18n("Compilation %1", keyToName(key - CompileOffset));
  }
  QString string;
  switch (key) {
@@ -547,13 +547,13 @@ QString BoInfo::keyToName(int key)
 		string = i18n("Kernel Module (tdfx) string");
 		break;
 	case BoInfo::HaveXExtLibGLX_a:
-		string = i18n("Have %1").arg(XEXTLIBGLX_A);
+		string = i18n("Have %1", QString::fromLatin1(XEXTLIBGLX_A));
 		break;
 	case BoInfo::HaveXExtLibGLX_so:
-		string = i18n("Have %1").arg(XEXTLIBGLX_SO);
+		string = i18n("Have %1", QString::fromLatin1(XEXTLIBGLX_SO));
 		break;
 	case BoInfo::HaveXExtLibGLCore_a:
-		string = i18n("Have %1").arg(XEXTLIBGLCORE_A);
+		string = i18n("Have %1", QString::fromLatin1(XEXTLIBGLCORE_A));
 		break;
 	case BoInfo::HaveLibGL_so:
 		string = i18n("Have libGL.so");
@@ -565,7 +565,7 @@ QString BoInfo::keyToName(int key)
 		string = i18n("Have libGLcore.so.1 (NVidia)");
 		break;
 	case BoInfo::HaveProprietaryNVidiaXDriver:
-		string = i18n("Have the proprietary %1").arg(NVIDIAXDRIVER);
+		string = i18n("Have the proprietary %1", QString::fromLatin1(NVIDIAXDRIVER));
 		break;
 	case BoInfo::DevNVidiaCTL:
 		string = i18n("/dev/nvidiactl");
@@ -720,16 +720,16 @@ QStringList BoInfo::checkProprietaryNVidiaDriver() const
  // TODO: ensure the glx X-server module is loaded
  // TODO: ensure the nvidia driver is actually loaded (*not* nv)
  if (!getString(BoInfo::HaveXExtLibGLX_a).isEmpty()) {
-	list.append(i18n("%1 exists (it should not)").arg(XEXTLIBGLX_A));
+	list.append(i18n("%1 exists (it should not)", QString::fromLatin1(XEXTLIBGLX_A)));
  }
  if (!getString(BoInfo::HaveXExtLibGLCore_a).isEmpty()) {
-	list.append(i18n("%1 exists (it should not)").arg(XEXTLIBGLCORE_A));
+	list.append(i18n("%1 exists (it should not)", QString::fromLatin1(XEXTLIBGLCORE_A)));
  }
  if (getString(BoInfo::HaveProprietaryNVidiaXDriver).isEmpty()) {
-	list.append(i18n("%1 does not exists (but it should)").arg(NVIDIAXDRIVER));
+	list.append(i18n("%1 does not exists (but it should)", QString::fromLatin1(NVIDIAXDRIVER)));
  }
  if (getString(BoInfo::HaveXExtLibGLX_so).isEmpty()) {
-	list.append(i18n("%1 does not exists (but it should)").arg(XEXTLIBGLX_SO));
+	list.append(i18n("%1 does not exists (but it should)", QString::fromLatin1(XEXTLIBGLX_SO)));
  }
  if (getString(BoInfo::HaveLibGL_so).isEmpty()) {
 	list.append(i18n("libGL.so not found. Probably a boson bug - please tell us where your libGL.so resides."));
@@ -750,27 +750,27 @@ QStringList BoInfo::checkProprietaryNVidiaDriver() const
  int ret = getInt(BoInfo::DevNVidiaCTL);
  if (ret != CharSuccess) {
 	QString error = makeCharacterDeviceErrorString(ret);
-	list.append(i18n("Problem with %1: %2").arg("/dev/nvidiactl").arg(error));
+	list.append(i18n("Problem with %1: %2", QString::fromLatin1("/dev/nvidiactl"), error));
  }
  ret = getInt(BoInfo::DevNVidia0);
  if (ret != CharSuccess) {
 	QString error = makeCharacterDeviceErrorString(ret);
-	list.append(i18n("Problem with %1: %2").arg("/dev/nvidia0").arg(error));
+	list.append(i18n("Problem with %1: %2", QString::fromLatin1("/dev/nvidia0"), error));
  }
  ret = getInt(BoInfo::DevNVidia1);
  if (ret != CharSuccess) {
 	QString error = makeCharacterDeviceErrorString(ret);
-	list.append(i18n("Problem with %1: %2").arg("/dev/nvidia1").arg(error));
+	list.append(i18n("Problem with %1: %2", QString::fromLatin1("/dev/nvidia1"), error));
  }
  ret = getInt(BoInfo::DevNVidia2);
  if (ret != CharSuccess) {
 	QString error = makeCharacterDeviceErrorString(ret);
-	list.append(i18n("Problem with %1: %2").arg("/dev/nvidia2").arg(error));
+	list.append(i18n("Problem with %1: %2", QString::fromLatin1("/dev/nvidia2"), error));
  }
  ret = getInt(BoInfo::DevNVidia3);
  if (ret != CharSuccess) {
 	QString error = makeCharacterDeviceErrorString(ret);
-	list.append(i18n("Problem with %1: %2").arg("/dev/nvidia3").arg(error));
+	list.append(i18n("Problem with %1: %2", QString::fromLatin1("/dev/nvidia3"), error));
  }
  // TODO: finally the nvcheck.sh script checks for duplicated libGL
  // installations. we should do so as well.

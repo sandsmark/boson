@@ -281,12 +281,12 @@ protected:
 			mOil->hide();
 		}
 		if (m->minerals() >= 0) {
-			mMinerals->setText(i18n("Minerals: %1").arg(m->minerals()));
+			mMinerals->setText(i18n("Minerals: %1", m->minerals()));
 		} else {
 			mMinerals->setText(i18n("Minerals: unlimited"));
 		}
 		if (m->oil() >= 0) {
-			mOil->setText(i18n("Oil: %1").arg(m->oil()));
+			mOil->setText(i18n("Oil: %1", m->oil()));
 		} else {
 			mOil->setText(i18n("Oil: unlimited"));
 		}
@@ -389,7 +389,7 @@ void BosonInfoWidget::showUnit(const PlayerIO* player, const UnitProperties* pro
  }
 
  QString info;
- info = i18n("%1\n").arg(prop->name());
+ info = i18n("%1\n", prop->name());
  if (gameMode) {
 	info += QString("Minerals: %2\nOil: %3\n")
 			.arg(prop->mineralCost()).arg(prop->oilCost());
@@ -425,12 +425,12 @@ void BosonInfoWidget::showTechnology(const PlayerIO* player, const UpgradeProper
  }
 
  QString info;
- info = i18n("%1\n").arg(prop->upgradeName());
+ info = i18n("%1\n", prop->upgradeName());
  if (gameMode) {
 	// TODO: if the requirements are not met yet: display missing
 	// requirements
-	info += i18n("Minerals: %2\nOil: %3\n")
-			.arg(prop->mineralCost()).arg(prop->oilCost());
+	info += i18n("Minerals: %2\nOil: %3\n",
+			 prop->mineralCost(), prop->oilCost());
  }
  if (!prop->upgradeDescription().isEmpty()) {
 	if (!info.isEmpty()) {

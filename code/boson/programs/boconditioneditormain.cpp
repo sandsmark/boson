@@ -151,7 +151,7 @@ void BoConditionEditorMain::slotLoadFile(const QString& file)
  reset();
  mFile = new KTar(file, QString::fromLatin1("application/x-gzip"));
  if (!mFile->open(QIODevice::ReadOnly)) {
-	KMessageBox::sorry(this, i18n("Could not open %1 for reading").arg(file));
+	KMessageBox::sorry(this, i18n("Could not open %1 for reading", file));
 	mFile->close();
 	reset();
 	return;
@@ -167,7 +167,7 @@ void BoConditionEditorMain::slotLoadFile(const QString& file)
 	}
  }
  if (!topLevelDir) {
-	KMessageBox::sorry(this, i18n("Error while reading %1. Cannot retrieve toplevel directory.").arg(file));
+	KMessageBox::sorry(this, i18n("Error while reading %1. Cannot retrieve toplevel directory.", file));
 	mFile->close();
 	reset();
 	return;
@@ -189,13 +189,13 @@ void BoConditionEditorMain::slotLoadFile(const QString& file)
 			const KArchiveFile* f = (const KArchiveFile*)e;
 			if ((*it).endsWith(".xml")) {
 				if (!loadXMLFile(f)) {
-					KMessageBox::sorry(this, i18n("File format error in %1: Loading %2 failed.").arg(file).arg(*it));
+					KMessageBox::sorry(this, i18n("File format error in %1: Loading %2 failed.", file, *it));
 					reset();
 					return;
 				}
 				if ((*it) == "players.xml") {
 					if (!parsePlayerIds(f)) {
-						KMessageBox::sorry(this, i18n("File format error in %1: Parsing PlayerIds in %2 failed. Maybe the file format was too old.").arg(file).arg(*it));
+						KMessageBox::sorry(this, i18n("File format error in %1: Parsing PlayerIds in %2 failed. Maybe the file format was too old.", file, *it));
 						reset();
 						return;
 					}
@@ -309,9 +309,9 @@ bool BoConditionEditorMain::loadXMLFile(const KArchiveFile* file)
 		boError() << k_funcinfo << "NULL element?!" << endl;
 		return false;
 	}
-	QString name = i18n("%1").arg(file->name());
+	QString name = i18n("%1", file->name());
 	if (file->name() == "canvas.xml") {
-		name = i18n("Global conditions (%1)").arg(file->name());
+		name = i18n("Global conditions (%1)", file->name());
 	}
 	Q3ListBoxText* item = new Q3ListBoxText(mConditions, name);
 	mItem2Element.insert(item, e);
@@ -373,7 +373,7 @@ void BoConditionEditorMain::slotSelectSaveFile()
 	return;
  }
  if (QFile::exists(file)) {
-	int r = KMessageBox::questionYesNo(this, i18n("The file %1 already exists. Overwrite?").arg(file));
+	int r = KMessageBox::questionYesNo(this, i18n("The file %1 already exists. Overwrite?", file));
 	if (r != KMessageBox::Yes) {
 		return;
 	}
@@ -391,7 +391,7 @@ void BoConditionEditorMain::slotSaveFile(const QString& fileName)
  }
  KTar save(fileName, QString::fromLatin1("application/x-gzip"));
  if (!save.open(QIODevice::WriteOnly)) {
-	KMessageBox::sorry(this, i18n("Could not open %1 for saving").arg(fileName));
+	KMessageBox::sorry(this, i18n("Could not open %1 for saving", fileName));
 	return;
  }
  const KArchiveDirectory* fromRoot = mFile->directory();

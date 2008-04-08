@@ -434,7 +434,7 @@ void BoCanvasEventListener::processEvent(const BoEvent* event)
 		boError(360) << k_funcinfo << "could not find specified player " << event->playerId() << endl;
 		return;
 	}
-	boGame->slotAddChatSystemMessage(i18n("%1 has lost all units").arg(p->name()));
+	boGame->slotAddChatSystemMessage(i18n("%1 has lost all units", p->name()));
 
 	checkGameOverAndEndGame();
  } else if (event->name() == "PlayerLost") {
@@ -451,7 +451,7 @@ void BoCanvasEventListener::processEvent(const BoEvent* event)
 	boGame->killPlayer(p);
 	p->setOutOfGame();
 
-	boGame->slotAddChatSystemMessage(i18n("%1 has lost and is out of the game").arg(p->name()));
+	boGame->slotAddChatSystemMessage(i18n("%1 has lost and is out of the game", p->name()));
  } else if (event->name() == "PlayerWon") {
 	Player* p = (Player*)boGame->findPlayerByUserId(event->playerId());
 	if (!p) {
@@ -465,7 +465,7 @@ void BoCanvasEventListener::processEvent(const BoEvent* event)
 	boDebug() << k_funcinfo << endl;
 	emit signalGameOver();
  } else if (event->name() == "CustomStringEvent") {
-	boGame->slotAddChatSystemMessage(i18n("Received CustomStringEvent - parameter1: %1").arg(event->data1()));
+	boGame->slotAddChatSystemMessage(i18n("Received CustomStringEvent - parameter1: %1", event->data1()));
  }
 }
 

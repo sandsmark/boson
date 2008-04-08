@@ -298,7 +298,7 @@ void BoUfoLoadSaveGameWidget::slotDelete()
  }
  QString file = w->file();
  int r = KMessageBox::questionYesNoCancel(0,
-		i18n("Do you really want to delete %1 ?").arg(QFileInfo(file).fileName()),
+		i18n("Do you really want to delete %1 ?", QFileInfo(file).fileName()),
 		QString(), KStandardGuiItem::yes(), KStandardGuiItem::no(), KStandardGuiItem::cancel(),
 		"ConfirmDeleteGame");
  if (r != KMessageBox::Yes) {

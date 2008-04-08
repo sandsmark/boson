@@ -133,7 +133,7 @@ void ProductionPlugin::addProduction(ProductionType type, quint32 id)
 	}
 	if (!canCurrentlyProduceUnit(id)) {
 		boError() << k_funcinfo << " cannot produce unit witht type " << id << endl;
-		game()->slotAddChatSystemMessage(i18n("Cannot produce unit %1").arg(prop->name()), player());
+		game()->slotAddChatSystemMessage(i18n("Cannot produce unit %1", prop->name()), player());
 		return;
 	}
  } else if (type == ProduceTech) {
@@ -144,7 +144,7 @@ void ProductionPlugin::addProduction(ProductionType type, quint32 id)
 	}
 	if (!canCurrentlyProduceTechnology(id)) {
 		boError() << k_funcinfo << " cannot produce technology with id " << id << endl;
-		game()->slotAddChatSystemMessage(i18n("Cannot produce technology %1").arg(prop->upgradeName()), player());
+		game()->slotAddChatSystemMessage(i18n("Cannot produce technology %1", prop->upgradeName()), player());
 		return;
 	}
  } else {
@@ -478,7 +478,7 @@ void ProductionPlugin::productionCompleted()
  }
  boDebug() << k_funcinfo << "Cannot find free cell around facility :-(" << endl;
  game()->slotAddChatSystemMessage(
-		i18n("%1 could not be placed on the map - no free cell found. Place it manuall!").arg(prop->name()),
+		i18n("%1 could not be placed on the map - no free cell found. Place it manuall!", prop->name()),
 		player());
 
 }
@@ -513,7 +513,7 @@ void ProductionPlugin::unitDestroyed(Unit* destroyedUnit)
 	abortProduction(abort[i].first, abort[i].second);
  }
  if (abort.count() > 0) {
-	game()->slotAddChatSystemMessage(i18n("Production in %1 got aborted because %2 was required but destroyed").arg(unit()->name()).arg(destroyedUnit->name()), player());
+	game()->slotAddChatSystemMessage(i18n("Production in %1 got aborted because %2 was required but destroyed", unit()->name(), destroyedUnit->name()), player());
  }
 }
 

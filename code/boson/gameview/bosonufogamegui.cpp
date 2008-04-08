@@ -535,7 +535,7 @@ void BosonUfoGameGUI::updateUfoLabels()
  double fps;
  double skippedFPS;
  fps = d->mFPSCounter->cachedFps(&skippedFPS);
- d->mFPSLabel->setText(i18n("FPS: %1\nSkipped FPS: %2").arg(fps, 0, 'f', 3).arg(skippedFPS, 0, 'f', 3));
+ d->mFPSLabel->setText(ki18n("FPS: %1\nSkipped FPS: %2").subs(fps, 0, 'f', 3).subs(skippedFPS, 0, 'f', 3).toString());
  d->mFPSLabel->setVisible(boConfig->boolValue("debug_fps"));
 
  bool renderGroundRendererDebug = boConfig->boolValue("debug_groundrenderer_debug");
@@ -633,42 +633,42 @@ void BosonUfoGameGUI::updateUfoLabelMatricesDebug()
  projModInv.transform(&result, &v);
 
  // it is a column vector, but we display as a row (so ^T)
- QString text = i18n("CursorPos = (Projection * Modelview)^(-1) * (%1 , %2 , %3 , %4)^T:").
-		arg(v[0], 6, 'f', 3).
-		arg(v[1], 6, 'f', 3).
-		arg(v[2], 6, 'f', 3).
-		arg(v[3], 6, 'f', 3);
- QString resultText = i18n("(%1 , %2 , %3 , %3)^T").
-		arg(result[0], 6, 'f', 3).
-		arg(result[1], 6, 'f', 3).
-		arg(result[2], 6, 'f', 3).
-		arg(result[3], 6, 'f', 3);
+ QString text = ki18n("CursorPos = (Projection * Modelview)^(-1) * (%1 , %2 , %3 , %4)^T:").
+		subs(v[0], 6, 'f', 3).
+		subs(v[1], 6, 'f', 3).
+		subs(v[2], 6, 'f', 3).
+		subs(v[3], 6, 'f', 3).toString();
+ QString resultText = ki18n("(%1 , %2 , %3 , %3)^T").
+		subs(result[0], 6, 'f', 3).
+		subs(result[1], 6, 'f', 3).
+		subs(result[2], 6, 'f', 3).
+		subs(result[3], 6, 'f', 3).toString();
  if (result[3] == 0.0f) {
 	d->mMatricesDebugText->setText("ERROR");
 	boError() << k_funcinfo << endl;
 	return;
  }
- QString realCoords = i18n("x = %1  ;  y = %2  ;  z = %3").
-		arg(result[0] / result[3]).
-		arg(result[1] / result[3]).
-		arg(result[2] / result[3]);
+ QString realCoords = i18n("x = %1  ;  y = %2  ;  z = %3", 
+		result[0] / result[3], 
+		result[1] / result[3], 
+		result[2] / result[3]);
 
 
 
  // display the planes. they consist of the normal vector and the
  // distance from the origin
- QString planes = i18n("Right Plane: %1\n").arg(planeDebugString(d->mViewFrustum.right()));
- planes += i18n("Left Plane: %1\n").arg(planeDebugString(d->mViewFrustum.left()));
- planes += i18n("Bottom Plane: %1\n").arg(planeDebugString(d->mViewFrustum.bottom()));
- planes += i18n("Top Plane: %1\n").arg(planeDebugString(d->mViewFrustum.top()));
- planes += i18n("Far Plane: %1\n").arg(planeDebugString(d->mViewFrustum.far()));
- planes += i18n("Near Plane: %1").arg(planeDebugString(d->mViewFrustum.near()));
+ QString planes = i18n("Right Plane: %1\n", planeDebugString(d->mViewFrustum.right()));
+ planes += i18n("Left Plane: %1\n", planeDebugString(d->mViewFrustum.left()));
+ planes += i18n("Bottom Plane: %1\n", planeDebugString(d->mViewFrustum.bottom()));
+ planes += i18n("Top Plane: %1\n", planeDebugString(d->mViewFrustum.top()));
+ planes += i18n("Far Plane: %1\n", planeDebugString(d->mViewFrustum.far()));
+ planes += i18n("Near Plane: %1", planeDebugString(d->mViewFrustum.near()));
 
  // AB: this label can be used to measure the performance of displaying multiple
  // lines in ULabel
- d->mMatricesDebugText->setText(i18n("%1\n%2\n%3\n\n%4")
-		.arg(text).arg(resultText).arg(realCoords)
-		.arg(planes));
+ d->mMatricesDebugText->setText(i18n("%1\n%2\n%3\n\n%4",
+		 text, resultText, realCoords,
+		 planes));
 }
 
 void BosonUfoGameGUI::updateUfoLabelItemWorkStatistics()
@@ -683,16 +683,16 @@ void BosonUfoGameGUI::updateUfoLabelItemWorkStatistics()
  QMap<int, int> workCounts = *statistics->workCounts();
  QString text;
  text += i18n("Item work statistics:\n");
- text += i18n("Total items: %1\n").arg(canvas()->allItemsCount());
- text += i18n("-1 (items): %1\n").arg(workCounts[-1]),
- text += i18n("Idle:     %1\n").arg(workCounts[(int)UnitBase::WorkIdle]);
- text += i18n("Moving or turning: %1\n").
-		arg(workCounts[(int)UnitBase::WorkMove] +
+ text += i18n("Total items: %1\n", canvas()->allItemsCount());
+ text += i18n("-1 (items): %1\n", workCounts[-1]),
+ text += i18n("Idle:     %1\n", workCounts[(int)UnitBase::WorkIdle]);
+ text += i18n("Moving or turning: %1\n", 
+		workCounts[(int)UnitBase::WorkMove] +
 		workCounts[(int)UnitBase::WorkTurn]);
- text += i18n("Attacking:         %1\n").
-		arg(workCounts[(int)UnitBase::WorkAttack]);
- text += i18n("Other:             %1\n").
-		arg(workCounts[(int)UnitBase::WorkConstructed] +
+ text += i18n("Attacking:         %1\n", 
+		workCounts[(int)UnitBase::WorkAttack]);
+ text += i18n("Other:             %1\n", 
+		workCounts[(int)UnitBase::WorkConstructed] +
 		workCounts[(int)UnitBase::WorkDestroyed] +
 		workCounts[(int)UnitBase::WorkFollow] +
 		workCounts[(int)UnitBase::WorkPlugin]);
@@ -713,15 +713,15 @@ void BosonUfoGameGUI::updateUfoLabelOpenGLCamera()
  const BoVector3Float up = camera()->up();
  QString text;
  text += i18n("Camera:\n");
- text += i18n("LookAt: (%1; %2; %3)\n").arg(lookAt.x()).
-		arg(lookAt.y()).arg(lookAt.z());
- text += i18n("CameraPos: (%1; %2; %3)\n").arg(cameraPos.x()).
-		arg(cameraPos.y()).arg(cameraPos.z());
- text += i18n("Up: (%1; %2; %3)\n").arg(up.x()).
-		arg(up.y()).arg(up.z());
- text += i18n("Distance: %1\n").arg(camera()->distance());
- text += i18n("Rotation: %1\n").arg(camera()->rotation());
- text += i18n("XRotation: %1\n").arg(camera()->xRotation());
+ text += i18n("LookAt: (%1; %2; %3)\n", lookAt.x(), 
+		lookAt.y(), lookAt.z());
+ text += i18n("CameraPos: (%1; %2; %3)\n", cameraPos.x(), 
+		cameraPos.y(), cameraPos.z());
+ text += i18n("Up: (%1; %2; %3)\n", up.x(), 
+		up.y(), up.z());
+ text += i18n("Distance: %1\n", camera()->distance());
+ text += i18n("Rotation: %1\n", camera()->rotation());
+ text += i18n("XRotation: %1\n", camera()->xRotation());
 
  d->mOpenGLCamera->setText(text);
 }
@@ -736,8 +736,8 @@ void BosonUfoGameGUI::updateUfoLabelRenderCounts()
  QString text;
 #define HAVE_CANVAS_RENDERER 0
 #if HAVE_CANVAS_RENDERER
- text += i18n("Items rendered: %1\n").arg(d->mCanvasRenderer->renderedItems());
- text += i18n("Particles rendered: %1\n").arg(d->mCanvasRenderer->renderedParticles());
+ text += i18n("Items rendered: %1\n", d->mCanvasRenderer->renderedItems());
+ text += i18n("Particles rendered: %1\n", d->mCanvasRenderer->renderedParticles());
 #endif
 
  text += i18n("Ground renderer statistics:\n");
@@ -754,8 +754,8 @@ void BosonUfoGameGUI::updateUfoLabelRenderCounts()
  text += i18n("\n");
 
 #if HAVE_CANVAS_RENDERER
- text += i18n("Texture binds: %1 (C: %2; I: %3; W: %4; P: %5)\n")
-		.arg(boTextureManager->textureBinds()).arg(d->mCanvasRenderer->textureBindsCells()).arg(d->mCanvasRenderer->textureBindsItems()).arg(d->mCanvasRenderer->textureBindsWater()).arg(d->mCanvasRenderer->textureBindsParticles());
+ text += i18n("Texture binds: %1 (C: %2; I: %3; W: %4; P: %5)\n",
+		 boTextureManager->textureBinds(), d->mCanvasRenderer->textureBindsCells(), d->mCanvasRenderer->textureBindsItems(), d->mCanvasRenderer->textureBindsWater(), d->mCanvasRenderer->textureBindsParticles());
 #endif
 
  d->mRenderCounts->setText(text);
@@ -769,10 +769,10 @@ void BosonUfoGameGUI::updateUfoLabelAdvanceCalls()
  }
  d->mAdvanceCalls->setVisible(true);
  QString text;
- text += i18n("Advance calls passed: %1\n").arg(boGame->advanceCallsCount());
- text += i18n("Delayed messages: %1 (delayed advance messages: %2)\n").arg(boGame->delayedMessageCount()).arg(boGame->delayedAdvanceMessageCount());
- text += i18n("Advance message interval: %1 ms\n").arg(Boson::advanceMessageInterval());
- text += i18n("Game speed (advance calls per advance message): %1\n").arg(boGame->gameSpeed());
+ text += i18n("Advance calls passed: %1\n", boGame->advanceCallsCount());
+ text += i18n("Delayed messages: %1 (delayed advance messages: %2)\n", boGame->delayedMessageCount(), boGame->delayedAdvanceMessageCount());
+ text += i18n("Advance message interval: %1 ms\n", Boson::advanceMessageInterval());
+ text += i18n("Game speed (advance calls per advance message): %1\n", boGame->gameSpeed());
  d->mAdvanceCalls->setText(text);
 }
 
@@ -784,8 +784,8 @@ void BosonUfoGameGUI::updateUfoLabelTextureMemory()
  }
  d->mTextureMemory->setVisible(true);
  QString text;
- text += i18n("Texture memory in use (approximately): %1 kb\n").arg(boTextureManager->usedTextureMemory() / 1024);
- text += i18n(" in %1 texures\n").arg(boTextureManager->textureCount());
+ text += i18n("Texture memory in use (approximately): %1 kb\n", boTextureManager->usedTextureMemory() / 1024);
+ text += i18n(" in %1 texures\n", boTextureManager->textureCount());
  d->mTextureMemory->setText(text);
 }
 
@@ -967,9 +967,9 @@ void BosonUfoGameGUI::slotBoDebugOutput(const BoDebugMessage& m)
  }
  QString from = i18n("DEBUG: ");
  if (!area.isEmpty()) {
-	from = i18n("DEBUG (%1): ").arg(area);
+	from = i18n("DEBUG (%1): ", area);
  }
- d->mUfoDebugDisplay->addMessage(i18n("%1: %2").arg(from).arg(message));
+ d->mUfoDebugDisplay->addMessage(i18n("%1: %2", from, message));
 #else
 #warning FIXME: BoDebugLog is disabled
  boWarning() << k_funcinfo << "FIXME: BoDebugLog is disabled";
@@ -986,9 +986,9 @@ void BosonUfoGameGUI::slotBoDebugWarning(const BoDebugMessage& m)
  }
  QString from = i18n("WARNING: ");
  if (!area.isEmpty()) {
-	from = i18n("WARNING(%1): ").arg(area);
+	from = i18n("WARNING(%1): ", area);
  }
- d->mUfoErrorDisplay->addMessage(i18n("%1: %2").arg(from).arg(message));
+ d->mUfoErrorDisplay->addMessage(i18n("%1: %2", from, message));
 #else
 #warning FIXME: BoDebugLog is disabled
  boWarning() << k_funcinfo << "FIXME: BoDebugLog is disabled";
@@ -1005,9 +1005,9 @@ void BosonUfoGameGUI::slotBoDebugError(const BoDebugMessage& m)
  }
  QString from = i18n("ERROR: ");
  if (!area.isEmpty()) {
-	from = i18n("ERROR(%1): ").arg(area);
+	from = i18n("ERROR(%1): ", area);
  }
- d->mUfoErrorDisplay->addMessage(i18n("%1: %2").arg(from).arg(message));
+ d->mUfoErrorDisplay->addMessage(i18n("%1: %2", from, message));
 #else
 #warning FIXME: BoDebugLog is disabled
  boWarning() << k_funcinfo << "FIXME: BoDebugLog is disabled";

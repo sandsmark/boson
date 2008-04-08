@@ -526,7 +526,7 @@ void KGameUnitDebug::updateUnitCollisions(BosonItem* item)
  Q3ValueList<Unit*> collisionsTrue = unit->unitCollisions(false);
  if (collisionsFalse.count() == 0) {
 	Q3ListViewItem* item = new Q3ListViewItem(d->mUnitCollisions);
-	item->setText(0, i18n("No unit collisions for %1").arg(unit->id()));
+	item->setText(0, i18n("No unit collisions for %1", unit->id()));
  }
 
  Q3ValueList<Unit*>::Iterator it = collisionsFalse.begin();
@@ -574,9 +574,9 @@ void KGameUnitDebug::updatePathInfo(BosonItem* item)
  }
 
  Q3ListViewItem* start = new Q3ListViewItem(d->mPathInfo, i18n("Start"));
- start->setText(1, i18n("(%1;%2)").arg(info->start.x()).arg(info->start.y()));
+ start->setText(1, i18n("(%1;%2)", info->start.x(), info->start.y()));
  Q3ListViewItem* dest = new Q3ListViewItem(d->mPathInfo, i18n("Dest"));
- dest->setText(1, i18n("(%1;%2)").arg(info->dest.x()).arg(info->dest.y()));
+ dest->setText(1, i18n("(%1;%2)", info->dest.x(), info->dest.y()));
  new Q3ListViewItem(d->mPathInfo, i18n("Range"), QString::number(info->range));
  Q3ListViewItem* target = new Q3ListViewItem(d->mPathInfo, i18n("Target"));
  if (info->target) {

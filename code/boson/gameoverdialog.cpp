@@ -83,7 +83,7 @@ void GameOverDialog::createStatistics(Boson* boson, Player* winner, Player* p)
  d->mBoson = boson;
  d->mLocalPlayer = p;
 
- d->mWinnerLabel->setText(i18n("And the winner is: %1").arg(winner->name()));
+ d->mWinnerLabel->setText(i18n("And the winner is: %1", winner->name()));
 
  foreach (Player* p, d->mBoson->gamePlayerList()) {
 	PlayerBox* winnerBox = addPlayer(p);
@@ -144,18 +144,18 @@ GameOverDialog::PlayerBox::PlayerBox(Player* p, QWidget* parent) : Q3Frame(paren
 
 
  BosonStatistics* statistics = p->statistics();
- mMinedMinerals->setText(i18n("Mined Minerals: %1").arg(statistics->minedMinerals()));
- mMinedOil->setText(i18n("Mined Oil: %1").arg(statistics->minedOil()));
- mRefinedMinerals->setText(i18n("Refined Minerals: %1").arg(statistics->refinedMinerals()));
- mRefinedOil->setText(i18n("Refined Oil: %1").arg(statistics->refinedOil()));
- mProducedUnits->setText(i18n("Produced Units: %1").arg(statistics->producedUnits()));
- mDestroyedUnits->setText(i18n("Destroyed Units: %1").arg(statistics->destroyedUnits()));
- mDestroyedOwnUnits->setText(i18n("Own Units Destroyed: %1").arg(statistics->destroyedOwnUnits()));
- mLostUnits->setText(i18n("Lost Units: %1").arg(statistics->lostUnits()));
+ mMinedMinerals->setText(i18n("Mined Minerals: %1", statistics->minedMinerals()));
+ mMinedOil->setText(i18n("Mined Oil: %1", statistics->minedOil()));
+ mRefinedMinerals->setText(i18n("Refined Minerals: %1", statistics->refinedMinerals()));
+ mRefinedOil->setText(i18n("Refined Oil: %1", statistics->refinedOil()));
+ mProducedUnits->setText(i18n("Produced Units: %1", statistics->producedUnits()));
+ mDestroyedUnits->setText(i18n("Destroyed Units: %1", statistics->destroyedUnits()));
+ mDestroyedOwnUnits->setText(i18n("Own Units Destroyed: %1", statistics->destroyedOwnUnits()));
+ mLostUnits->setText(i18n("Lost Units: %1", statistics->lostUnits()));
 
  // FIXME: this might be > 4 billion and therefore greater than unsigned long
  // int!!
- mShots->setText(i18n("Shots: %1").arg(statistics->shots()));
+ mShots->setText(i18n("Shots: %1", statistics->shots()));
 }
 
 GameOverDialog::PlayerBox::~PlayerBox()
@@ -177,6 +177,6 @@ void GameOverDialog::PlayerBox::setWinner(bool w)
  // e.g.:
  // player achieved 2nd place out of 8 -> the inverse is 7, so he received 7000
  // (or so) points. 
- mPoints->setText(i18n("Points: %1").arg(statistics->points() + winnerPoints));
+ mPoints->setText(i18n("Points: %1", statistics->points() + winnerPoints));
 }
 

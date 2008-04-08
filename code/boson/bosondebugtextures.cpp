@@ -66,21 +66,21 @@ void BosonDebugTextures::slotUpdate()
 	int approximateMemory = it.current()->memoryUsed();
 	memorySum += approximateMemory;
 
-	QString memory = i18n("%1 KB").arg(((float)approximateMemory) / 1024.0f);
+	QString memory = i18n("%1 KB", ((float)approximateMemory) / 1024.0f);
 
 	QListViewItemNumberPrefix* item = new QListViewItemNumberPrefix(mTextureList);
 	item->setText(0, file);
 	item->setText(1, memory);
  }
- mTextureCount->setText(i18n("%1").arg(textures.count()));
+ mTextureCount->setText(i18n("%1", textures.count()));
 
  QString sum;
  if (memorySum < 1024) {
-	sum = i18n("%1 B").arg(memorySum);
+	sum = i18n("%1 B", memorySum);
  } else if (memorySum < 1024 * 1024) {
-	sum = i18n("%1 KB").arg(((float)memorySum) / 1024.0f);
+	sum = i18n("%1 KB", ((float)memorySum) / 1024.0f);
  } else {
-	sum = i18n("%1 MB").arg(((float)memorySum) / (1024.0f * 1024.0f));
+	sum = i18n("%1 MB", ((float)memorySum) / (1024.0f * 1024.0f));
  }
  mTextureMemorySum->setText(sum);
 }

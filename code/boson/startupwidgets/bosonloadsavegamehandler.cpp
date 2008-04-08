@@ -89,14 +89,14 @@ void BosonLoadSaveGameHandler::slotSaveGame(const QString& fileName, const QStri
  }
  if (file[0] != '/') {
 	boError() << k_funcinfo << "filename must be absolute" << endl;
-	KMessageBox::sorry(0, i18n("Cannot save at given path (%1). Filename must be absolute at this point. Internal error.").arg(fileName));
+	KMessageBox::sorry(0, i18n("Cannot save at given path (%1). Filename must be absolute at this point. Internal error.", fileName));
 	return;
  }
  if (file.findRev('.') == -1) {
 	file += ".bsg";
  }
  if (!forceOverwrite && KStandardDirs::exists(file)) {
-	int r = KMessageBox::questionYesNo(0, i18n("File %1 already exists. Overwrite?").arg(file));
+	int r = KMessageBox::questionYesNo(0, i18n("File %1 already exists. Overwrite?", file));
 	if (r != KMessageBox::Yes) {
 		return;
 	}

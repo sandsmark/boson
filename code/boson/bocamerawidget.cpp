@@ -516,7 +516,7 @@ void BoUfoGLUCameraWidget::updateMatrixWidget()
  BoVector3Float lookAt = BoVector3Float(d->mLookAtX->value(), d->mLookAtY->value(), d->mLookAtZ->value());
  BoVector3Float orientation = cameraPos - lookAt;
  QString s = QString("(%1,%2,%3").arg(orientation[0]).arg(orientation[1]).arg(orientation[2]);
- d->mOrientation->setText(i18n("%1").arg(s));
+ d->mOrientation->setText(i18n("%1", s));
 }
 
 

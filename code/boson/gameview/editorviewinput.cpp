@@ -269,7 +269,7 @@ bool EditorViewInput::actionPlace(const BoVector3Fixed& groundCanvasVector, bool
 	}
 	if (!force && !canvas()->canPlaceUnitAtTopLeftPos(prop, BoVector2Fixed(x, y), 0)) {
 		boDebug() << k_funcinfo << "Can't place unit at " << x << " " << y << endl;
-		boGame->slotAddChatSystemMessage(i18n("You can't place a %1 there!").arg(prop->name()));
+		boGame->slotAddChatSystemMessage(i18n("You can't place a %1 there!", prop->name()));
 		ret = false;
 	} else {
 		boDebug() << k_funcinfo << "place unit " << d->mPlacement.unitType() << endl;
@@ -697,7 +697,7 @@ QString EditorViewInput::messageName(const BosonMessageEditorMove* message) cons
 				type = prop->name();
 			}
 		}
-		name = i18n("Place unit (%1)").arg(type);
+		name = i18n("Place unit (%1)", type);
 		break;
 	}
 	case BosonMessageIds::MoveUndoPlaceUnit:
@@ -715,39 +715,39 @@ QString EditorViewInput::messageName(const BosonMessageEditorMove* message) cons
 		if (m->mDeleteUnit.mItems.count() > 0) {
 			id = QString::number(m->mDeleteUnit.mItems[0]);
 		}
-		name = i18n("Place unit (%1 , ID %2)").arg(type).arg(id);
+		name = i18n("Place unit (%1 , ID %2)", type, id);
 		break;
 	}
 	case BosonMessageIds::MoveDeleteItems: // redo
 	{
 		BosonMessageEditorMoveDeleteItems* m = (BosonMessageEditorMoveDeleteItems*)message;
 		QString count = QString::number(m->mItems.count());
-		name = i18n("Delete %1 items").arg(count);
+		name = i18n("Delete %1 items", count);
 		break;
 	}
 	case BosonMessageIds::MoveUndoDeleteItems:
 	{
 		BosonMessageEditorMoveUndoDeleteItems* m = (BosonMessageEditorMoveUndoDeleteItems*)message;
 		QString count = QString::number(m->mMessage.mItems.count());
-		name = i18n("Delete %1 items").arg(count);
+		name = i18n("Delete %1 items", count);
 		break;
 	}
 	case BosonMessageIds::MoveChangeHeight: // redo
 	{
 		BosonMessageEditorMoveChangeHeight* m = (BosonMessageEditorMoveChangeHeight*)message;
 		QString count = QString::number(m->mCellCornersX.count());
-		name = i18n("Change height of %1 corners").arg(count);
+		name = i18n("Change height of %1 corners", count);
 		break;
 	}
 	case BosonMessageIds::MoveUndoChangeHeight:
 	{
 		BosonMessageEditorMoveUndoChangeHeight* m = (BosonMessageEditorMoveUndoChangeHeight*)message;
 		QString count = QString::number(m->mOriginalHeights.mCellCornersX.count());
-		name = i18n("Change height of %1 corners").arg(count);
+		name = i18n("Change height of %1 corners", count);
 		break;
 	}
 	default:
-		name = i18n("(Unknown - ID %1)").arg(message->messageId());
+		name = i18n("(Unknown - ID %1)", message->messageId());
 		break;
  }
  return name;

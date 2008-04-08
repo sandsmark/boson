@@ -737,7 +737,7 @@ void BosonMainWidget::slotAddChatSystemMessage(const QString& fromName, const QS
  if (forPlayer && forPlayer != d->mLocalPlayer) {
 	return;
  }
- d->mGameView->addChatMessage(i18n("--- %1: %2").arg(fromName).arg(text));
+ d->mGameView->addChatMessage(i18n("--- %1: %2", fromName, text));
 }
 
 void BosonMainWidget::saveConfig()

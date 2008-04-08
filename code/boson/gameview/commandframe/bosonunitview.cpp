@@ -124,8 +124,8 @@ void BosonUnitView::setUnit(Unit* u)
 	return;
  }
  d->mName->setText(unit->unitProperties()->name());
- d->mOwner->setText(i18n("Player: %1").arg(owner->name()));
- d->mId->setText(i18n("Id: %1").arg(unit->id()));
+ d->mOwner->setText(i18n("Player: %1", owner->name()));
+ d->mId->setText(i18n("Id: %1", unit->id()));
  slotUnitChanged(u);
  showGeneral();
 }
@@ -171,10 +171,10 @@ void BosonUnitView::slotUnitChanged(Unit* u)
  if (unit() != u) {
 	return;
  }
- d->mHealth->setText(i18n("Health: %1 (%2)").arg(u->health()).arg(u->maxHealth()));
- d->mArmor->setText(i18n("Armor: %1 (%2)").arg(u->armor()).arg(u->maxArmor()));
- d->mShields->setText(i18n("Shields: %1 (%2)").arg(u->shields()).arg(u->maxShields()));
- d->mSight->setText(i18n("Sight range: %1").arg(u->sightRange()));
+ d->mHealth->setText(i18n("Health: %1 (%2)", u->health(), u->maxHealth()));
+ d->mArmor->setText(i18n("Armor: %1 (%2)", u->armor(), u->maxArmor()));
+ d->mShields->setText(i18n("Shields: %1 (%2)", u->shields(), u->maxShields()));
+ d->mSight->setText(i18n("Sight range: %1", u->sightRange()));
  BosonOrderButton::slotUnitChanged(u);
 }
 

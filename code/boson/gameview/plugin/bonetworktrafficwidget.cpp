@@ -84,8 +84,8 @@ void BoNetworkTrafficWidget::slotUpdate()
  const BosonNetworkTraffic* traffic = boGame->networkTraffic();
  BO_CHECK_NULL_RET(traffic);
 
- d->mTotalSent->setText(i18n("Total bytes sent: %1").arg(traffic->totalBytesSent()));
- d->mTotalReceived->setText(i18n("Total bytes received: %1").arg(traffic->totalBytesReceived()));
+ d->mTotalSent->setText(i18n("Total bytes sent: %1", traffic->totalBytesSent()));
+ d->mTotalReceived->setText(i18n("Total bytes received: %1", traffic->totalBytesReceived()));
 
  if (traffic->statistics().count() > 0) {
 	int mostCount = 5;
@@ -119,7 +119,7 @@ void BoNetworkTrafficWidget::slotUpdate()
 	mostString += i18n("Most traffic caused by message IDs:\n");
 	for (Q3ValueList<const BosonNetworkTrafficStatistics*>::iterator it = most.begin(); it != most.end(); ++it) {
 		const BosonNetworkTrafficStatistics* s = *it;
-		mostString += i18n("ID=%1 (%2) bytes sent=%3 (%4 messages) bytes received=%5 (%6 messages)\n").arg(s->msgid()).arg(s->userMsgid()).arg(s->totalBytesSent()).arg(s->messagesSent()).arg(s->totalBytesReceived()).arg(s->messagesReceived());
+		mostString += i18n("ID=%1 (%2) bytes sent=%3 (%4 messages) bytes received=%5 (%6 messages)\n", s->msgid(), s->userMsgid(), s->totalBytesSent(), s->messagesSent(), s->totalBytesReceived(), s->messagesReceived());
 	}
 	d->mMostTraffic->setText(mostString);
  }
@@ -141,6 +141,6 @@ void BoNetworkTrafficWidget::slotUpdate()
 		break;
 	}
  }
- d->mRecentlySent->setText(i18n("Bytes sent in last %1 seconds: %2").arg(pastSeconds).arg(trafficSent));
- d->mRecentlyReceived->setText(i18n("Bytes received in last %1 seconds: %2").arg(pastSeconds).arg(trafficReceived));
+ d->mRecentlySent->setText(i18n("Bytes sent in last %1 seconds: %2", pastSeconds, trafficSent));
+ d->mRecentlyReceived->setText(i18n("Bytes received in last %1 seconds: %2", pastSeconds, trafficReceived));
 }

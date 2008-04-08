@@ -177,22 +177,22 @@ void BoTexMapImportDialog::slotSelectTexMapImage()
  QImage image(fileName);
  if (image.isNull()) {
 	boError() << k_funcinfo << "null image: fileName" << endl;
-	KMessageBox::sorry(this, i18n("Unable to load %1 as image").arg(fileName));
+	KMessageBox::sorry(this, i18n("Unable to load %1 as image", fileName));
 	return;
  }
  if ((unsigned int)image.width() != d->mMap->width() + 1 ||
 		(unsigned int)image.height() != d->mMap->height() + 1) {
 	boError() << k_funcinfo << "invalid image size" << endl;
-	KMessageBox::sorry(this, i18n("This image can't be used as texmap for this map. The map is a %1x%2 map, meaning you need a %3x%4 image.\nThe selected image (%5) is a %6x%7 image.").
-			arg(d->mMap->width()).arg(d->mMap->height()).
-			arg(d->mMap->width() + 1).arg(d->mMap->height() + 1).
-			arg(fileName).
-			arg(image.width()).arg(image.height()));
+	KMessageBox::sorry(this, i18n("This image can't be used as texmap for this map. The map is a %1x%2 map, meaning you need a %3x%4 image.\nThe selected image (%5) is a %6x%7 image.", 
+			d->mMap->width(), d->mMap->height(), 
+			d->mMap->width() + 1, d->mMap->height() + 1, 
+			fileName, 
+			image.width(), image.height()));
 	return;
  }
  if (image.depth() != 32) {
 	boError() << k_funcinfo << "bpp: " << image.depth() << endl;
-	KMessageBox::sorry(this, i18n("Only 32bpp (depth) images are supported at the moment. %1 has %2 bits per pixel").arg(fileName).arg(image.depth()));
+	KMessageBox::sorry(this, i18n("Only 32bpp (depth) images are supported at the moment. %1 has %2 bits per pixel", fileName, image.depth()));
 	return;
  }
 

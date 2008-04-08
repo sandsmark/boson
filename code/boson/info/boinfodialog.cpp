@@ -623,13 +623,13 @@ void BoInfoDialog::slotSaveToFile()
  QFileInfo fileInfo(file);
  if (fileInfo.exists()) {
 	int ok = KMessageBox::questionYesNoCancel(this,
-			i18n("The file %1 does already exists. Do you want to overwrite it?").arg(file));
+			i18n("The file %1 does already exists. Do you want to overwrite it?", file));
 	if (ok != KMessageBox::Yes) {
 		return;
 	}
  }
  if (!d->data()->saveToFile(file)) {
-	KMessageBox::sorry(this, i18n("Unable to save to file %1").arg(file));
+	KMessageBox::sorry(this, i18n("Unable to save to file %1", file));
  }
 }
 

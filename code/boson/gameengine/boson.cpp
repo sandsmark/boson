@@ -1010,7 +1010,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, quint32 , quint
 		BO_CHECK_NULL_RET(p);
 		BO_CHECK_NULL_RET(d->mCanvas);
 		killPlayer(p);
-		slotAddChatSystemMessage(i18n("Debug"), i18n("Killed player %1 - %2").arg(p->bosonId()).arg(p->name()));
+		slotAddChatSystemMessage(i18n("Debug"), i18n("Killed player %1 - %2", p->bosonId(), p->name()));
 		break;
 	}
 	case BosonMessageIds::IdModifyMinerals:
@@ -1284,7 +1284,7 @@ void Boson::slotReplacePlayerIO(KPlayer* player, bool* remove)
 	return;
  }
 #endif
- slotAddChatSystemMessage(i18n("Player %1(%2) left the game. Units of that player remain on the map.").arg(player->name()).arg(((Player*)player)->bosonId()));
+ slotAddChatSystemMessage(i18n("Player %1(%2) left the game. Units of that player remain on the map.", player->name(), ((Player*)player)->bosonId()));
 // boDebug() << k_funcinfo << endl;
 }
 
@@ -1342,7 +1342,7 @@ void Boson::slotPlayerJoinedGame(KPlayer* p)
  if (!p) {
 	return;
  }
- slotAddChatSystemMessage(i18n("Player %1 - %2 joined").arg(((Player*)p)->bosonId()).arg(p->name()));
+ slotAddChatSystemMessage(i18n("Player %1 - %2 joined", ((Player*)p)->bosonId(), p->name()));
 }
 
 void Boson::slotPlayerLeftGame(KPlayer* p)
@@ -1350,7 +1350,7 @@ void Boson::slotPlayerLeftGame(KPlayer* p)
  if (!p) {
 	return;
  }
- slotAddChatSystemMessage(i18n("Player %1 - %2 left the game").arg(((Player*)p)->bosonId()).arg(p->name()));
+ slotAddChatSystemMessage(i18n("Player %1 - %2 left the game", ((Player*)p)->bosonId(), p->name()));
 }
 
 Q3ValueList<QColor> Boson::availableTeamColors() const
