@@ -73,7 +73,7 @@ public:
 
 	void append(const T& item)
 	{
-		if (!policy() != PolicyLocal) {
+		if (policy() != PolicyLocal) {
 			POLICY_ERROR;
 			return;
 		}
@@ -86,7 +86,7 @@ public:
 
 	void removeFirst()
 	{
-		if (!policy() != PolicyLocal) {
+		if (policy() != PolicyLocal) {
 			POLICY_ERROR;
 			return;
 		}
@@ -99,7 +99,7 @@ public:
 
 	void removeLast()
 	{
-		if (!policy() != PolicyLocal) {
+		if (policy() != PolicyLocal) {
 			POLICY_ERROR;
 			return;
 		}
@@ -117,7 +117,7 @@ public:
 
 	void clear()
 	{
-		if (!policy() != PolicyLocal) {
+		if (policy() != PolicyLocal) {
 			POLICY_ERROR;
 			return;
 		}
