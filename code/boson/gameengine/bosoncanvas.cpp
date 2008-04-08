@@ -1312,6 +1312,9 @@ void BosonCanvas::slotAdvance(unsigned int advanceCallsCount)
  BoCanvasAdvance a(this, d->mPlayerListManager);
  a.advance(d->mAllItems, advanceCallsCount, previousAdvanceFlag);
 
+ // delete temporary created lists
+ BoItemListHandler::itemListHandler()->slotDeleteLists();
+
  boProfiling->pop();
  boProfiling->popStorage();
 }

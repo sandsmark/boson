@@ -45,12 +45,14 @@ public:
 	}
 	Q3PtrList<BoItemList> mLists;
 	bool mTimerActive;
+	bool mEnableDeletionTimer;
 };
 
 BoItemListHandler::BoItemListHandler() : QObject(0)
 {
  d = new BoItemListHandlerPrivate();
  d->mTimerActive = false;
+ d->mEnableDeletionTimer = true;
 }
 
 BoItemListHandler::~BoItemListHandler()
@@ -64,10 +66,15 @@ BoItemListHandler* BoItemListHandler::itemListHandler()
  return BoGlobal::boGlobal()->boItemListHandler();
 }
 
+void BoItemListHandler::setEnableDeletionTimer(bool e)
+{
+ d->mEnableDeletionTimer = e;
+}
+
 void BoItemListHandler::registerList(BoItemList* list)
 {
  d->mLists.append(list);
- if (!d->mTimerActive) {
+ if (!d->mTimerActive && d->mEnableDeletionTimer) {
 	// we need to delete this list once we return to the event loop.
 	 QTimer::singleShot(DELETION_DELAY, this, SLOT(slotDeleteLists()));
 

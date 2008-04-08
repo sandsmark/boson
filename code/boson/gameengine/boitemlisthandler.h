@@ -43,6 +43,9 @@ public:
 
 	static BoItemListHandler* itemListHandler();
 
+	// ENABLED by default
+	void setEnableDeletionTimer(bool enable);
+
 	void registerList(BoItemList* list);
 	void unregisterList(BoItemList* list);
 
