@@ -161,11 +161,11 @@ SpeciesTheme* TestFrameWork::createAndLoadDummySpeciesTheme(const QColor& teamCo
 	stream << "Name=Unit " << id << "\n";
 	if (id == 1) {
 		// id==1 is a mobile ground unit
+		stream << "Producer=1\n";
 		stream << "\n";
 		stream << "[Boson Mobile Unit]\n";
 		stream << "CanGoOnLand=true\n";
 		stream << "Speed=2\n";
-		stream << "Producer=1\n";
 	} else if (id == 2) {
 		// id==2 is a dummy facility with default values
 		stream << "IsFacility=true\n";
