@@ -186,7 +186,7 @@ BosonGroundType* BosonGroundTheme::loadGroundType(KConfig& conf_, unsigned int i
 {
  QString groupName = QString::fromLatin1("Ground_%1").arg(index);
  KConfigGroup group = conf_.group(groupName);
- if (!group.isValid()) {
+ if (!group.exists()) {
 	boError() << k_funcinfo << "no such group " << groupName << endl;
 	return 0;
 }

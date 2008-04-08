@@ -234,7 +234,7 @@ bool UnitProperties::loadMobileProperties(KConfig* conf_)
 bool UnitProperties::loadFacilityProperties(KConfig* conf)
 {
  KConfigGroup group = conf->group("Boson Facility");
- if (!group.isValid()) {
+ if (!group.exists()) {
 	return false;
  }
  mConstructionFrames = group.readEntry("ConstructionSteps", (quint32)20);
@@ -246,7 +246,7 @@ bool UnitProperties::loadAllPluginProperties(KConfig* conf)
 #define TRY_LOAD_PROPERTIES(x) \
 	{ \
 		KConfigGroup group = conf->group(x::propertyGroup()); \
-		if (group.isValid()) { \
+		if (group.exists()) { \
 			if (!loadPluginProperties(new x(this), group)) { \
 				return false; \
 			} \
@@ -286,7 +286,7 @@ bool UnitProperties::loadPluginProperties(PluginProperties* prop, const KConfigG
 	BO_NULL_ERROR(prop);
 	return false;
  }
- if (!conf.isValid()) {
+ if (!conf.exists()) {
 	BO_NULL_ERROR(prop);
 	delete prop;
 	return false;
@@ -342,7 +342,7 @@ bool UnitProperties::loadWeapons(KConfig* conf)
  mCanShootAtLandUnits = false;
  for (qint32 i = 0; i < num; i++) {
 	KConfigGroup weaponGroup = conf->group(QString("Weapon_%1").arg(i));
-	if (!weaponGroup.isValid()) {
+	if (!weaponGroup.exists()) {
 		return false;
 	}
 	BosonWeaponProperties* p = new BosonWeaponProperties(this, i + 1);
