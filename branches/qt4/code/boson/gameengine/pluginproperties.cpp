@@ -81,8 +81,8 @@ QString RepairProperties::name() const
 
 bool RepairProperties::loadPlugin(const KConfigGroup& config)
 {
- if (!config.isValid()) {
-	boError() << k_funcinfo << "config not valid";
+ if (!config.exists()) {
+	boError() << k_funcinfo << "config group does not exist";
 	return false;
  }
  return true;
@@ -116,8 +116,8 @@ QString ProductionProperties::name() const
 
 bool ProductionProperties::loadPlugin(const KConfigGroup& config)
 {
- if (!config.isValid()) {
-	boError() << k_funcinfo << "config not valid";
+ if (!config.exists()) {
+	boError() << k_funcinfo << "config group does not exist";
 	return false;
  }
  mProducerList = BosonConfig::readUnsignedLongNumList(&config, "ProducerList");
@@ -156,8 +156,8 @@ QString HarvesterProperties::name() const
 
 bool HarvesterProperties::loadPlugin(const KConfigGroup& config)
 {
- if (!config.isValid()) {
-	boError() << k_funcinfo << "config not valid";
+ if (!config.exists()) {
+	boError() << k_funcinfo << "config group does not exist";
 	return false;
  }
  mCanMineMinerals = config.readEntry("CanMineMinerals", false);
@@ -208,8 +208,8 @@ QString RefineryProperties::name() const
 
 bool RefineryProperties::loadPlugin(const KConfigGroup& config)
 {
- if (!config.isValid()) {
-	boError() << k_funcinfo << "config not valid";
+ if (!config.exists()) {
+	boError() << k_funcinfo << "config group does not exist";
 	return false;
  }
  mCanRefineMinerals = config.readEntry("CanRefineMinerals", false);
@@ -252,8 +252,8 @@ QString ResourceMineProperties::propertyGroup()
 
 bool ResourceMineProperties::loadPlugin(const KConfigGroup& config)
 {
- if (!config.isValid()) {
-	boError() << k_funcinfo << "config not valid";
+ if (!config.exists()) {
+	boError() << k_funcinfo << "config group does not exist";
 	return false;
  }
  mMinerals = config.readEntry("CanProvideMinerals", false);
@@ -290,8 +290,8 @@ QString AmmunitionStorageProperties::name() const
 
 bool AmmunitionStorageProperties::loadPlugin(const KConfigGroup& config)
 {
- if (!config.isValid()) {
-	boError() << k_funcinfo << "config not valid";
+ if (!config.exists()) {
+	boError() << k_funcinfo << "config group does not exist";
 	return false;
  }
  mCanStore = config.readEntry("CanStore", QList<QString>());
@@ -345,8 +345,8 @@ QString RadarProperties::name() const
 
 bool RadarProperties::loadPlugin(const KConfigGroup& config)
 {
- if (!config.isValid()) {
-	boError() << k_funcinfo << "config not valid";
+ if (!config.exists()) {
+	boError() << k_funcinfo << "config group does not exist";
 	return false;
  }
  mTransmittedPower = config.readEntry("TransmittedPower", 10000.0f);
@@ -386,8 +386,8 @@ QString RadarJammerProperties::name() const
 
 bool RadarJammerProperties::loadPlugin(const KConfigGroup& config)
 {
- if (!config.isValid()) {
-	boError() << k_funcinfo << "config not valid";
+ if (!config.exists()) {
+	boError() << k_funcinfo << "config group does not exist";
 	return false;
  }
  mTransmittedPower = config.readEntry("TransmittedPower", 500.0f);
@@ -423,8 +423,8 @@ QString UnitStorageProperties::name() const
 
 bool UnitStorageProperties::loadPlugin(const KConfigGroup& config)
 {
- if (!config.isValid()) {
-	boError() << k_funcinfo << "config not valid";
+ if (!config.exists()) {
+	boError() << k_funcinfo << "config group does not exist";
 	return false;
  }
 
@@ -465,7 +465,7 @@ bool UnitStorageProperties::loadEnterPath(int path, const KConfig* config)
  }
  QString groupName = propertyGroup() + QString::fromLatin1("_EnterPath_%1").arg(path);
  KConfigGroup group = config->group(groupName);
- if (!group.isValid()) {
+ if (!group.exists()) {
 	boError() << k_funcinfo << "no such group " << groupName << endl;
 	return false;
  }
@@ -491,8 +491,8 @@ bool UnitStorageProperties::saveEnterPath(int path, KConfig* config)
 
 bool UnitStorageProperties::Path::loadPath(const KConfigGroup& config)
 {
- if (!config.isValid()) {
-	boError() << k_funcinfo << "config not valid";
+ if (!config.exists()) {
+	boError() << k_funcinfo << "config group does not exist";
 	return false;
  }
  clear();
