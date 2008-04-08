@@ -311,7 +311,7 @@ void BoSaveGameConverter::initVersionNames(QMap<int, BoSaveGameConverter*>& conv
 
 	QString version = saveGameVersion2ReleaseName[*releaseVersionIt];
 	if (*releaseVersionIt != *it) {
-		version = i18n("(development release after %1)").arg(version);
+		version = i18n("(development release after %1)", version);
 	}
 	converters[*releaseVersionIt]->setHandlesBosonVersionString(version);
  }

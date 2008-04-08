@@ -450,7 +450,7 @@ bool BosonGameViewInput::actionBuild(const BoVector3Fixed& groundCanvasVector)
  }
  if (!canvas()->canPlaceUnitAtTopLeftPos(prop, BoVector2Fixed(x, y), production)) {
 	boDebug() << k_funcinfo << "Cannot place production here" << endl;
-	boGame->slotAddChatSystemMessage(i18n("You can't place a %1 there").arg(prop->name()));
+	boGame->slotAddChatSystemMessage(i18n("You can't place a %1 there", prop->name()));
 	return false;
  }
 

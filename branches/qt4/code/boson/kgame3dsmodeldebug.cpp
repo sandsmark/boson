@@ -654,11 +654,11 @@ void BoNodeTracksWidget::setNodeObjectData(Lib3dsObjectData* d)
  } else {
 	emit signalDisplayTrack(0);
  }
- mPositionLabel->setText(i18n("Flag: %1 Key Number: %2").arg(mPositionTrack->flags()).arg(mPositionTrack->keyCount()));
- mRotationLabel->setText(i18n("Flag: %1 Key Number: %2").arg(mRotationTrack->flags()).arg(mRotationTrack->keyCount()));
- mScaleLabel->setText(i18n("Flag: %1 Key Number: %2").arg(mScaleTrack->flags()).arg(mScaleTrack->keyCount()));
- mHideLabel->setText(i18n("Flag: %1 Key Number: %2").arg(mHideTrack->flags()).arg(mHideTrack->keyCount()));
- mMorphLabel->setText(i18n("Flag: %1 Key Number: %2").arg(mMorphTrack->flags()).arg(mMorphTrack->keyCount()));
+ mPositionLabel->setText(i18n("Flag: %1 Key Number: %2", mPositionTrack->flags(), mPositionTrack->keyCount()));
+ mRotationLabel->setText(i18n("Flag: %1 Key Number: %2", mRotationTrack->flags(), mRotationTrack->keyCount()));
+ mScaleLabel->setText(i18n("Flag: %1 Key Number: %2", mScaleTrack->flags(), mScaleTrack->keyCount()));
+ mHideLabel->setText(i18n("Flag: %1 Key Number: %2", mHideTrack->flags(), mHideTrack->keyCount()));
+ mMorphLabel->setText(i18n("Flag: %1 Key Number: %2", mMorphTrack->flags(), mMorphTrack->keyCount()));
 
  if (mPosition->isChecked()) {
 	mPosition->toggle();
@@ -773,7 +773,7 @@ void BoTrackWidget::slotDisplayTrack(Bo3DSTrack* track)
 			all |= LIB3DS_UNLINK_Z;
 		}
 		if ((flags | all) != all) {
-			(void)new Q3ListBoxText(mFlagList, i18n("Some flags not recognized! Remaining: %1").arg((flags | all) ^ all));
+			(void)new Q3ListBoxText(mFlagList, i18n("Some flags not recognized! Remaining: %1", (flags | all) ^ all));
 		}
 	} else {
 		mFlagList->hide();
@@ -1017,7 +1017,7 @@ public:
 			mAdditive->setChecked(m->additive);
 			mUseFalloff->setChecked(m->use_falloff);
 			mSelfIllum->setChecked(m->self_illum);
-			mShading->setText(QString::number(m->shading) + i18n(" (%1)").arg(shadingText(m->shading)));
+			mShading->setText(QString::number(m->shading) + i18n(" (%1)", shadingText(m->shading)));
 			mSoften->setChecked(m->soften);
 			mFaceMap->setChecked(m->face_map);
 			mTwoSided->setChecked(m->two_sided);
@@ -2124,12 +2124,12 @@ void KGame3DSModelDebug::slotFrameChanged(int frame)
 
 QString KGame3DSModelDebug::rgbaText(Lib3dsRgba r)
 {
- return i18n("%1,%2,%3,%4").arg(r[0]).arg(r[1]).arg(r[2]).arg(r[3]);
+ return i18n("%1,%2,%3,%4", r[0], r[1], r[2], r[3]);
 }
 
 QString KGame3DSModelDebug::rgbText(Lib3dsRgb r)
 {
- return i18n("%1,%2,%3").arg(r[0]).arg(r[1]).arg(r[2]);
+ return i18n("%1,%2,%3", r[0], r[1], r[2]);
 }
 
 void KGame3DSModelDebug::addTextureMap(const QString& name, _Lib3dsTextureMap* t)
@@ -2141,8 +2141,8 @@ void KGame3DSModelDebug::addTextureMap(const QString& name, _Lib3dsTextureMap* t
  item->setText(2, flags);
  item->setText(3, QString::number(t->percent));
  item->setText(4, QString::number(t->blur));
- item->setText(5, i18n("%1,%2").arg(t->scale[0]).arg(t->scale[1]));
- item->setText(6, i18n("%1,%2").arg(t->offset[0]).arg(t->offset[1]));
+ item->setText(5, i18n("%1,%2", t->scale[0], t->scale[1]));
+ item->setText(6, i18n("%1,%2", t->offset[0], t->offset[1]));
  item->setText(7, QString::number(t->rotation));
  item->setText(8, rgbText(t->tint_1));
  item->setText(9, rgbText(t->tint_2));

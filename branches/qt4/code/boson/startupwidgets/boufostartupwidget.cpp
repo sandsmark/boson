@@ -181,7 +181,7 @@ void BoUfoStartupWidget::slotLoadFromLog(const QString& fileName)
 	return;
  }
  if (!w->loadFromLog(fileName)) {
-	KMessageBox::sorry(0, i18n("Could not load from log file %1").arg(fileName));
+	KMessageBox::sorry(0, i18n("Could not load from log file %1", fileName));
 	return;
  }
 }

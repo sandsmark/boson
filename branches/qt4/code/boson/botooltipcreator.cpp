@@ -67,11 +67,11 @@ QString BoToolTipCreatorExtended::createToolTip(const BosonItem* item) const
  QString tip;
 
  Unit* u = (Unit*)item;
- tip = i18n("%1\nHealth: %2").arg(u->name()).arg(u->health());
+ tip = i18n("%1\nHealth: %2", u->name(), u->health());
  if (u->isFacility()) {
 	UnitConstruction* c = u->construction();
 	if (!c->isConstructionComplete()) {
-		tip += i18n("\n%1% constructed").arg((int)c->constructionProgress());
+		tip += i18n("\n%1% constructed", (int)c->constructionProgress());
 	} else {
 		ProductionPlugin* production = (ProductionPlugin*)u->plugin(UnitPlugin::Production);
 		if (production && production->hasProduction()) {
@@ -81,10 +81,10 @@ QString BoToolTipCreatorExtended::createToolTip(const BosonItem* item) const
 			double p = production->productionProgress();
 			if (type == ProduceUnit) {
 				const UnitProperties* prop = production->speciesTheme()->unitProperties(id);
-				text = i18n("\nProducing: %1 (%2%)").arg(prop->name()).arg((int)p);
+				text = i18n("\nProducing: %1 (%2%)", prop->name(), (int)p);
 			} else if (type == ProduceTech) {
 				const UpgradeProperties* prop = production->speciesTheme()->technology(id);
-				text = i18n("\nResearching: %1 (%2%)").arg(prop->upgradeName()).arg((int)p);
+				text = i18n("\nResearching: %1 (%2%)", prop->upgradeName(), (int)p);
 			}
 			if (!text.isNull()) {
 				tip += text;
@@ -96,9 +96,9 @@ QString BoToolTipCreatorExtended::createToolTip(const BosonItem* item) const
 	if (harvester) {
 		double p = (double)(harvester->resourcesMined() * 100) / (double)harvester->maxResources();
 		if (harvester->canMineMinerals()) {
-			tip += i18n("\nMineral filling: %1%").arg((int)p);
+			tip += i18n("\nMineral filling: %1%", (int)p);
 		} else if (harvester->canMineOil()) {
-			tip += i18n("\nOil filling: %1%").arg((int)p);
+			tip += i18n("\nOil filling: %1%", (int)p);
 		}
 	}
  }
@@ -115,10 +115,10 @@ QString BoToolTipCreatorDebug::createToolTip(const BosonItem* item) const
  // included...
  // especially data about position is *really* important. cells are very handy,
  // too
- QString tip = i18n("Rtti: %1").arg(item->rtti());
- tip += i18n("\nCenter Position: (%1,%2,%3)").arg(item->centerX()).arg(item->centerY()).arg(item->z());
- tip += i18n("\nRotation: (%1,%2,%3)").arg(item->xRotation()).arg(item->yRotation()).arg(item->rotation());
- tip += i18n("\nSize: (%1,%2)").arg(item->width()).arg(item->height());
+ QString tip = i18n("Rtti: %1", item->rtti());
+ tip += i18n("\nCenter Position: (%1,%2,%3)", item->centerX(), item->centerY(), item->z());
+ tip += i18n("\nRotation: (%1,%2,%3)", item->xRotation(), item->yRotation(), item->rotation());
+ tip += i18n("\nSize: (%1,%2)", item->width(), item->height());
 
  Q3PtrVector<Cell>* cells = item->cellsConst();
  tip += i18n("\nCells: ");
@@ -126,20 +126,20 @@ QString BoToolTipCreatorDebug::createToolTip(const BosonItem* item) const
 	if (i != 0) {
 		tip += i18n(",");
 	}
-	tip += i18n("(%1,%2)").arg(cells->at(i)->x()).arg(cells->at(i)->y());
+	tip += i18n("(%1,%2)", cells->at(i)->x(), cells->at(i)->y());
 
  }
- tip += i18n("\nVelocity: (%1,%2,%3)").arg(item->xVelocity()).arg(item->yVelocity()).arg(item->zVelocity());
+ tip += i18n("\nVelocity: (%1,%2,%3)", item->xVelocity(), item->yVelocity(), item->zVelocity());
 
  if (!RTTI::isUnit(item->rtti())) {
 	return tip;
  }
 
  Unit* u = (Unit*)item;
- tip += i18n("\nId : %1").arg(u->id());
- tip += i18n("\nName: %1").arg(u->name()); // AB: could be left out for debugging tooltips
- tip += i18n("\nHealth: %1").arg(u->health()); // AB: could be left out for debugging tooltips
- tip += i18n("\nAdvance Work: %1").arg(u->advanceWork());
+ tip += i18n("\nId : %1", u->id());
+ tip += i18n("\nName: %1", u->name()); // AB: could be left out for debugging tooltips
+ tip += i18n("\nHealth: %1", u->health()); // AB: could be left out for debugging tooltips
+ tip += i18n("\nAdvance Work: %1", u->advanceWork());
 
  QList<BoVector2Fixed> pathpoints = u->pathPointList();
  if (pathpoints.count() == 0) {
@@ -151,14 +151,14 @@ QString BoToolTipCreatorDebug::createToolTip(const BosonItem* item) const
 		if (it != pathpoints.begin()) {
 			tip += i18n(",");
 		}
-		tip += i18n("(%1,%2)").arg((*it).x()).arg((*it).y());
+		tip += i18n("(%1,%2)", (*it).x(), (*it).y());
 	}
  }
 
  if (u->isFacility()) {
 	UnitConstruction* c = u->construction();
 	if (!c->isConstructionComplete()) {
-		tip += i18n("\n%1% constructed").arg((int)c->constructionProgress());
+		tip += i18n("\n%1% constructed", (int)c->constructionProgress());
 	} else {
 		ProductionPlugin* production = (ProductionPlugin*)u->plugin(UnitPlugin::Production);
 		if (production && production->hasProduction()) {
@@ -168,10 +168,10 @@ QString BoToolTipCreatorDebug::createToolTip(const BosonItem* item) const
 			double p = production->productionProgress();
 			if (type == ProduceUnit) {
 				const UnitProperties* prop = production->speciesTheme()->unitProperties(id);
-				text = i18n("\nProducing: %1 (%2%)").arg(prop->name()).arg((int)p);
+				text = i18n("\nProducing: %1 (%2%)", prop->name(), (int)p);
 			} else if (type == ProduceTech) {
 				const UpgradeProperties* prop = production->speciesTheme()->technology(id);
-				text = i18n("\nResearching: %1 (%2%)").arg(prop->upgradeName()).arg((int)p);
+				text = i18n("\nResearching: %1 (%2%)", prop->upgradeName(), (int)p);
 			}
 			if (!text.isNull()) {
 				tip += text;
@@ -183,9 +183,9 @@ QString BoToolTipCreatorDebug::createToolTip(const BosonItem* item) const
 	if (harvester) {
 		double p = (double)(harvester->resourcesMined() * 100) / (double)harvester->maxResources();
 		if (harvester->canMineMinerals()) {
-			tip += i18n("\nMineral filling: %1%").arg((int)p);
+			tip += i18n("\nMineral filling: %1%", (int)p);
 		} else if (harvester->canMineOil()) {
-			tip += i18n("\nOil filling: %1%").arg((int)p);
+			tip += i18n("\nOil filling: %1%", (int)p);
 		}
 	}
  }

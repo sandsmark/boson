@@ -268,19 +268,19 @@ void BosonModelsView::update()
  unsigned int min = 0;
  unsigned int max = 0;
  countMeshes(&all, &min, &max);
- mMeshCount->setText(i18n("%1 / %2 / %3").arg(all).arg(min).arg(max));
+ mMeshCount->setText(i18n("%1 / %2 / %3", all, min, max));
 
  unsigned int allFrames = 0;
  unsigned int minFrames = 0;
  unsigned int maxFrames = 0;
  countFrames(&allFrames, &minFrames, &maxFrames);
- mFrameCount->setText(i18n("%1 / %2 / %3").arg(allFrames).arg(min).arg(max));
+ mFrameCount->setText(i18n("%1 / %2 / %3", allFrames, min, max));
 
  all = 0;
  min = 0;
  max = 0;
  countPoints(&all, &min, &max);
- mPointCount->setText(i18n("%1 / %2 / %3").arg(all).arg(min).arg(max));
+ mPointCount->setText(i18n("%1 / %2 / %3", all, min, max));
 }
 
 

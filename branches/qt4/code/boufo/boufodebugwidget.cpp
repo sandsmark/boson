@@ -133,12 +133,12 @@ BoUfoDebugWidget::~BoUfoDebugWidget()
 void BoUfoDebugWidget::setBoUfoManager(BoUfoManager* manager)
 {
  d->mManager = manager;
- d->mToolkitLabel->setText(i18n("Ufo toolkit: 0x%1").
-		arg(QString::number((unsigned long int)manager->toolkit(), 16)));
- d->mDisplayLabel->setText(i18n("Ufo display: 0x%1").
-		arg(QString::number((unsigned long int)manager->display(), 16)));
- d->mContextLabel->setText(i18n("Ufo context: 0x%1").
-		arg(QString::number((unsigned long int)manager->context(), 16)));
+ d->mToolkitLabel->setText(i18n("Ufo toolkit: 0x%1", 
+		QString::number((unsigned long int)manager->toolkit(), 16)));
+ d->mDisplayLabel->setText(i18n("Ufo display: 0x%1", 
+		QString::number((unsigned long int)manager->display(), 16)));
+ d->mContextLabel->setText(i18n("Ufo context: 0x%1", 
+		QString::number((unsigned long int)manager->context(), 16)));
 
  d->mListView->clear();
  d->mDetailedWidgetView->setWidget(0, 0);
@@ -177,7 +177,7 @@ void BoUfoDebugWidget::addWidget(ufo::UWidget* ufoWidget, Q3ListViewItem* item)
  QString boufoWidgetText = QString("0x") + QString::number((unsigned long int)boufoWidget, 16);
  if (boufoWidget) {
 	if (QString(boufoWidget->name()) != QString("unnamed")) {
-		boufoWidgetText = i18n("%1 (%2)").arg(boufoWidgetText).arg(boufoWidget->name());
+		boufoWidgetText = i18n("%1 (%2)", boufoWidgetText, boufoWidget->name());
 	}
  }
  item->setText(1, boufoWidgetText);
@@ -322,23 +322,23 @@ void BoUfoDebugSingleWidget::setWidget(ufo::UWidget* u, BoUfoWidget* w)
 	return;
  }
  show();
- d->mUfoWidget->setText(i18n("Selected Ufo Widget: 0x%1").
-		arg(QString::number((unsigned long int)u, 16)));
- d->mBoUfoWidget->setText(i18n("BoUfo Widget: 0x%1%2").
-		arg(QString::number((unsigned long int)w, 16)).
-		arg(w ? (QString(" (%1)").arg(w->name())) : QString("")));
- d->mUfoString->setText(i18n("Ufo widget string: %1").
-		arg(u->toString().c_str()));
- d->mUfoName->setText(i18n("Ufo name: %1").
-		arg(u->getName().c_str()));
+ d->mUfoWidget->setText(i18n("Selected Ufo Widget: 0x%1", 
+		QString::number((unsigned long int)u, 16)));
+ d->mBoUfoWidget->setText(i18n("BoUfo Widget: 0x%1%2", 
+		QString::number((unsigned long int)w, 16), 
+		w ? (QString(" (%1)").arg(w->name())) : QString("")));
+ d->mUfoString->setText(i18n("Ufo widget string: %1", 
+		u->toString().c_str()));
+ d->mUfoName->setText(i18n("Ufo name: %1", 
+		u->getName().c_str()));
 
  const ufo::UClassInfo* classInfo = u->getClassInfo();
- d->mUfoClass->setText(i18n("Ufo class: %1").arg(classInfo->getClassName().c_str()));
+ d->mUfoClass->setText(i18n("Ufo class: %1", classInfo->getClassName().c_str()));
  QString boufoClass = i18n("(null)");
  if (w) {
 	boufoClass = w->className();
  }
- d->mBoUfoClass->setText(i18n("BoUfo class: %1").arg(boufoClass));
+ d->mBoUfoClass->setText(i18n("BoUfo class: %1", boufoClass));
  QString layoutClass = i18n("(null)");
  if (u->getLayout()) {
 	 ufo::ULayoutManager* l = u->getLayout();
@@ -346,24 +346,24 @@ void BoUfoDebugSingleWidget::setWidget(ufo::UWidget* u, BoUfoWidget* w)
 	BO_CHECK_NULL_RET(i);
 	layoutClass = i->getClassName().c_str();
  }
- d->mLayout->setText(i18n("Layout class: %1").arg(layoutClass));
- d->mRootBounds->setText(i18n("Absolute bounds: x=%1 y=%2 w=%3 h=%4").
-	arg(u->getRootLocation().x).
-	arg(u->getRootLocation().y).
-	arg(u->getWidth()).
-	arg(u->getHeight()));
- d->mBounds->setText(i18n("Relative (to parent) bounds: x=%1 y=%2 w=%3 h=%4").
-	arg(u->getX()).
-	arg(u->getY()).
-	arg(u->getWidth()).
-	arg(u->getHeight()));
+ d->mLayout->setText(i18n("Layout class: %1", layoutClass));
+ d->mRootBounds->setText(i18n("Absolute bounds: x=%1 y=%2 w=%3 h=%4", 
+	u->getRootLocation().x, 
+	u->getRootLocation().y, 
+	u->getWidth(), 
+	u->getHeight()));
+ d->mBounds->setText(i18n("Relative (to parent) bounds: x=%1 y=%2 w=%3 h=%4", 
+	u->getX(), 
+	u->getY(), 
+	u->getWidth(), 
+	u->getHeight()));
  d->mVisible->setChecked(u->isVisible());
  d->mEnabled->setChecked(u->isEnabled());
 
- d->mLayoutHint->setText(i18n("Layout Hint: %1").arg(u->getString("layout").c_str()));
- d->mStretch->setText(i18n("Stretch: %1").arg(u->getString("stretch").c_str()));
+ d->mLayoutHint->setText(i18n("Layout Hint: %1", u->getString("layout").c_str()));
+ d->mStretch->setText(i18n("Stretch: %1", u->getString("stretch").c_str()));
  ufo::UDimension preferredSize = u->getPreferredSize();
- d->mPreferredSize->setText(i18n("Preferred Size: w=%1 h=%2").arg(preferredSize.w).arg(preferredSize.h));
+ d->mPreferredSize->setText(i18n("Preferred Size: w=%1 h=%2", preferredSize.w, preferredSize.h));
 
  int stretchCount = 0;
  for (unsigned int i = 0; i < u->getWidgetCount(); i++) {
@@ -382,6 +382,6 @@ void BoUfoDebugSingleWidget::setWidget(ufo::UWidget* u, BoUfoWidget* w)
 		}
 	}
  }
- d->mChildrenStretch->setText(i18n("Children stretch count: %1").arg(stretchCount));
+ d->mChildrenStretch->setText(i18n("Children stretch count: %1", stretchCount));
 }
 

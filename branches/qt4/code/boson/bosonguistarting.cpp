@@ -103,7 +103,7 @@ bool BosonGUIStarting::createTasks(Q3PtrList<BosonStartingTask>* tasks)
  foreach (Player* p, boGame->gamePlayerList()) {
 	QString text;
 	if (p->isActiveGamePlayer()) {
-		text = i18n("Load player data of player %1 (of %2)").arg(index + 1).arg(boGame->activeGamePlayerCount());
+		text = i18n("Load player data of player %1 (of %2)", index + 1, boGame->activeGamePlayerCount());
 	} else {
 		text = i18n("Load player data of neutral player");
 	}
@@ -311,7 +311,7 @@ bool BosonStartingLoadPlayerGUIData::loadUnitDatas()
  int currentUnit = 0;
  float factor = 0.0f;
  for (it = unitIds.begin(); it != unitIds.end(); ++it, currentUnit++) {
-	startSubTask(i18n("Unit %1 of %2...").arg(currentUnit).arg(unitIds.count()));
+	startSubTask(i18n("Unit %1 of %2...", currentUnit, unitIds.count()));
 
 	const UnitProperties* prop = player()->speciesTheme()->unitProperties(*it);
 	if (!speciesData->loadUnit(prop, player()->speciesTheme()->teamColor())) {

@@ -91,7 +91,7 @@ void BoUfoListBoxTest::initializeGL()
 
  list->insertItem(i18n("First item"));
  for (int i = 2; i <= 100; i++) {
-	list->insertItem(i18n("Item %1").arg(i));
+	list->insertItem(i18n("Item %1", i));
  }
  list->insertItem(i18n("Last item"));
 

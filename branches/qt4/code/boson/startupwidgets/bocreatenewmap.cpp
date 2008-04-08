@@ -92,7 +92,7 @@ QByteArray BoCreateNewMap::createNewMap()
  }
  if (!BosonMap::isValidMapGeo(mWidth, mHeight)) {
 	boError() << k_funcinfo << "invalid map geo" << endl;
-	KMessageBox::sorry(0, i18n("The desired map geo is not valid\nWidth=%1\nHeight=%2").arg(mWidth).arg(mHeight));
+	KMessageBox::sorry(0, i18n("The desired map geo is not valid\nWidth=%1\nHeight=%2", mWidth, mHeight));
 	return QByteArray();
  }
  BosonPlayField playField;
@@ -105,7 +105,7 @@ QByteArray BoCreateNewMap::createNewMap()
 
  if (mGroundFilling >= mGroundTheme->groundTypeCount()) {
 	boError() << k_funcinfo << "invalid groundtype for filling " << mGroundFilling << endl;
-	KMessageBox::sorry(0, i18n("Could not fill the map with texture %1 - only %2 textures in groundTheme %3").arg(mGroundFilling).arg(mGroundTheme->groundTypeCount()).arg(mGroundTheme->identifier()));
+	KMessageBox::sorry(0, i18n("Could not fill the map with texture %1 - only %2 textures in groundTheme %3", mGroundFilling, mGroundTheme->groundTypeCount(), mGroundTheme->identifier()));
 	return QByteArray();
  }
  map->fill(mGroundFilling);
@@ -113,12 +113,12 @@ QByteArray BoCreateNewMap::createNewMap()
  // we add dummy players in order to save them into the bytearray.
  if (mPlayerCount < 2) {
 	boError() << k_funcinfo << "playerCount < 2 does not make sense" << endl;
-	KMessageBox::sorry(0, i18n("Max Players is an invalid value: %1").arg(mPlayerCount));
+	KMessageBox::sorry(0, i18n("Max Players is an invalid value: %1", mPlayerCount));
 	return QByteArray();
  }
  if (mPlayerCount > BOSON_MAX_PLAYERS) {
 	boError() << k_funcinfo << "mPlayerCount > " << BOSON_MAX_PLAYERS << " is not allowed" << endl;
-	KMessageBox::sorry(0, i18n("Max Players is an invalid value: %1 (must be < %2)").arg(mPlayerCount).arg(BOSON_MAX_PLAYERS));
+	KMessageBox::sorry(0, i18n("Max Players is an invalid value: %1 (must be < %2)", mPlayerCount, BOSON_MAX_PLAYERS));
 	return QByteArray();
  }
 

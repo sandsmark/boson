@@ -361,19 +361,19 @@ void BosonProfilingDialog::slotSaveToFile()
 	return;
  }
  if (QFile::exists(file)) {
-	int ret = KMessageBox::questionYesNo(this, i18n("File %1 already exists. Overwrite?").arg(file));
+	int ret = KMessageBox::questionYesNo(this, i18n("File %1 already exists. Overwrite?", file));
 	if (ret != KMessageBox::Yes) {
 		return;
 	}
  }
  QFile f(file);
  if (!f.open(QIODevice::WriteOnly)) {
-	KMessageBox::sorry(this, i18n("File %1 could not be opened").arg(file));
+	KMessageBox::sorry(this, i18n("File %1 could not be opened", file));
 	return;
  }
  QDataStream stream(&f);
  if (!d->mProfiling.save(stream)) {
-	KMessageBox::sorry(this, i18n("Error while saving to %1").arg(file));
+	KMessageBox::sorry(this, i18n("Error while saving to %1", file));
 	return;
  }
  f.close();
@@ -396,12 +396,12 @@ void BosonProfilingDialog::loadFromFile(const QString& file)
 {
  QFile f(file);
  if (!f.open(QIODevice::ReadOnly)) {
-	KMessageBox::sorry(this, i18n("File %1 could not be opened").arg(file));
+	KMessageBox::sorry(this, i18n("File %1 could not be opened", file));
 	return;
  }
  QDataStream stream(&f);
  if (!d->mProfiling.load(stream)) {
-	KMessageBox::sorry(this, i18n("Error while loading from %1").arg(file));
+	KMessageBox::sorry(this, i18n("Error while loading from %1", file));
 	return;
  }
  f.close();
@@ -548,14 +548,14 @@ void BosonProfilingDialog::slotShowSumForEvent(Q3ListViewItem* item)
  }
  d->mGUI->mSelectedEventName->setText(eventName);
  d->mGUI->mSelectedEventCalls->setText(QString::number(calls));
- d->mGUI->mSelectedEventSum->setText(i18n("%1/%2/%3")
-		.arg(QString::number(sumUs))
-		.arg(QString::number(((double)sumUs) / 1000.0))
-		.arg(QString::number(((double)sumUs) / 1000000.0)));
- d->mGUI->mSelectedEventAverage->setText(i18n("%1/%2/%3")
-		.arg(QString::number(averageUs))
-		.arg(QString::number(averageUs / 1000.0))
-		.arg(QString::number(averageUs / 1000000.0)));
+ d->mGUI->mSelectedEventSum->setText(i18n("%1/%2/%3",
+		 QString::number(sumUs),
+		 QString::number(((double)sumUs) / 1000.0),
+		 QString::number(((double)sumUs) / 1000000.0)));
+ d->mGUI->mSelectedEventAverage->setText(i18n("%1/%2/%3",
+		 QString::number(averageUs),
+		 QString::number(averageUs / 1000.0),
+		 QString::number(averageUs / 1000000.0)));
 
  d->mGUI->mSelectedEventCalledBy->clear();
  for (QMap<QString, int>::iterator it = callers.begin(); it != callers.end(); ++it) {

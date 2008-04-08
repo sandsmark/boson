@@ -121,7 +121,7 @@ void BosonUfoChat::setFromPlayer(KPlayer* player)
  }
  d->mFromPlayer = player;
  if (fromPlayer()) {
-	d->mSendToFromPlayerGroupId = insertSendingEntry(i18n("Send to my group (\"%1\")").arg(fromPlayer()->group()));
+	d->mSendToFromPlayerGroupId = insertSendingEntry(i18n("Send to my group (\"%1\")", fromPlayer()->group()));
  }
 }
 
@@ -220,7 +220,7 @@ void BosonUfoChat::addMessage(KPlayer* p, const QString& text)
 	boError() << k_funcinfo << "NULL player" << endl;
 	return;
  }
- addMessage(i18n("%1: %2").arg(p->name()).arg(text));
+ addMessage(i18n("%1: %2", p->name(), text));
 }
 
 void BosonUfoChat::addMessage(const QString& text)
@@ -333,7 +333,7 @@ int BosonUfoChat::insertSendToAllSendingEntry(int id, int index)
 
 int BosonUfoChat::insertPlayerSendingEntry(const QString& name, int id, int index)
 {
- return insertSendingEntry(i18n("Send to %1").arg(name), id, index);
+ return insertSendingEntry(i18n("Send to %1", name), id, index);
 }
 
 void BosonUfoChat::removeSendingEntry(int id)

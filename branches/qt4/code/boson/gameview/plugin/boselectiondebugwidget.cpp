@@ -160,16 +160,16 @@ void BoSelectionGroupDebugWidget::update(BoSelection* selection)
 	return;
  }
  QString text;
- text += i18n("Selected units: %1\n").arg(selection->count());
+ text += i18n("Selected units: %1\n", selection->count());
  if (selection->leader()) {
 	Unit* leader = selection->leader();
 	Player* owner = leader->owner();
-	text += i18n("Leader: %1 (ID=%2, type=%3), Owner: %4 (%5)\n")
-			.arg(leader->name())
-			.arg(leader->id())
-			.arg(leader->type())
-			.arg(owner->name())
-			.arg(owner->bosonId());
+	text += i18n("Leader: %1 (ID=%2, type=%3), Owner: %4 (%5)\n",
+			 leader->name(),
+			 leader->id(),
+			 leader->type(),
+			 owner->name(),
+			 owner->bosonId());
  } else {
 	text += i18n("Leader: NULL\n");
  }
@@ -178,7 +178,7 @@ void BoSelectionGroupDebugWidget::update(BoSelection* selection)
  for (unsigned int i = 1; i < units.count(); i++) {
 	ids += QString(", %1").arg(units.at(i)->id());
  }
- text += i18n("All IDs: %1\n\n").arg(ids);
+ text += i18n("All IDs: %1\n\n", ids);
  if (selection->canShoot()) {
 	text += i18n("Selection can shoot\n");
  } else {
@@ -215,11 +215,11 @@ void BoSelectionGroupDebugWidget::update(BoSelection* selection)
 			count++;
 		}
 	}
-	text += i18n("Units with type=%1 (%2): %3.  IDs: %4\n")
-			.arg(type)
-			.arg(u->unitProperties()->name())
-			.arg(count)
-			.arg(ids);
+	text += i18n("Units with type=%1 (%2): %3.  IDs: %4\n",
+			 type,
+			 u->unitProperties()->name(),
+			 count,
+			 ids);
  }
 
  d->mText->setText(text);
@@ -260,12 +260,12 @@ void BoUnitDebugWidget::update(Unit* unit)
 	return;
  }
  QString text;
- text += i18n("Name: %1, Type: %2, Id: %3, RTTI: %4\n").arg(unit->name()).arg(unit->type()).arg(unit->id()).arg(unit->rtti());
+ text += i18n("Name: %1, Type: %2, Id: %3, RTTI: %4\n", unit->name(), unit->type(), unit->id(), unit->rtti());
 
- text += i18n("Location: (%1, %2, %3)").arg(unit->centerX()).arg(unit->centerY()).arg(unit->z());
- text += i18n("Rotation: (%1, %2, %3)").arg(unit->xRotation()).arg(unit->yRotation()).arg(unit->rotation());
- text += i18n("AdvanceWork: %1").arg(unit->advanceWork()); // TODO: int -> string
- text += i18n("CurrentOrder type: %1").arg(unit->currentOrder() ? unit->currentOrder()->type() : 0); // TODO: int -> string
+ text += i18n("Location: (%1, %2, %3)", unit->centerX(), unit->centerY(), unit->z());
+ text += i18n("Rotation: (%1, %2, %3)", unit->xRotation(), unit->yRotation(), unit->rotation());
+ text += i18n("AdvanceWork: %1", unit->advanceWork()); // TODO: int -> string
+ text += i18n("CurrentOrder type: %1", unit->currentOrder() ? unit->currentOrder()->type() : 0); // TODO: int -> string
 
 
  text += "\n";
@@ -284,7 +284,7 @@ void BoUnitDebugWidget::update(Unit* unit)
 	if (name.isEmpty()) {
 		name = i18n("<unknown>");
 	}
-	text += i18n("%1 (ID=%2) = %3\n").arg(name).arg(prop->id()).arg(value);
+	text += i18n("%1 (ID=%2) = %3\n", name, prop->id(), value);
  }
  text += "\n";
 
@@ -304,7 +304,7 @@ void BoUnitDebugWidget::update(Unit* unit)
  if (!effects) {
 	text += i18n("No item effects\n");
  } else {
-	text += i18n("%1 item effects\n").arg(effects->effects().count());
+	text += i18n("%1 item effects\n", effects->effects().count());
  }
  BosonItemRenderer* r = container->itemRenderer();
  if (!r) {
@@ -321,16 +321,16 @@ void BoUnitDebugWidget::update(Unit* unit)
 		mr = (BosonItemModelRenderer*)r;
 		m = mr->model();
 	}
-	text += i18n("Renderer Type: %1 (%2)\n").arg(type).arg(r->rtti());
-	text += i18n("Animation mode: %1\n").arg(r->animationMode());
+	text += i18n("Renderer Type: %1 (%2)\n", type, r->rtti());
+	text += i18n("Animation mode: %1\n", r->animationMode());
 	if (mr) {
-		text += i18n("Current Frame: %1\n").arg(mr->currentFrame());
-		text += i18n("LOD count: %1\n").arg(mr->lodCount());
+		text += i18n("Current Frame: %1\n", mr->currentFrame());
+		text += i18n("LOD count: %1\n", mr->lodCount());
 	}
 	if (m) {
-		text += i18n("Model file: %1\n").arg(m->file());
-		text += i18n("Model pointarray size: %1\n").arg(m->pointArraySize());
-		text += i18n("Model indexarray size: %1\n").arg(m->indexArraySize());
+		text += i18n("Model file: %1\n", m->file());
+		text += i18n("Model pointarray size: %1\n", m->pointArraySize());
+		text += i18n("Model indexarray size: %1\n", m->indexArraySize());
 		// ...
 	}
 	text += i18n("\n");

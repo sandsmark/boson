@@ -531,12 +531,12 @@ void BoUfoNewGameWidget::slotNetStart()
  if (boGame->gamePlayerCount() > mMaxPlayers) {
     KMessageBox::sorry(0, i18n("There are too many players in game.\n"
             "Current map supports only %1 players, currently, there are %2 players in the game.\n"
-            "Please remove some players.").arg(mMaxPlayers).arg(boGame->gamePlayerCount()),
+            "Please remove some players.", mMaxPlayers, boGame->gamePlayerCount()),
             i18n("Too many players"));
  } else if (boGame->gamePlayerCount() < mMinPlayers) {
     KMessageBox::sorry(0, i18n("There are too few players in game.\n"
             "Current map requires at least %1 players, currently, there are only %2 players in the game.\n"
-            "Please add some players.").arg(mMinPlayers).arg(boGame->gamePlayerCount()),
+            "Please add some players.", mMinPlayers, boGame->gamePlayerCount()),
             i18n("Too few players"));
  } else {
     // All good
@@ -556,7 +556,7 @@ void BoUfoNewGameWidget::slotNetStart()
                 continue;
             }
             if (p->teamColor() == p2->teamColor()) {
-                KMessageBox::sorry(0, i18n("Cannot start game - player %1 (id=%2) and %3 (id=%4) have the same teamcolor.\nThis is not allowed!").arg(p->name()).arg(p->bosonId()).arg(p2->name()).arg(p2->bosonId()));
+                KMessageBox::sorry(0, i18n("Cannot start game - player %1 (id=%2) and %3 (id=%4) have the same teamcolor.\nThis is not allowed!", p->name(), p->bosonId(), p2->name(), p2->bosonId()));
                 return;
             }
         }
@@ -618,13 +618,13 @@ void BoUfoNewGameWidget::slotNetPlayerJoinedGame(KPlayer* p)
     // Display chat message
     if (!p->isVirtual()) {
         // Localplayer added AI player
-        boGame->slotAddChatSystemMessage("Boson", i18n("You added AI player %1 to the game").arg(p->name()));
+        boGame->slotAddChatSystemMessage("Boson", i18n("You added AI player %1 to the game", p->name()));
     } else {
         int gameID = KGameMessage::rawGameId(p->kgameId());  // gameID == clientID
         KPlayer* mainPlayer = boGame->findPlayerByKGameId(KGameMessage::createPlayerId(1, gameID));
         if (mainPlayer == p) {
             // Another client connected
-            boGame->slotAddChatSystemMessage("Boson", i18n("%1 joined the game").arg(p->name()));
+            boGame->slotAddChatSystemMessage("Boson", i18n("%1 joined the game", p->name()));
             if (boGame->isAdmin()) {
                 boDebug() << k_funcinfo << "new client connected - sending current playfield" << endl;
                 QString identifier = d->mPlayFieldSelection->playFieldIdentifier();
@@ -635,10 +635,10 @@ void BoUfoNewGameWidget::slotNetPlayerJoinedGame(KPlayer* p)
         } else if(!mainPlayer) {
             // first player has not ID 0. probably do a loop instead, searching for the
             //  player with the lowest KGameMessage::rawPlayerId() in this gameID.
-            boGame->slotAddChatSystemMessage("Boson", i18n("%1 joined (?) the game").arg(p->name()));
+            boGame->slotAddChatSystemMessage("Boson", i18n("%1 joined (?) the game", p->name()));
         } else {
             // AI player was added
-            boGame->slotAddChatSystemMessage("Boson", i18n("%1 added AI player %2 to the game").arg(mainPlayer->name()).arg(p->name()));
+            boGame->slotAddChatSystemMessage("Boson", i18n("%1 added AI player %2 to the game", mainPlayer->name(), p->name()));
         }
     }
     foreach (Player* p2, boGame->gamePlayerList()) {
@@ -672,7 +672,7 @@ void BoUfoNewGameWidget::slotNetPlayerLeftGame(KPlayer* p)
  }
 
  if (mInited) {
-    boGame->slotAddChatSystemMessage("Boson", i18n("%1 left the game").arg(p->name()));
+    boGame->slotAddChatSystemMessage("Boson", i18n("%1 left the game", p->name()));
  }
 
  if (p == (KPlayer*)localPlayer() && boGame->isNetwork()) {
@@ -740,11 +740,11 @@ void BoUfoNewGameWidget::slotNetPlayFieldChanged(BPFPreview* preview)
  mMaxPlayers = preview->maxPlayers();
 
  // Update general map info
- mMapSize->setText(i18n("%1x%2\n").arg(preview->mapWidth()).arg(preview->mapHeight()));
+ mMapSize->setText(i18n("%1x%2\n", preview->mapWidth(), preview->mapHeight()));
  if (mMinPlayers == mMaxPlayers) {
-    mMapPlayers->setText(i18n("%1").arg(mMinPlayers));
+    mMapPlayers->setText(i18n("%1", mMinPlayers));
  } else {
-    mMapPlayers->setText(i18n("%1-%2").arg(mMinPlayers).arg(mMaxPlayers));
+    mMapPlayers->setText(i18n("%1-%2", mMinPlayers, mMaxPlayers));
  }
 
  // Update description of the map
@@ -779,10 +779,10 @@ void BoUfoNewGameWidget::slotNetPlayerNameChanged(Player* p)
     if ((*it) == (KPlayer*)p) {
         if (mInited) {
             if (p == localPlayer()) {
-                boGame->slotAddChatSystemMessage("Boson", i18n("You are now known as %1").arg(p->name()));
+                boGame->slotAddChatSystemMessage("Boson", i18n("You are now known as %1", p->name()));
             } else {
                 QString oldName = mConnectedPlayersList->itemText(it.key());
-                boGame->slotAddChatSystemMessage("Boson", i18n("%1 is now known as %2").arg(oldName).arg(p->name()));
+                boGame->slotAddChatSystemMessage("Boson", i18n("%1 is now known as %2", oldName, p->name()));
             }
         }
 
@@ -948,7 +948,7 @@ void BoUfoNewGameWidget::slotAddComputerPlayer()
  // computer players with names that fit to the story (if we'll ever have one).
  // so the randomName() isn't required anyway.
 // p->setName(KGameMisc::randomName());
- p->setName(i18n("Computer %1").arg(d->mComputerPlayerNumber));
+ p->setName(i18n("Computer %1", d->mComputerPlayerNumber));
  d->mComputerPlayerNumber++;
 
  // the color is dangerous concerning network and so!
@@ -1092,7 +1092,7 @@ void BoUfoNewGameWidget::possibleSidesChanged()
    if (p && p != mSelectedPlayer) {
      continue;
    }
-   sides.append(i18n("Player %1 (Id=%2)").arg(i + 1).arg(id));
+   sides.append(i18n("Player %1 (Id=%2)", i + 1, id));
    d->mSideIndex2Side.insert(sides.count() - 1, id);
  }
 
@@ -1116,7 +1116,7 @@ void BoUfoNewGameWidget::possibleSidesChanged()
  // AB: by definition a "watch" player must have an Id >= 1 and <= 127.
  //     See http://boson.freehackers.org/wiki/Main/PlayerIds
  if (watchId >= 1 && watchId <= 127) {
-   sides.append(i18n("Watch game only (Id = %1)").arg(watchId));
+   sides.append(i18n("Watch game only (Id = %1)", watchId));
    d->mSideIndex2Side.insert(sides.count() - 1, watchId);
  }
 
@@ -1160,7 +1160,7 @@ void BoUfoNewGameWidget::slotConnectingToServer()
 
 void BoUfoNewGameWidget::slotConnectedToServer()
 {
- boGame->slotAddChatSystemMessage("Boson", i18n("You are now connected to the server %1:%2").arg(boGame->bosonHostName()).arg(boGame->bosonPort()));
+ boGame->slotAddChatSystemMessage("Boson", i18n("You are now connected to the server %1:%2", boGame->bosonHostName(), boGame->bosonPort()));
  mInited = true;
  // Select localplayer
  QMap<int, KPlayer*>::iterator it;

@@ -1403,13 +1403,13 @@ void ModelDisplay::updateMeshUnderMouse()
 		} else {
 			material = i18n("(None)");
 		}
-		selectedMeshText = i18n("Selected mesh: %1 points: %2 material: %3")
-				.arg(name)
-				.arg(mesh->pointCount())
-				.arg(material);
+		selectedMeshText = i18n("Selected mesh: %1 points: %2 material: %3",
+				 name,
+				 mesh->pointCount(),
+				 material);
 	}
  }
- emit signalMeshUnderMouseLabel(i18n("Mesh under cursor: %1").arg(meshUnderCursor));
+ emit signalMeshUnderMouseLabel(i18n("Mesh under cursor: %1", meshUnderCursor));
  if (selectedMeshText.isEmpty()) {
 	emit signalShowSelectedMeshLabel(false);
 	emit signalSelectedMeshLabel("");

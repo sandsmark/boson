@@ -75,8 +75,8 @@
 
 // compare name and name2 and add an error to the QString variable "error". note
 // that this works only if type of name/name2 is compatible with QString::arg().
-#define COMPARE(name) if (name != name##2) { error += i18n("Variables not equal: %1(%2) and %3(%4)\n").arg(#name).arg(name).arg(#name "2").arg(name##2); }
-#define COMPAREITEM(name, id, rtti, type) if (name != name##2) { error += i18n("Variables not equal for item %1 (%2/%3): %4(%5) and %6(%7)\n").arg(id).arg(rtti).arg(type).arg(#name).arg(name).arg(#name "2").arg(name##2); }
+#define COMPARE(name) if (name != name##2) { error += i18n("Variables not equal: %1(%2) and %3(%4)\n", QString::fromLatin1(#name), name, QString::fromLatin1(#name "2"), name##2); }
+#define COMPAREITEM(name, id, rtti, type) if (name != name##2) { error += i18n("Variables not equal for item %1 (%2/%3): %4(%5) and %6(%7)\n", id, rtti, type, QString::fromLatin1(#name), name, QString::fromLatin1(#name "2"), name##2); }
 
 // convenience macros that combine the above macros.
 #define DECLARE_UNSTREAM(type, name) DECLARE(type, name) UNSTREAM(name)
@@ -258,10 +258,10 @@ protected:
 		DECLARE_UNSTREAM(double, randomdouble);
 
 		if (randomint != randomint2) {
-			return i18n("Random integer numbers differ. Found: %1 should be: %2").arg(randomint2).arg(randomint);
+			return i18n("Random integer numbers differ. Found: %1 should be: %2", randomint2, randomint);
 		}
 		if (randomdouble != randomdouble2) {
-			return i18n("Random double numbers differ. Found: %1 should be: %2").arg(randomdouble2).arg(randomdouble);
+			return i18n("Random double numbers differ. Found: %1 should be: %2", randomdouble2, randomdouble);
 		}
 		return i18n("There is an error in the game (i.e. the Boson class) log (MD5 sums don't match), but it could not be found.");
 	}
@@ -305,7 +305,7 @@ protected:
 		QDataStream s2(b2);
 		DECLARE_UNSTREAM(quint32, count);
 		if (count != count2) {
-			return i18n("Have players: %1 should be: %2").arg(count2).arg(count);
+			return i18n("Have players: %1 should be: %2", count2, count);
 		}
 		for (unsigned int i = 0; i < count; i++) {
 			DECLARE_UNSTREAM(quint32, fogged);
@@ -314,7 +314,7 @@ protected:
 			DECLARE_UNSTREAM(quint32, oil);
 			DECLARE_UNSTREAM(quint32, genericAmmunition);
 
-#define CHECK(x,x2) if (x != x2) { return i18n("Different players in players log: variable %1: found %2, expected %3").arg(#x).arg(x2).arg(x); }
+#define CHECK(x,x2) if (x != x2) { return i18n("Different players in players log: variable %1: found %2, expected %3", QString::fromLatin1(#x), x2, x); }
 			CHECK(fogged, fogged2);
 			CHECK(explored, explored2);
 			CHECK(minerals, minerals2);
@@ -482,7 +482,7 @@ protected:
 		QDataStream s2(b2);
 		DECLARE_UNSTREAM(quint32, items);
 		if (items != items2) {
-			return i18n("Different item counts in canvas log: found %1, expected %2").arg(items2).arg(items);
+			return i18n("Different item counts in canvas log: found %1, expected %2", items2, items);
 		}
 		for (unsigned int i = 0; i < items; i++) {
 			QString error = findItemError(s1, s2);
@@ -493,7 +493,7 @@ protected:
 
 		DECLARE_UNSTREAM(quint32, units);
 		if (units != units2) {
-			return i18n("Different unit counts in canvas log: found %1, expected %2").arg(units2).arg(units);
+			return i18n("Different unit counts in canvas log: found %1, expected %2", units2, units);
 		}
 		for (unsigned int i = 0; i < units; i++) {
 			QString error = findUnitError(s1, s2);
@@ -674,23 +674,23 @@ protected:
 				waiting2, pathrecalced2);
 #endif
 		if (id != id2) {
-			error += i18n("Different unit ids: %1 != %2\n").arg(id).arg(id2);
+			error += i18n("Different unit ids: %1 != %2\n", id, id2);
 			// it makes no sense to collect more
 			return error;
 		}
-#define CHECK(x) if (x != x##2) { error += i18n("Unit %1: ").arg(id); COMPARE(x) }
+#define CHECK(x) if (x != x##2) { error += i18n("Unit %1: ", id); COMPARE(x) }
 		CHECK(id);
 		CHECK(work);
 		CHECK(health);
 #if PATH_LOG
 		CHECK(hlstep);
 		if (start != start2) {
-			error += i18n("Unit %1: start != start2: (%2,%3) != (%4,%5)\n").
-					arg(id).arg(start.x()).arg(start.y()).arg(start2.x()).arg(start2.y());
+			error += i18n("Unit %1: start != start2: (%2,%3) != (%4,%5)\n", 
+					id, start.x(), start.y(), start2.x(), start2.y());
 		}
 		if (dest != dest2) {
-			error += i18n("Unit %1: dest != dest2: (%1,%2) != (%3,%4)\n").
-					arg(id).arg(dest.x()).arg(dest.y()).arg(dest2.x()).arg(dest2.y());
+			error += i18n("Unit %1: dest != dest2: (%1,%2) != (%3,%4)\n", 
+					id, dest.x(), dest.y(), dest2.x(), dest2.y());
 		}
 		CHECK(range);
 		CHECK(startRegId);
@@ -839,7 +839,7 @@ QString BoLongSyncCheckMessage::findLogError(const QByteArray& b1, const QByteAr
 
  QString error;
  if (streams.count() != streams2.count()) {
-	error = i18n("Different streams count: %1, but should be %2").arg(streams2.count()).arg(streams.count());
+	error = i18n("Different streams count: %1, but should be %2", streams2.count(), streams.count());
 	return error;
  }
  BoGameSyncCheckMessage gameSync;
@@ -968,7 +968,7 @@ void BosonNetworkSynchronizer::syncCheckingCompleted(const Q3ValueList<quint32>&
 	if (outOfSyncClients.isEmpty()) {
 		addChatSystemMessage(i18n("Network Sync completed. Clients are in sync now. Unpause the game to continue"));
 	} else {
-		addChatSystemMessage(i18n("Network Sync completed, however there are still %1 clients out of sync. Sync failed, the game is probably broken permanently for you now. Sorry.").arg(outOfSyncClients.count()));
+		addChatSystemMessage(i18n("Network Sync completed, however there are still %1 clients out of sync. Sync failed, the game is probably broken permanently for you now. Sorry.", outOfSyncClients.count()));
 		// AB: we are out of sync, but if the player wants to, he can
 		// still continue the game by unpausing it. we don't prevent him
 		// from doing so (maybe he's lucky and we succeed at syncing
@@ -1230,7 +1230,7 @@ bool BosonNetworkSyncChecker::receiveNetworkSyncCheckAck(QDataStream& stream, qu
 
  if (!verify) {
 	boWarning(370) << k_funcinfo << "network out of sync for client " << sender << endl;
-	addChatSystemMessage(i18n("Network out of sync for client %1").arg(sender));
+	addChatSystemMessage(i18n("Network out of sync for client %1", sender));
 	if (await) {
 		await->addOutOfSyncClient(sender);
 
@@ -1239,7 +1239,7 @@ bool BosonNetworkSyncChecker::receiveNetworkSyncCheckAck(QDataStream& stream, qu
 		QByteArray broken = brokenLog;
 		BoLongSyncCheckMessage longSync;
 		QString error = longSync.findError(correct, broken);
-		addChatSystemMessage(i18n("Error message: %1").arg(error));
+		addChatSystemMessage(i18n("Error message: %1", error));
 		boDebug(370) << k_funcinfo << "Error message: " << error << endl;
 	}
  }

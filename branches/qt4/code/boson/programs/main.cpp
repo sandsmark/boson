@@ -147,10 +147,10 @@ int main(int argc, char **argv)
 	KMessageBox::information(0, i18n("Your OpenGL driver appears to be broken! The reported error is:\n%1"
 			"\n\nGL library used: %2"
 			"\nGLU library used: %3"
-			"\n\nThis error will be ignored, but will probably cause problems later on!").
-			arg(glDriverBroken).
-			arg(BoGL::bogl()->OpenGLFile()).
-			arg(BoGL::bogl()->GLUFile()));
+			"\n\nThis error will be ignored, but will probably cause problems later on!", 
+			glDriverBroken, 
+			BoGL::bogl()->OpenGLFile(), 
+			BoGL::bogl()->GLUFile()));
  }
 #else
 #warning TODO: port BosonGLWidget::glDriverBroken()

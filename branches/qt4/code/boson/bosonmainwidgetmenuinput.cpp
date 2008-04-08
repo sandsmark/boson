@@ -381,9 +381,9 @@ void BosonMainWidgetMenuInput::slotGrabScreenshot()
  bool ok = shot.save(file, "JPEG", 90);
  if (!ok) {
 	boError() << k_funcinfo << "Error saving screenshot to " << file << endl;
-	boGame->slotAddChatSystemMessage(i18n("An error occured while saving screenshot to %1").arg(file));
+	boGame->slotAddChatSystemMessage(i18n("An error occured while saving screenshot to %1", file));
  } else {
-	boGame->slotAddChatSystemMessage(i18n("Screenshot saved to %1").arg(file));
+	boGame->slotAddChatSystemMessage(i18n("Screenshot saved to %1", file));
  }
 }
 
@@ -401,9 +401,9 @@ void BosonMainWidgetMenuInput::slotGrabProfiling()
  bool ok = boProfiling->saveToFile(file);
  if (!ok) {
 	boError() << k_funcinfo << "Error saving profiling to " << file << endl;
-	boGame->slotAddChatSystemMessage(i18n("An error occured while saving profiling log to %1").arg(file));
+	boGame->slotAddChatSystemMessage(i18n("An error occured while saving profiling log to %1", file));
  } else {
-	boGame->slotAddChatSystemMessage(i18n("Profiling log saved to %1").arg(file));
+	boGame->slotAddChatSystemMessage(i18n("Profiling log saved to %1", file));
  }
 #endif
 }

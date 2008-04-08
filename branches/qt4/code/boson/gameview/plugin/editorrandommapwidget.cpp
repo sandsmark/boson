@@ -1173,11 +1173,11 @@ void EditorRandomMapWidget::slotUpdateHeightProbabilityLabels()
  float probDown = d->mChangeDownCount->value() / d->mRandomHeightCount->value();
  d->mHeightProbabilities->setText(i18n(
 			 	"Prob(Change height UP by %1 at corner) = %2\n"
-			 	"Prob(Change height DOWN by %3 at corner) = %4\n")
-				.arg(changeBy)
-				.arg(probUp)
-				.arg(changeBy)
-				.arg(probDown));
+			 	"Prob(Change height DOWN by %3 at corner) = %4\n",
+				 changeBy,
+				 probUp,
+				 changeBy,
+				 probDown));
 }
 
 void EditorRandomMapWidget::slotUpdateMountainProbabilityLabels()
@@ -1186,8 +1186,8 @@ void EditorRandomMapWidget::slotUpdateMountainProbabilityLabels()
  if (lrint(d->mRandomMountainCount->value()) > 0) {
 	probMountain = 1.0f / d->mRandomMountainCount->value();
  }
- d->mMountainProbabilities->setText(i18n("Prob(Start mountain at corner) = %5")
-				.arg(probMountain));
+ d->mMountainProbabilities->setText(i18n("Prob(Start mountain at corner) = %5",
+				 probMountain));
 }
 
 void EditorRandomMapWidget::slotTerrainCreationChanged(BoUfoRadioButton* button)

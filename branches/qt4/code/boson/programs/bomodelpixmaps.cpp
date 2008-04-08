@@ -117,7 +117,7 @@ BoTextureCopyright::~BoTextureCopyright()
 void BoTextureCopyright::setTexture(const QString& f)
 {
  mFile = f;
- mTexture->setText(i18n("Texture: %1").arg(textureFile()));
+ mTexture->setText(i18n("Texture: %1", textureFile()));
 }
 
 QString BoTextureCopyright::textureFile() const
@@ -549,7 +549,7 @@ void BoModelPixmaps::selectModelFile(const QString& file)
 {
  reset();
  if (!mGLWidget->loadModel(file)) {
-	KMessageBox::sorry(this, i18n("Unable to load from file %1").arg(file));
+	KMessageBox::sorry(this, i18n("Unable to load from file %1", file));
 	reset();
 	return;
  }
@@ -922,10 +922,10 @@ bool BoModelPixmaps::slotCheckPackage()
  }
  for (Q3PtrListIterator<BoTextureCopyright> it(mTextureCopyright); it.current(); ++it) {
 	if (it.current()->author().isEmpty()) {
-		d->mGUI->mPackagingWarnings->insertItem(i18n("Texture %1 has unknown author!").arg(it.current()->textureFile()));
+		d->mGUI->mPackagingWarnings->insertItem(i18n("Texture %1 has unknown author!", it.current()->textureFile()));
 	}
 	if (it.current()->license().isEmpty()) {
-		d->mGUI->mPackagingWarnings->insertItem(i18n("Texture %1 has unknown license!").arg(it.current()->textureFile()));
+		d->mGUI->mPackagingWarnings->insertItem(i18n("Texture %1 has unknown license!", it.current()->textureFile()));
 	}
  }
 
@@ -963,7 +963,7 @@ void BoModelPixmaps::packageIt(const QString& fileName)
 
  KTar tar(fileName, QString::fromLatin1("application/x-gzip"));
  if (!tar.open(QIODevice::WriteOnly)) {
-	KMessageBox::sorry(this, i18n("Could not open %1 for writing").arg(fileName));
+	KMessageBox::sorry(this, i18n("Could not open %1 for writing", fileName));
 	return;
  }
  QFileInfo info(fileName);
@@ -976,7 +976,7 @@ void BoModelPixmaps::packageIt(const QString& fileName)
 
  QFile file(mModelFileName);
  if (!file.open(QIODevice::ReadOnly)) {
-	KMessageBox::sorry(this, i18n("Could not open %1 for reading").arg(file.name()));
+	KMessageBox::sorry(this, i18n("Could not open %1 for reading", file.name()));
 	return;
  }
  QByteArray fileData = file.readAll();
@@ -1008,7 +1008,7 @@ void BoModelPixmaps::packageIt(const QString& fileName)
 	QString texture = it.current()->texture();
 	file.setName(texture);
 	if (!file.open(QIODevice::ReadOnly)) {
-		KMessageBox::sorry(this, i18n("Could not open %1 for reading").arg(file.name()));
+		KMessageBox::sorry(this, i18n("Could not open %1 for reading", file.name()));
 		return;
 	}
 	QByteArray fileData = file.readAll();

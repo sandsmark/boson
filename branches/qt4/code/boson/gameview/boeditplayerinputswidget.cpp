@@ -202,6 +202,6 @@ QString BoEditPlayerInputsWidget::rttiString(int rtti) const
 		name = i18n("Unknown");
 		break;
  }
- return i18n("%1 (RTTI=%2)").arg(name).arg(rtti);
+ return i18n("%1 (RTTI=%2)", name, rtti);
 }
 

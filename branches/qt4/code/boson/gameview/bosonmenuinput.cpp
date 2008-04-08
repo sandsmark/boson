@@ -387,17 +387,17 @@ void BosonMenuInputData::initUfoGameActions()
 		this, SIGNAL(signalShowSelectionGroup(int)));
 
  for (int i = 0; i < 10; i++) {
-	BoUfoAction* a = new BoUfoAction(i18n("Select Group %1").arg(i == 0 ? 10 : i),
+	BoUfoAction* a = new BoUfoAction(i18n("Select Group %1", i == 0 ? 10 : i),
 			KShortcut(Qt::Key_0 + i), d->mSelectMapper,
 			SLOT(map()), actionCollection(),
 			QString("select_group_%1").arg(i));
 	d->mSelectMapper->setMapping(a, i);
-	a = new BoUfoAction(i18n("Create Group %1").arg(i == 0 ? 10 : i),
+	a = new BoUfoAction(i18n("Create Group %1", i == 0 ? 10 : i),
 			KShortcut(Qt::CTRL + Qt::Key_0 + i), d->mCreateMapper,
 			SLOT(map()), actionCollection(),
 			QString("create_group_%1").arg(i));
 	d->mCreateMapper->setMapping(a, i);
-	a = new BoUfoAction(i18n("Show Group %1").arg(i == 0 ? 10 : i),
+	a = new BoUfoAction(i18n("Show Group %1", i == 0 ? 10 : i),
 			KShortcut(Qt::ALT + Qt::Key_0 + i), d->mShowSelectionMapper,
 			SLOT(map()), actionCollection(),
 			QString("show_group_%1").arg(i));
@@ -1026,7 +1026,7 @@ void BosonMenuInput::slotExploreAll(Player* pl)
 			p->explore(x, y);
 		}
 	}
-	boGame->slotAddChatSystemMessage(i18n("Debug"), i18n("Explored player %1 - %2").arg(p->bosonId()).arg(p->name()));
+	boGame->slotAddChatSystemMessage(i18n("Debug"), i18n("Explored player %1 - %2", p->bosonId(), p->name()));
  }
 }
 
@@ -1058,7 +1058,7 @@ void BosonMenuInput::slotUnfogAll(Player* pl)
 			p->addFogRef(x, y);
 		}
 	}
-	boGame->slotAddChatSystemMessage(i18n("Debug"), i18n("Unfogged player %1 - %2").arg(p->bosonId()).arg(p->name()));
+	boGame->slotAddChatSystemMessage(i18n("Debug"), i18n("Unfogged player %1 - %2", p->bosonId(), p->name()));
  }
 }
 
@@ -1090,7 +1090,7 @@ void BosonMenuInput::slotFogAll(Player* pl)
 			p->removeFogRef(x, y);
 		}
 	}
-	boGame->slotAddChatSystemMessage(i18n("Debug"), i18n("Fogged player %1 - %2").arg(p->bosonId()).arg(p->name()));
+	boGame->slotAddChatSystemMessage(i18n("Debug"), i18n("Fogged player %1 - %2", p->bosonId(), p->name()));
  }
 }
 
@@ -1256,7 +1256,7 @@ void BosonMenuInput::slotEditorSavePlayFieldAs()
 	fileName += ".bpf";
  }
  if (info.exists()) {
-	int r = KMessageBox::warningYesNoCancel(0, i18n("The file \"%1\" already exists. Are you sure you want to overwrite it?").arg(info.fileName()), i18n("Overwrite File?"));
+	int r = KMessageBox::warningYesNoCancel(0, i18n("The file \"%1\" already exists. Are you sure you want to overwrite it?", info.fileName()), i18n("Overwrite File?"));
 	if (r != KMessageBox::Yes) {
 		return;
 	}
@@ -1295,7 +1295,7 @@ void BosonMenuInput::slotEditorEditPlayerMinerals()
  QIntValidator val(this);
  val.setBottom(0);
  val.setTop(1000000); // we need to set a top, because int is limited. this should be enough, i hope (otherwise feel free to increase)
- QString caption = i18n("Minerals for player %1").arg(playerIO()->name());
+ QString caption = i18n("Minerals for player %1", playerIO()->name());
  QString label = caption;
  value = KInputDialog::getText(caption, label, value, &ok, 0, &val);
  if (!ok) {
@@ -1321,7 +1321,7 @@ void BosonMenuInput::slotEditorEditPlayerOil()
  QIntValidator val(this);
  val.setBottom(0);
  val.setTop(1000000); // we need to set a top, because int is limited. this should be enough, i hope (otherwise feel free to increase)
- QString caption = i18n("Oil for player %1").arg(playerIO()->name());
+ QString caption = i18n("Oil for player %1", playerIO()->name());
  QString label = caption;
  value = KInputDialog::getText(caption, label, value, &ok, 0, &val);
  if (!ok) {
@@ -1351,21 +1351,21 @@ void BosonMenuInput::slotEditorImportHeightMap()
  QImage image(fileName);
  if (image.isNull()) {
 	boError() << k_funcinfo << "unbable to load file " << fileName << endl;
-	KMessageBox::sorry(0, i18n("Unable to load %1\nSeems not to be a valid image.").arg(fileName));
+	KMessageBox::sorry(0, i18n("Unable to load %1\nSeems not to be a valid image.", fileName));
 	return;
  }
  BosonMap* map = boGame->playField()->map();
  if ((unsigned int)image.width() != map->width() + 1 ||
 		(unsigned int)image.height() != map->height() + 1) {
-	KMessageBox::sorry(0, i18n("This image can't be used as height map for this map. The map is a %1x%2 map, meaning you need a %3x%4 image.\nThe image selected %5 was %6x%7").
-			arg(map->width()).arg(map->height()).
-			arg(map->width() + 1).arg(map->height() + 1).
-			arg(fileName).
-			arg(image.width()).arg(image.height()));
+	KMessageBox::sorry(0, i18n("This image can't be used as height map for this map. The map is a %1x%2 map, meaning you need a %3x%4 image.\nThe image selected %5 was %6x%7", 
+			map->width(), map->height(), 
+			map->width() + 1, map->height() + 1, 
+			fileName, 
+			image.width(), image.height()));
 	return;
  }
  if (!image.isGrayscale()) {
-	KMessageBox::sorry(0, i18n("%1 is not a greyscale image").arg(fileName));
+	KMessageBox::sorry(0, i18n("%1 is not a greyscale image", fileName));
 	return;
  }
  boGame->playField()->importHeightMapImage(image);
@@ -1395,7 +1395,7 @@ void BosonMenuInput::slotEditorExportHeightMap()
  }
  if (!image.save(fileName, "PNG")) {
 	boError() << k_funcinfo << "unable to save image to " << fileName << endl;
-	KMessageBox::sorry(0, i18n("Unable to save image to %1.").arg(fileName));
+	KMessageBox::sorry(0, i18n("Unable to save image to %1.", fileName));
 	return;
  }
 }
@@ -1460,7 +1460,7 @@ void BosonMenuInput::slotEditorExportTexMap()
  }
  if (!image.save(fileName, "PNG")) {
 	boError() << k_funcinfo << "unable to save image to " << fileName << endl;
-	KMessageBox::sorry(0, i18n("Unable to save image to %1.").arg(fileName));
+	KMessageBox::sorry(0, i18n("Unable to save image to %1.", fileName));
 	return;
  }
 }
@@ -1477,7 +1477,7 @@ void BosonMenuInput::slotEditorHasUndo(const QString& name)
 	undo->setText(BoUfoStdAction::label(BoUfoStdAction::EditUndo));
  } else {
 	undo->setEnabled(true);
-	undo->setText(i18n("%1: %2").arg(BoUfoStdAction::label(BoUfoStdAction::EditUndo)).arg(name));
+	undo->setText(i18n("%1: %2", BoUfoStdAction::label(BoUfoStdAction::EditUndo), name));
  }
 }
 
@@ -1492,7 +1492,7 @@ void BosonMenuInput::slotEditorHasRedo(const QString& name)
 	redo->setText(BoUfoStdAction::label(BoUfoStdAction::EditRedo));
  } else {
 	redo->setEnabled(true);
-	redo->setText(i18n("%1: %2").arg(BoUfoStdAction::label(BoUfoStdAction::EditRedo)).arg(name));
+	redo->setText(i18n("%1: %2", BoUfoStdAction::label(BoUfoStdAction::EditRedo), name));
  }
 }
 

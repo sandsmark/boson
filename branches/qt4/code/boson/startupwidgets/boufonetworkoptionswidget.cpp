@@ -100,9 +100,9 @@ void BoUfoNetworkOptionsWidget::setConnected(bool connected, bool master)
 	return;
  }
  if (master) {
-	mNetStatusLabel->setText(i18n("Multiplayer mode\nYou are MASTER\nListening at port %1").arg(boGame->bosonPort()));
+	mNetStatusLabel->setText(i18n("Multiplayer mode\nYou are MASTER\nListening at port %1", boGame->bosonPort()));
  } else {
-	mNetStatusLabel->setText(i18n("Multiplayer mode\nYou are Connected\nServer: %1:%2").arg(boGame->bosonHostName()).arg(boGame->bosonPort()));
+	mNetStatusLabel->setText(i18n("Multiplayer mode\nYou are Connected\nServer: %1:%2", boGame->bosonHostName(), boGame->bosonPort()));
  }
  mNetConfigGroupBox->setEnabled(false);
  mDisconnectButton->setEnabled(true);

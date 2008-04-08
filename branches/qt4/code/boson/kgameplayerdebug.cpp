@@ -51,14 +51,14 @@ public:
 	}
 	void setSpeciesIdentifier(const QString& s)
 	{
-		mSpecies->setText(i18n("Species Identifier: %1").arg(s));
+		mSpecies->setText(i18n("Species Identifier: %1", s));
 	}
 	void setTeamColor(const QColor& c)
 	{
-		mTeamColor->setText(i18n("Teamcolor (RGB): %1,%2,%3").
-				arg(QString::number(c.red())).
-				arg(QString::number(c.green())).
-				arg(QString::number(c.blue())));
+		mTeamColor->setText(i18n("Teamcolor (RGB): %1,%2,%3", 
+				QString::number(c.red()), 
+				QString::number(c.green()), 
+				QString::number(c.blue())));
 	}
 private:
 	QLabel* mSpecies;

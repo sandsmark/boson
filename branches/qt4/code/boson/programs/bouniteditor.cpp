@@ -652,7 +652,7 @@ void BoUnitEditor::slotSaveUnit()
  if(!errors.isEmpty()) {
 	QString allErrors = errors.join("\n");
 	KMessageBox::sorry(this, i18n("Sorry, but current properties cannot be saved "
-			"until following errors are fixed:\n\n%1").arg(allErrors),
+			"until following errors are fixed:\n\n%1", allErrors),
 			i18n("Current properties contain errors!"));
 	return;
  }
@@ -672,13 +672,13 @@ void BoUnitEditor::slotSaveUnit()
  }
  d.setPath(dir);
  if(!d.exists()) {
-	KMessageBox::error(this, i18n("Directory %1 does not exist!").arg(dir),
+	KMessageBox::error(this, i18n("Directory %1 does not exist!", dir),
 			i18n("Invalid directory"));
 	return;
  }
  QFileInfo fi(d.absPath());
  if(!fi.isWritable()) {
-	KMessageBox::error(this, i18n("Directory %1 is not writable!").arg(dir),
+	KMessageBox::error(this, i18n("Directory %1 is not writable!", dir),
 			i18n("Directory isn't writable"));
 	return;
  }

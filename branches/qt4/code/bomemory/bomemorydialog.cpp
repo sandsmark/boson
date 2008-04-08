@@ -195,10 +195,10 @@ void BoMemoryDialog::slotUpdate()
  _allNodes = 0;
  MemoryManager::manager()->enable();
 
- d->mNodeCount->setText(i18n("Total nodes: %1").arg(nodeCount));
- d->mMemory->setText(i18n("Memory in use (Bytes/KB/MB): %1 / %2 / %3").arg(totalMemory).
-		arg( ((double)totalMemory) / (1024.0)).
-		arg( ((double)totalMemory) / (1024.0 * 1024.0) ));
+ d->mNodeCount->setText(i18n("Total nodes: %1", nodeCount));
+ d->mMemory->setText(i18n("Memory in use (Bytes/KB/MB): %1 / %2 / %3", totalMemory, 
+		 ((double)totalMemory) / (1024.0), 
+		 ((double)totalMemory) / (1024.0 * 1024.0) ));
 
  boDebug() << k_funcinfo << "processing " << allNodes.count() << " nodes" << endl;
 

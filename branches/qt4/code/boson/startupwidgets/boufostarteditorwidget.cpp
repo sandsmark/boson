@@ -261,7 +261,7 @@ void BoUfoStartEditorWidget::slotNetStart()
  for (int i = 0; i < maxPlayers; i++) {
 	// add dummy computer player
 	Player* p = new Player;
-	p->setName(i18n("Player %1").arg(i + 1));
+	p->setName(i18n("Player %1", i + 1));
 
 	// AB: all players can be controlled by the user in editor mode, so all
 	// have a localplayer input.
@@ -371,7 +371,7 @@ void BoUfoStartEditorWidget::slotGroundThemeChanged(int)
  QStringList groundThemes = BosonData::bosonData()->availableGroundThemes();
  int themeIndex = mGroundTheme->currentItem();
  if (themeIndex < 0 || themeIndex >= groundThemes.count()) {
-	KMessageBox::sorry(0, i18n("Invalid groundTheme index %1").arg(themeIndex));
+	KMessageBox::sorry(0, i18n("Invalid groundTheme index %1", themeIndex));
 	return;
  }
  QString themeId = groundThemes[themeIndex];
@@ -506,7 +506,7 @@ QByteArray BoUfoStartEditorWidget::createNewMap()
 	if (themeIndex < 0) {
 		KMessageBox::sorry(0, i18n("Please select a ground theme first"));
 	} else {
-		KMessageBox::sorry(0, i18n("The selected groundTheme at index %1 could not be found. %2 themes are available").arg(themeIndex).arg(groundThemes.count()));
+		KMessageBox::sorry(0, i18n("The selected groundTheme at index %1 could not be found. %2 themes are available", themeIndex, groundThemes.count()));
 	}
 	return QByteArray();
  }
@@ -521,19 +521,19 @@ QByteArray BoUfoStartEditorWidget::createNewMap()
  unsigned int groundType = mFilling->currentItem();
  if (groundType >= theme->groundTypeCount()) {
 	boError() << k_funcinfo << "invalid groundtype " << groundType << endl;
-	KMessageBox::sorry(0, i18n("Could not fill the map with texture %1 - only %2 textures in groundTheme %3").arg(groundType).arg(theme->groundTypeCount()).arg(themeId));
+	KMessageBox::sorry(0, i18n("Could not fill the map with texture %1 - only %2 textures in groundTheme %3", groundType, theme->groundTypeCount(), themeId));
 	return QByteArray();
  }
 
  int maxPlayers = (int)mMaxPlayers->value();
  if (maxPlayers < 2) {
 	boError() << k_funcinfo << "maxPlayers < 2 does not make sense" << endl;
-	KMessageBox::sorry(0, i18n("Max Players is an invalid value: %1").arg(maxPlayers));
+	KMessageBox::sorry(0, i18n("Max Players is an invalid value: %1", maxPlayers));
 	return QByteArray();
  }
  if (maxPlayers > BOSON_MAX_PLAYERS) {
 	boError() << k_funcinfo << "maxPlayers > " << BOSON_MAX_PLAYERS << " is not allowed" << endl;
-	KMessageBox::sorry(0, i18n("Max Players is an invalid value: %1 (must be < %2)").arg(maxPlayers).arg(BOSON_MAX_PLAYERS));
+	KMessageBox::sorry(0, i18n("Max Players is an invalid value: %1 (must be < %2)", maxPlayers, BOSON_MAX_PLAYERS));
 	return QByteArray();
  }
 

@@ -114,12 +114,12 @@ QString BoMeshRendererStatisticsCollection::statisticsData() const
 {
  QString data;
  unsigned int frames = d->mStatistics.count();
- data += i18n("Frames: %1\n").arg(frames);
+ data += i18n("Frames: %1\n", frames);
  if (frames == 0) {
 	return data;
  }
- data += i18n("Meshes: %1   Meshes per Frame: %2\n").arg(mMeshes).arg(mMeshes / frames);
- data += i18n("Points: %1   Points per Frame: %2\n").arg(mPoints).arg(mPoints / frames);
+ data += i18n("Meshes: %1   Meshes per Frame: %2\n", mMeshes, mMeshes / frames);
+ data += i18n("Points: %1   Points per Frame: %2\n", mPoints, mPoints / frames);
  return data;
 }
 

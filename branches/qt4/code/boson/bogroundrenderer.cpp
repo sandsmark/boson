@@ -251,9 +251,9 @@ bool BoGroundRenderer::usable() const
 
 QString BoGroundRendererStatistics::statisticsData() const
 {
- QString data = i18n("Cells rendered: %1 (quads: %2)").arg(renderedCells()).arg(renderedQuads());
+ QString data = i18n("Cells rendered: %1 (quads: %2)", renderedCells(), renderedQuads());
  if (renderedQuads() > 0 && usedTextures() > 0) {
-	data += i18n("\n Used Textures: %1").arg(usedTextures());
+	data += i18n("\n Used Textures: %1", usedTextures());
  }
  return data;
 }

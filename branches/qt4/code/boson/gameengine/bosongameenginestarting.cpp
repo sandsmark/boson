@@ -164,7 +164,7 @@ bool BosonGameEngineStarting::createTasks(Q3PtrList<BosonStartingTask>* tasks)
  foreach (Player* p, boGame->gamePlayerList()) {
 	QString text;
 	if (p->isActiveGamePlayer()) {
-		text = i18n("Load player game data of player %1 (of %2)").arg(index + 1).arg(boGame->activeGamePlayerCount());
+		text = i18n("Load player game data of player %1 (of %2)", index + 1, boGame->activeGamePlayerCount());
 	} else {
 		text = i18n("Load player game data of neutral player");
 	}
