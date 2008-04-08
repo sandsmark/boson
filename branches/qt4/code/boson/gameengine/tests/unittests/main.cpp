@@ -24,6 +24,7 @@
 #include "bosonconfig.h"
 #include "boapplication.h"
 #include "gameengine/boeventloop.h"
+#include "gameengine/boitemlisthandler.h"
 #include "boglobal.h"
 
 #include "maptest.h"
@@ -63,6 +64,7 @@ int main(int argc, char **argv)
 
  BoGlobal::initStatic();
  BoGlobal::boGlobal()->initGlobalObjects();
+ BoItemListHandler::itemListHandler()->setEnableDeletionTimer(false); // we dont have an even loop here, so dont use timers
 
  KComponentData instance(&about);
 
