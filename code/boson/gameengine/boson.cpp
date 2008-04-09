@@ -804,9 +804,12 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
  return d->mPlayerInputHandler->playerInput(stream, (Player*)p);
 }
 
-void Boson::systemAddPlayer(KPlayer* p)
+bool Boson::systemAddPlayer(KPlayer* p)
 {
- BO_CHECK_NULL_RET(p);
+ if (!p) {
+	BO_NULL_ERROR(p);
+	return false;
+ }
  if (p->userId() == 0) {
 	int userId = 128;
 	while (findPlayerByUserId(userId) != 0) {
@@ -822,15 +825,16 @@ void Boson::systemAddPlayer(KPlayer* p)
 	have = true;
  }
  blockSignals(true);
- KGame::systemAddPlayer(p);
+ bool ret = KGame::systemAddPlayer(p);
  blockSignals(false);
 
  recalculatePlayerLists();
- if (!have) {
+ if (!have && ret) {
 	if (playerList()->contains(p)) {
 		emit signalPlayerJoinedGame(p);
 	}
  }
+ return ret;
 }
 
 void Boson::systemRemovePlayer(KPlayer* p, bool deleteIt)

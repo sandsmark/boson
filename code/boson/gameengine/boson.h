@@ -572,7 +572,7 @@ signals:
 protected:
 	virtual bool playerInput(QDataStream& stream, KPlayer* player);
 
-	virtual void systemAddPlayer(KPlayer* p);
+	virtual bool systemAddPlayer(KPlayer* p);
 	virtual void systemRemovePlayer(KPlayer* p, bool deleteIt);
 
 	/**
