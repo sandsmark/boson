@@ -814,7 +814,7 @@ protected:
     /**
      * Finally adds a player to the game and therefore to the list.
      **/
-    bool systemAddPlayer(KPlayer* newplayer);
+    virtual bool systemAddPlayer(KPlayer* newplayer);
 
     /**
      * Removes a player from the game
@@ -823,7 +823,7 @@ protected:
      * as this Id is received systemRemovePlayer is called and the player is
      * removed directly.
      **/
-    void systemRemovePlayer(KPlayer* player,bool deleteit);
+    virtual void systemRemovePlayer(KPlayer* player,bool deleteit);
 
     /**
      * This member function will transmit e.g. all players to that client, as well as
