@@ -1454,10 +1454,6 @@ bool BoUfoActionCollection::createGUI()
  }
 
  QStringList fileList = guiFiles();
- if (fileList.isEmpty()) {
-	boError() << k_funcinfo << "no guiFiles() specified.";
-	return false;
- }
  for (Q3PtrListIterator<BoUfoActionCollection> it(d->mChildCollections); it.current(); ++it) {
 	QStringList l = it.current()->guiFiles();
 	QStringList::iterator i;
@@ -1466,6 +1462,10 @@ bool BoUfoActionCollection::createGUI()
 			fileList.append(*i);
 		}
 	}
+ }
+ if (fileList.isEmpty()) {
+	boError() << k_funcinfo << "no guiFiles() specified.";
+	return false;
  }
  QStringList::const_iterator it = fileList.begin();
  for (; it != fileList.end(); ++it) {
