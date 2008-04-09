@@ -88,6 +88,10 @@ public:
 	}
 	bool mergeFile(const QString& fileName)
 	{
+		if (fileName.isEmpty()) {
+			boError() << k_funcinfo << "empty filename specified";
+			return false;
+		}
 		QFile file(fileName);
 		if (!file.open(QIODevice::ReadOnly)) {
 			boError() << k_funcinfo << "could not open " << fileName << endl;
@@ -1450,6 +1454,10 @@ bool BoUfoActionCollection::createGUI()
  }
 
  QStringList fileList = guiFiles();
+ if (fileList.isEmpty()) {
+	boError() << k_funcinfo << "no guiFiles() specified.";
+	return false;
+ }
  for (Q3PtrListIterator<BoUfoActionCollection> it(d->mChildCollections); it.current(); ++it) {
 	QStringList l = it.current()->guiFiles();
 	QStringList::iterator i;
