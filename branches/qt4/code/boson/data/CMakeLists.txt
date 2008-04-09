@@ -1,11 +1,10 @@
 
-install_files(${XDG_APPS_INSTALL_DIR} .*\\.desktop)
-install_files(${DATA_INSTALL_DIR}/boson .*ui\\.rc)
-install_files(${CONFIG_INSTALL_DIR} FILES
-	bodebugrc
-	bodebug.areas
-)
+FILE(GLOB desktop_files "*.desktop")
+FILE(GLOB ui_files "*ui.rc")
+install(FILES ${desktop_files} DESTINATION ${XDG_APPS_INSTALL_DIR})
+install(FILES ${ui_files} DESTINATION ${DATA_INSTALL_DIR}/boson)
+install(FILES bodebugrc bodebug.areas DESTINATION ${CONFIG_INSTALL_DIR})
 
 kde4_install_icons(hicolor)
-#kde3_install_icons(locolor)
+#kde4_install_icons(locolor)
 

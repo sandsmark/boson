@@ -221,7 +221,8 @@ set(bocommandframetester_SRCS
 #	${LIB_BOMEMORY}
 #)
 
-install_targets(/bin
+install(
+	TARGETS
 	boson
 #	boson-no-gui
 	bounit
@@ -233,6 +234,8 @@ install_targets(/bin
 	boconditioneditor
 	boprofiling
 #	bocommandframetester
+	DESTINATION
+	${BIN_INSTALL_DIR}
 )
 
 ################ bofileconverter #################
