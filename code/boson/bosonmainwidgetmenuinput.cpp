@@ -164,8 +164,16 @@ void BosonMainWidgetMenuInput::initUfoActions()
 
 
  QStringList files;
- files.append(boData->locateDataFile("boson/topui.rc"));
- actionCollection()->setGUIFiles(files);
+ QString topUi = boData->locateDataFile("boson/topui.rc");
+ if (topUi.isEmpty()) {
+	boError() << k_funcinfo << "boson/topui.rc not found - check installation!";
+	// TODO: return false?
+ } else {
+	files.append(topUi);
+ }
+ if (!files.isEmpty()) {
+	actionCollection()->setGUIFiles(files);
+ }
 }
 
 BoUfoActionCollection* BosonMainWidgetMenuInput::actionCollection() const
