@@ -267,8 +267,9 @@ void BosonMainWidget::initializeGL()
 
  d->mFPSCounter->reset();
 
-#if 0
+#ifdef HAVE_DEVICE_IS_PIXMAP
  if (!context()->deviceIsPixmap()) {
+#endif
 	// start rendering (will also start the timer if necessary)
 	QTimer::singleShot(d->mUpdateInterval, this, SLOT(slotUpdateGL()));
 
@@ -277,6 +278,7 @@ void BosonMainWidget::initializeGL()
 	boProfiling->push("Update BoInfo");
 	BoInfo::boInfo()->update(this);
 	boProfiling->pop();
+#ifdef HAVE_DEVICE_IS_PIXMAP
  }
 #endif
 
