@@ -275,7 +275,7 @@ bool VertexOptimizer::processMesh(Mesh* mesh)
 
 void VertexOptimizer::replaceVertex(Mesh* mesh, Vertex* replace, Vertex* with)
 {
-  for(unsigned int i = 0; i < replace->faces.count(); i++)
+  for(int i = 0; i < replace->faces.count(); i++)
   {
     Face* f = replace->faces[i];
     for(unsigned int j = 0; j < f->vertexCount(); j++)

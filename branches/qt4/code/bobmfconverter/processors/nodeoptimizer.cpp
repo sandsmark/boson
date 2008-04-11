@@ -126,7 +126,7 @@ void NodeOptimizer::breakup(Mesh* mesh)
       // This node uses same mesh but non-identity matrix
       // Check if we already have a mesh corresponding to such matrix
       int index = -1;
-      for(unsigned int k = 0; k < mMatrices.count(); k++)
+      for(int k = 0; k < mMatrices.count(); k++)
       {
         if(f->matrix(j)->isEqual(mMatrices[k]))
         {
