@@ -68,7 +68,7 @@ boson_target_link_libraries(common
 
 
 set(gameengine_SRCS
-	gameengine/boeventloop.cpp
+	gameengine/boadvancecontrol.cpp
 	gameengine/boupgradeableproperty.cpp
 	gameengine/unitbase.cpp
 	gameengine/unit.cpp

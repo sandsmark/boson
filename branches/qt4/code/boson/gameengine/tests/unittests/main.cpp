@@ -23,7 +23,6 @@
 #include "bodebug.h"
 #include "bosonconfig.h"
 #include "boapplication.h"
-#include "gameengine/boeventloop.h"
 #include "gameengine/boitemlisthandler.h"
 #include "boglobal.h"
 

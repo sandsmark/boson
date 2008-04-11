@@ -30,6 +30,7 @@ class Boson;
 template<class T> class Q3PtrQueue;
 template<class T> class Q3PtrList;
 class QIODevice;
+class BoAdvanceControl;
 
 /**
  * @short Helper class for @ref Boson.
@@ -85,7 +86,7 @@ public:
 	 * Unlock message delivery (see @ref lock) and deliver all delayed
 	 * messages.
 	 **/
-	void unlock();
+	void unlock(BoAdvanceControl* advanceControl);
 
 	bool isLocked() const
 	{
@@ -120,7 +121,7 @@ public:
 	 * @return TRUE if the message can be delivered normally, FALSE if it
 	 * got delayed.
 	 **/
-	bool processMessage(BoMessage* m);
+	bool processMessage(BoMessage* m, BoAdvanceControl* advanceControl);
 
 	// force to delay @p m
 	bool delay(BoMessage* m);
@@ -134,7 +135,7 @@ protected:
 	 * messages have been deliverd! (this happens e.g. when 2 advance
 	 * messages got delayed)
 	 **/
-	void processDelayed();
+	void processDelayed(BoAdvanceControl* advanceControl);
 
 private:
 	Boson* mBoson;

@@ -23,7 +23,7 @@
 #include <bodebug.h>
 #include "boson.h"
 #include "bosonmessageids.h"
-#include "boeventloop.h"
+#include "boadvancecontrol.h"
 
 #include <kgame/kgamemessage.h>
 #include <kgame/kplayer.h>
@@ -36,10 +36,6 @@
 #include <qapplication.h>
 //Added by qt3to4:
 #include <Q3TextStream>
-
-
-#define DISABLE_BOEVENTLOOP 1
-
 
 
 BoMessage::BoMessage(QByteArray& _message, int _msgid, quint32 _receiver, quint32 _sender, quint32 _clientId, unsigned int _advanceCallsCount)
@@ -176,12 +172,12 @@ void BoMessageDelayer::lock()
  mIsLocked = true;
 }
 
-void BoMessageDelayer::unlock()
+void BoMessageDelayer::unlock(BoAdvanceControl* advanceControl)
 {
  boDebug(300) << k_funcinfo << endl;
  mIsLocked = false;
  while (!mDelayedMessages->isEmpty() && !mIsLocked) {
-	processDelayed();
+	processDelayed(advanceControl);
  }
  if (mDelayedMessages->isEmpty()) {
 	mBoson->setLoadFromLogComplete();
@@ -200,7 +196,7 @@ void BoMessageDelayer::clearDelayedMessages()
  mDelayedWaiting = false;
 }
 
-bool BoMessageDelayer::processMessage(BoMessage* m)
+bool BoMessageDelayer::processMessage(BoMessage* m, BoAdvanceControl* advanceControl)
 {
  if (!m) {
 	return true;
@@ -217,9 +213,7 @@ bool BoMessageDelayer::processMessage(BoMessage* m)
 				// not, usually.
 				boWarning(300) << k_funcinfo << "advance call " << mBoson->advanceCallsCount() << ": now " << mAdvanceMessageWaiting << " advance messages delayed" << endl;
 			}
-#if !DISABLE_BOEVENTLOOP
-			((BoEventLoop*)qApp->eventLoop())->setAdvanceMessagesWaiting(mAdvanceMessageWaiting);
-#endif
+			advanceControl->setAdvanceMessagesWaiting(mAdvanceMessageWaiting);
 			break;
 		default:
 			break;
@@ -238,7 +232,7 @@ bool BoMessageDelayer::delay(BoMessage* m)
  return true;
 }
 
-void BoMessageDelayer::processDelayed()
+void BoMessageDelayer::processDelayed(BoAdvanceControl* advanceControl)
 {
  BoMessage* m = mDelayedMessages->dequeue();
  if (!m) {
@@ -251,9 +245,7 @@ void BoMessageDelayer::processDelayed()
 	case BosonMessageIds::AdvanceN:
 //		boWarning(300) << k_funcinfo << "delayed advance msg will be sent!" << endl;
 		mAdvanceMessageWaiting--;
-#if !DISABLE_BOEVENTLOOP
-		((BoEventLoop*)qApp->eventLoop())->setAdvanceMessagesWaiting(mAdvanceMessageWaiting);
-#endif
+		advanceControl->setAdvanceMessagesWaiting(mAdvanceMessageWaiting);
 		break;
 	default:
 		break;

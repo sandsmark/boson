@@ -26,7 +26,6 @@
 #include "../boglobal.h"
 #include "../bocheckinstallation.h"
 #include "../boapplication.h"
-//#include "../gameengine/boeventloop.h"
 
 #include <kaboutdata.h>
 #include <kcmdlineargs.h>
@@ -96,9 +95,6 @@ int main(int argc, char **argv)
  KApplication::disableAutoDcopRegistration();
 #endif
 
-#if 0
- BoEventLoop eventLoop(0, "main event loop");
-#endif
  BoApplication app(argv0, false);
  KGlobal::locale()->insertCatalog("libkdegames");
 
