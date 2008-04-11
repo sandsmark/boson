@@ -98,7 +98,7 @@ find_package(OpenGL REQUIRED)
 #find_package(Lib3ds REQUIRED)
 set(LIB3DS_INCLUDE_DIR "${boson_SOURCE_DIR}/lib3ds")
 set(LIB3DS_LIBRARY_DIR "${boson_BINARY_DIR}/lib3ds")
-set(LIB3DS_LIBRARY "3ds")
+set(LIB3DS_LIBRARY "lib3ds")
 
 add_definitions(${QT_DEFINITIONS} ${KDE4_DEFINITIONS} -DHAVE_CONFIG_H=1)
 link_directories(${KDE4_LIB_DIR})
