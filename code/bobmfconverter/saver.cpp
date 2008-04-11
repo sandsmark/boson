@@ -77,11 +77,20 @@ bool Saver::saveModel(QDataStream& stream, Model* model)
   // Info
   stream << (quint32)BMF_MAGIC_MODEL_INFO;
   stream << (quint32)BMF_MAGIC_MODEL_NAME;
-  stream << model->name().toLatin1();
+  {
+    QByteArray tmp = model->name().toLatin1();
+    stream << tmp.data();
+  }
   stream << (quint32)BMF_MAGIC_MODEL_COMMENT;
-  stream << model->comment().toLatin1();
+  {
+    QByteArray tmp = model->comment().toLatin1();
+    stream << tmp.data();
+  }
   stream << (quint32)BMF_MAGIC_MODEL_AUTHOR;
-  stream << model->author().toLatin1();
+  {
+    QByteArray tmp = model->author().toLatin1();
+    stream << tmp.data();
+  }
   stream << (quint32)BMF_MAGIC_MODEL_RADIUS;
   stream << model->radius();
   stream << (quint32)BMF_MAGIC_MODEL_BBOX;
@@ -164,14 +173,16 @@ bool Saver::saveModel(QDataStream& stream, Model* model)
 
 bool Saver::saveTexture(QDataStream& stream, Texture* tex)
 {
-  stream << tex->filename().toLatin1();
+  QByteArray tmp = tex->filename().toLatin1();
+  stream << tmp.data();
   stream << (quint8)tex->hasTransparency();
   return true;
 }
 
 bool Saver::saveMaterial(QDataStream& stream, Material* mat)
 {
-  stream << mat->name().toLatin1();
+  QByteArray tmp = mat->name().toLatin1();
+  stream << tmp.data();
 
   stream << mat->ambient();
   stream << mat->diffuse();
@@ -215,7 +226,8 @@ bool Saver::saveMesh(QDataStream& stream, Mesh* mesh)
 {
   // Info
   stream << (quint32)BMF_MAGIC_MESH_INFO;
-  stream << mesh->name().toLatin1();
+  QByteArray tmp = mesh->name().toLatin1();
+  stream << tmp.data();
   stream << mesh->minCoord();
   stream << mesh->maxCoord();
 
@@ -257,3 +269,6 @@ bool Saver::saveFrame(QDataStream& stream, Frame* frame)
   return true;
 }
 
+/*
+ * vim: et sw=2 ts=2
+ */
