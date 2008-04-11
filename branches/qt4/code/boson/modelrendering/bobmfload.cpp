@@ -171,6 +171,12 @@ bool BoBMFLoad::loadModel()
 
 bool BoBMFLoad::loadInfo(QDataStream& stream)
 {
+  #define CHECK_MAGIC(x, magic) \
+      if (x != magic) \
+      { \
+        boError(100) << k_funcinfo << "loading failed. wrong magic cookie:" << x << "!=" << magic; \
+        return false; \
+      }
   quint32 magic;
   stream >> magic;
   if(magic != BMF_MAGIC_MODEL_INFO)
@@ -183,14 +189,17 @@ bool BoBMFLoad::loadInfo(QDataStream& stream)
   char* str;
   // Name
   stream >> magic;
+  CHECK_MAGIC(magic, BMF_MAGIC_MODEL_NAME)
   stream >> str;
   delete[] str;
   // Comment
   stream >> magic;
+  CHECK_MAGIC(magic, BMF_MAGIC_MODEL_COMMENT)
   stream >> str;
   delete[] str;
   // Author
   stream >> magic;
+  CHECK_MAGIC(magic, BMF_MAGIC_MODEL_AUTHOR)
   stream >> str;
   delete[] str;
 
