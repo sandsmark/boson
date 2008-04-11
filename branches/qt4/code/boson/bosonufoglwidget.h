@@ -82,6 +82,8 @@ protected:
 	virtual void keyPressEvent(QKeyEvent* e);
 	virtual void keyReleaseEvent(QKeyEvent* e);
 
+	virtual void paintEvent(QPaintEvent*);
+
 protected:
 	void initUfo();
 

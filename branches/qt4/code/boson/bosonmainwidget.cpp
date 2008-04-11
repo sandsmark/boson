@@ -134,6 +134,8 @@ public:
 	BosonStarting* mStarting;
 
 	QPointer<Player> mLocalPlayer;
+
+	bool mIsInUpdateGL;
 };
 
 BosonMainWidget::BosonMainWidget(QWidget* parent, bool wantDirect)
@@ -187,6 +189,7 @@ BosonMainWidget::~BosonMainWidget()
 void BosonMainWidget::init()
 {
  d = new BosonMainWidgetPrivate;
+ d->mIsInUpdateGL = false;
  d->mUpdateInterval = 0;
  d->mGrabMovie = false;
 
@@ -206,7 +209,7 @@ void BosonMainWidget::init()
  boAudio->setSound(boConfig->boolValue("Sound"));
  boAudio->setMusic(boConfig->boolValue("Music"));
 
- connect(&d->mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdateGL()));
+ connect(&d->mUpdateTimer, SIGNAL(timeout()), this, SLOT(updateGL()));
  slotSetUpdateInterval(boConfig->uintValue("GLUpdateInterval"));
 
  qApp->setGlobalMouseTracking(true);
@@ -271,7 +274,7 @@ void BosonMainWidget::initializeGL()
  if (!context()->deviceIsPixmap()) {
 #endif
 	// start rendering (will also start the timer if necessary)
-	QTimer::singleShot(d->mUpdateInterval, this, SLOT(slotUpdateGL()));
+	QTimer::singleShot(d->mUpdateInterval, this, SLOT(updateGL()));
 
 	// update system information (initializeGL() must have been called before
 	// this makes sense)
@@ -287,7 +290,7 @@ void BosonMainWidget::initializeGL()
  boProfiling->pop();
 
 #if !DISABLE_BOEVENTLOOP
- connect(kapp->eventLoop(), SIGNAL(signalUpdateGL()), this, SLOT(slotUpdateGL()));
+ connect(kapp->eventLoop(), SIGNAL(signalUpdateGL()), this, SLOT(updateGL()));
 #endif
 
  recursive = false;
@@ -330,7 +333,7 @@ void BosonMainWidget::initUfoGUI()
  d->mStartup = new BoUfoStartupWidget();
  d->mStartup->show();
  connect(d->mStartup, SIGNAL(signalUpdateGL()),
-		this, SLOT(slotUpdateGL()));
+		this, SLOT(updateGL()));
  connect(d->mStartup, SIGNAL(signalAddLocalPlayer()),
 		this, SLOT(slotAddLocalPlayer()));
  connect(d->mStartup, SIGNAL(signalResetGame()),
@@ -423,8 +426,9 @@ public:
 	}
 };
 
-void BosonMainWidget::slotUpdateGL()
+void BosonMainWidget::updateGL()
 {
+ d->mIsInUpdateGL = true;
  BosonProfilingGlFinishPopTask popTask;
  bool glFinishOnProfilingPop = boConfig->boolValue("debug_glfinish_before_profiling", false);
  if (glFinishOnProfilingPop) {
@@ -432,7 +436,7 @@ void BosonMainWidget::slotUpdateGL()
  }
 
  boProfiling->pushStorage("GL");
- boProfiling->push("slotUpdateGL");
+ boProfiling->push("updateGL");
 
  // AB: using the FPS counter here is most dependable and gives us some
  // additional information.
@@ -440,17 +444,22 @@ void BosonMainWidget::slotUpdateGL()
  // on rendering, i.e. including swapBuffers(), which we have no control of in
  // paintGL().
  d->mFPSCounter->startFrame();
- BosonUfoGLWidget::slotUpdateGL();
+ BosonUfoGLWidget::updateGL();
  d->mFPSCounter->endFrame();
 
  boProfiling->pop();
  boProfiling->popStorage();
 
  boProfiling->setPopTask(0);
+ d->mIsInUpdateGL = false;
 }
 
 void BosonMainWidget::paintGL()
 {
+ if (!d->mIsInUpdateGL) {
+	boWarning() << "paintGL() called from outside updateGL()!";
+	return;
+ }
  BosonProfiler prof("paintGL");
 
  if (Bo3dTools::checkError()) {
@@ -512,7 +521,7 @@ void BosonMainWidget::renderUfo()
 void BosonMainWidget::slotSetUpdateInterval(unsigned int ms)
 {
  d->mUpdateInterval = ms;
- QTimer::singleShot(d->mUpdateInterval, this, SLOT(slotUpdateGL()));
+ QTimer::singleShot(d->mUpdateInterval, this, SLOT(updateGL()));
 }
 
 QByteArray BosonMainWidget::grabMovieFrame()
@@ -520,7 +529,7 @@ QByteArray BosonMainWidget::grabMovieFrame()
  boDebug() << k_funcinfo << "Grabbing movie frame..." << endl;
 
  // Repaint
- slotUpdateGL();
+ updateGL();
  glFinish();
 
  // Slots in Qt can be called in any order, so it is possible that particle

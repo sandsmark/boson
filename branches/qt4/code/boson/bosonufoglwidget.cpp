@@ -227,3 +227,10 @@ void BosonUfoGLWidget::keyReleaseEvent(QKeyEvent* e)
  boProfiling->popStorage();
 }
 
+void BosonUfoGLWidget::paintEvent(QPaintEvent*)
+{
+ // nothing to do: we update the GL widget using a timer.
+ // (we reimplement this method to prevent QGLWidget from calling paintGL())
+
+}
+
