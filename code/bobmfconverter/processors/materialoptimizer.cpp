@@ -59,7 +59,7 @@ bool MaterialOptimizer::process()
   {
     Material* mat = model()->material(i);
     bool valid = true;
-    for(unsigned int j = 0; j < validmaterials.count(); j++)
+    for(int j = 0; j < validmaterials.count(); j++)
     {
       Material* validmat = validmaterials[j];
       if(mat->texture() == validmat->texture())
