@@ -7,7 +7,10 @@ include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}/mixkit
 	${CMAKE_CURRENT_SOURCE_DIR}/libgfx
 	${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
-	${LIB3DS_INCLUDE_DIR}
+)
+include_directories(
+	BEFORE
+	${LIB3DS_INCLUDE_DIR}/..
 )
 
 set(libgfx_SRCS
