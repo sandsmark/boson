@@ -89,10 +89,10 @@ public:
 
 public slots:
 	/**
-	 * This extends the original @ref BosonGLWidget::slotUpdateGL by an FPS
+	 * This extends the original @ref BosonGLWidget::updateGL by an FPS
 	 * counter.
 	 **/
-	virtual void slotUpdateGL();
+	virtual void updateGL();
 
 	/**
 	 * Called when user clicks "start new game" button

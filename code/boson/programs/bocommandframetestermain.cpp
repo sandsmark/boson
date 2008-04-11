@@ -76,7 +76,7 @@ BoCommandFrameTesterGLWidget::BoCommandFrameTesterGLWidget()
 
  QTimer* timer = new QTimer(this);
  connect(timer, SIGNAL(timeout()),
-		this, SLOT(slotUpdateGL()));
+		this, SLOT(updateGL()));
  timer->start(100);
 
  setMouseTracking(true);

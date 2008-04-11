@@ -1628,7 +1628,7 @@ RenderMain::RenderMain() : KMainWindow()
  setCentralWidget(w);
 
  mUpdateTimer = new QTimer(this);
- connect(mUpdateTimer, SIGNAL(timeout()), mGLWidget, SLOT(slotUpdateGL()));
+ connect(mUpdateTimer, SIGNAL(timeout()), mGLWidget, SLOT(updateGL()));
  mUpdateTimer->start(GL_UPDATE_TIMER);
 }
 

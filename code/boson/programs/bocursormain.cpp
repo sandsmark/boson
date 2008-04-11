@@ -58,7 +58,7 @@ CursorPreview::CursorPreview(QWidget* parent) : QGLWidget(parent)
  setMinimumSize(200, 200);
  setMouseTracking(true);
  mUpdateTimer = new QTimer(this);
- connect(mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdateGL()));
+ connect(mUpdateTimer, SIGNAL(timeout()), this, SLOT(updateGL()));
 }
 
 CursorPreview::~CursorPreview()
