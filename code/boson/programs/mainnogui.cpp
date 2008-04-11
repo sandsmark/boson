@@ -27,7 +27,6 @@
 #include "../boglobal.h"
 #include "bodebug.h"
 #include "../bo3dtools.h"
-#include "../gameengine/boeventloop.h"
 #include "../gameengine/bosongameengine.h"
 #include "../gameengine/player.h"
 #include "../gameengine/boson.h"

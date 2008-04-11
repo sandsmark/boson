@@ -26,7 +26,6 @@
 #include "boversion.h"
 #include "bodebug.h"
 #include "bo3dtools.h"
-//#include "boeventloop.h"
 #include "bosongameengine.h"
 #include "bosongldriverworkarounds.h"
 #include <config.h>
@@ -116,7 +115,6 @@ int main(int argc, char **argv)
  }
  boDebug() << k_funcinfo << "GL, GLX and GLU symbols successfully resolved" << endl;
 
- //BoEventLoop eventLoop(0, "main event loop");
  BoApplication app(argv0);
  KGlobal::locale()->insertCatalog("libkdegames");
 

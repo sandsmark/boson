@@ -30,7 +30,6 @@
 #include "../bocheckinstallation.h"
 #include "../bosonguistarting.h"
 #include "../bosonviewdata.h"
-#include "../gameengine/boeventloop.h"
 #include "../gameengine/boson.h"
 #include "../gameengine/player.h"
 #include "../gameengine/playerio.h"
@@ -279,7 +278,6 @@ int main(int argc, char **argv)
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
 
- BoEventLoop eventLoop(0, "main event loop");
  BoApplication app(argv0);
  KGlobal::locale()->insertCatalog("libkdegames");
 

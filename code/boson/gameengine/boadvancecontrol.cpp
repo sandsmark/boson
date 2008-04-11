@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2004-2008 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,18 +17,17 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "boeventloop.h"
-#include "boeventloop.moc"
+#include "boadvancecontrol.h"
+#include "boadvancecontrol.moc"
 
 #include "../../bomemory/bodummymemory.h"
 #include "../global.h"
 #include "bodebug.h"
 #include "boson.h"
 
-#include <qdatetime.h>
-#include <qapplication.h>
-//Added by qt3to4:
-#include <QEventLoop>
+#include <QTime>
+#include <QTimer>
+#include <QCoreApplication>
 #include <QEvent>
 
 /*
@@ -43,10 +42,10 @@
 #define DO_SEND_NOT_POST 1
 
 
-class BoEventLoopPrivate
+class BoAdvanceControlPrivate
 {
 public:
-	BoEventLoopPrivate()
+	BoAdvanceControlPrivate()
 	{
 		mGameSpeed = 0;
 		mAdvanceCallsMade = 0;
@@ -64,20 +63,20 @@ public:
 	QTime mNextAdvanceCall;
 };
 
-BoEventLoop::BoEventLoop(QObject* parent)
-	: QEventLoop(parent)
+BoAdvanceControl::BoAdvanceControl(QObject* parent)
+	: QObject(parent)
 {
- d = new BoEventLoopPrivate;
+ d = new BoAdvanceControlPrivate;
  d->mAdvanceMessageInterval = 250;
  mAdvanceObject = 0;
 }
 
-BoEventLoop::~BoEventLoop()
+BoAdvanceControl::~BoAdvanceControl()
 {
  delete d;
 }
 
-void BoEventLoop::setAdvanceMessageInterval(int interval)
+void BoAdvanceControl::setAdvanceMessageInterval(int interval)
 {
  if (interval <= 0) {
 	boError() << k_funcinfo << "interval must be > 0" << endl;
@@ -86,7 +85,7 @@ void BoEventLoop::setAdvanceMessageInterval(int interval)
  d->mAdvanceMessageInterval = interval;
 }
 
-void BoEventLoop::setAdvanceObject(QObject* o)
+void BoAdvanceControl::setAdvanceObject(QObject* o)
 {
  mAdvanceObject = o;
  d->mAdvanceCallsMade = 0;
@@ -97,12 +96,12 @@ void BoEventLoop::setAdvanceObject(QObject* o)
  d->mAdvanceMessagesWaiting = 0;
 }
 
-void BoEventLoop::setAdvanceMessagesWaiting(int count)
+void BoAdvanceControl::setAdvanceMessagesWaiting(int count)
 {
  d->mAdvanceMessagesWaiting = count;
 }
 
-void BoEventLoop::postAdvanceCallEvent()
+void BoAdvanceControl::postAdvanceCallEvent()
 {
  BO_CHECK_NULL_RET(mAdvanceObject);
  BO_CHECK_NULL_RET(boGame);
@@ -126,10 +125,10 @@ void BoEventLoop::postAdvanceCallEvent()
 
 #if DO_SEND_NOT_POST
  QEvent e((QEvent::Type)((int)QEvent::User + QtEventAdvanceCall));
- qApp->sendEvent(mAdvanceObject, &e);
+ QCoreApplication::instance()->sendEvent(mAdvanceObject, &e);
 #else
  QEvent* e = new QEvent((QEvent::Type)((int)QEvent::User + QtEventAdvanceCall));
- qApp->postEvent(mAdvanceObject, e);
+ QCoreApplication::instance()->postEvent(mAdvanceObject, e);
 #endif
 
 
@@ -140,15 +139,15 @@ void BoEventLoop::postAdvanceCallEvent()
 
 #if DO_SEND_NOT_POST
 	QEvent e((QEvent::Type)((int)QEvent::User + QtEventAdvanceMessageCompleted));
-	qApp->sendEvent(mAdvanceObject, &e);
+	QCoreApplication::instance()->sendEvent(mAdvanceObject, &e);
 #else
 	QEvent* e = new QEvent((QEvent::Type)((int)QEvent::User + QtEventAdvanceMessageCompleted));
-	qApp->postEvent(mAdvanceObject, e);
+	QCoreApplication::instance()->postEvent(mAdvanceObject, e);
 #endif
  }
 }
 
-void BoEventLoop::receivedAdvanceMessage(int gameSpeed)
+void BoAdvanceControl::receivedAdvanceMessage(int gameSpeed)
 {
  QTime expected = d->mNextAdvanceMessage;
  d->mLastAdvanceMessage = QTime::currentTime();
@@ -168,48 +167,50 @@ void BoEventLoop::receivedAdvanceMessage(int gameSpeed)
  postAdvanceCallEvent();
 }
 
-bool BoEventLoop::processEvents(ProcessEventsFlags flags)
+void BoAdvanceControl::slotProcess()
 {
- bool ret;
- ret = QEventLoop::processEvents(flags);
- if (d->mAdvanceMessagesWaiting) {
-	ret = QEventLoop::processEvents(flags & ~WaitForMoreEvents);
- } else {
-//	ret = QEventLoop::processEvents(flags & ~WaitForMoreEvents);
-	ret = QEventLoop::processEvents(flags);
- }
-
- if (flags & (AllEvents | WaitForMoreEvents)) {
-	// probably this was called from enterLoop(), but if not it's still fine
-	// to do our stuff here, since WaitForMore was requested anyway.
-
-	if (!ret) {
-		// nothing found to do?? ha! we always have something to do!
-		// FIXME: test whether this makes enough sense - it might be
-		// possible that we block too long here. but probably its ok
-		// AB: only do that if WaitForMore was removed when calling
-		// processEvents()
-//		if (boConfig->unusedCPUTimeForRendering())
-		{
-//			emit signalUpdateGL();
-		}
-	}
-
-	int maxCalls = 4;
+ if (mAdvanceObject && d->mGameSpeed > 0) {
+	const int maxCalls = 4;
 	// we do now up to maxCalls advance calls, but in the optimal case we
 	// do only one.
+	int callsMade = 0;
 	for (int i = 0; i < maxCalls; i++) {
-		if (mAdvanceObject && d->mGameSpeed > 0 && d->mAdvanceCallsMade < d->mGameSpeed) {
+		if (d->mAdvanceCallsMade < d->mGameSpeed) {
 			QTime now = QTime::currentTime();
 			if (now.msecsTo(d->mNextAdvanceCall) <= 0) {
 				postAdvanceCallEvent();
+				callsMade++;
 			} else {
 				i = maxCalls;
 			}
 		}
 	}
 
+	if (callsMade == 0) {
+		// nothing found to do?? ha! we always have something to do!
+//		if (boConfig->unusedCPUTimeForRendering())
+		{
+//			emit signalUpdateGL();
+		}
+	}
  }
- return ret;
+
+ int msecs = 0;
+ if (d->mAdvanceMessagesWaiting) {
+	msecs = 0;
+ } else {
+	if (d->mAdvanceCallsMade < d->mGameSpeed) {
+		msecs = QTime::currentTime().msecsTo(d->mNextAdvanceCall);
+	} else {
+		msecs = QTime::currentTime().msecsTo(d->mNextAdvanceMessage);
+	}
+
+	// expect a little overhead
+	msecs -= 20;
+
+	msecs = qMax(0, msecs);
+	msecs = qMin(0, d->mAdvanceMessageInterval);
+ }
+ QTimer::singleShot(msecs, this, SLOT(slotProcess()));
 }
 

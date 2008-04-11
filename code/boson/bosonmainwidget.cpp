@@ -62,13 +62,13 @@
 #include "gameengine/speciestheme.h"
 #include "bosondebugtextures.h"
 #include "bosondebugmodels.h"
+#include "boadvancecontrol.h"
 
 #include <klocale.h>
 #include <kmessagebox.h>
 #include <kstandarddirs.h>
 #include <kapplication.h>
 #include <kdialog.h>
-#include "boeventloop.h"
 
 #include <qtimer.h>
 #include <qbuffer.h>
@@ -97,8 +97,6 @@
 #include <math.h>
 #include <stdlib.h>
 #include <unistd.h>
-
-#define DISABLE_BOEVENTLOOP 1
 
 class BosonMainWidgetPrivate
 {
@@ -288,10 +286,6 @@ void BosonMainWidget::initializeGL()
  boProfiling->push("init texture manager");
  BoTextureManager::initStatic();
  boProfiling->pop();
-
-#if !DISABLE_BOEVENTLOOP
- connect(kapp->eventLoop(), SIGNAL(signalUpdateGL()), this, SLOT(updateGL()));
-#endif
 
  recursive = false;
  boDebug() << k_funcinfo << "done" << endl;
@@ -605,6 +599,8 @@ void BosonMainWidget::initBoson()
  if (!d->mStarting) {
 	BO_NULL_ERROR(d->mStarting);
  }
+ connect(boGame, SIGNAL(signalUpdateGL()), SLOT(updateGL()));
+
  connect(boGame, SIGNAL(signalStartingCompletedReceived(const QByteArray&, quint32)),
 		d->mStarting, SLOT(slotStartingCompletedReceived(const QByteArray&, quint32)));
  connect(boGame, SIGNAL(signalSetNewGameData(const QByteArray&, bool*)),

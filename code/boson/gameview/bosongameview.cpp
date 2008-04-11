@@ -87,7 +87,6 @@
 #include <klocale.h>
 #include <kmessagebox.h>
 #include <kapplication.h>
-#include "../gameengine/boeventloop.h"
 
 #include <qtimer.h>
 #include <qcursor.h>

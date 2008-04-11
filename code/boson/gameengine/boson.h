@@ -569,6 +569,11 @@ signals:
 	void signalEditorNewUndoMessage(const BosonMessageEditorMove&, bool fromRedo);
 	void signalEditorNewRedoMessage(const BosonMessageEditorMove&);
 
+	/**
+	 * See @ref BoAdvanceControl::signalUpdateGL
+	 **/
+	void signalUpdateGL();
+
 protected:
 	virtual bool playerInput(QDataStream& stream, KPlayer* player);
 

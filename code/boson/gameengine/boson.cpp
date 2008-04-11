@@ -45,7 +45,7 @@
 #include "bosonplayerinputhandler.h"
 #include "bosonnetworksynchronizer.h"
 #include "bosonnetworktraffic.h"
-#include "boeventloop.h"
+#include "boadvancecontrol.h"
 #include "bosonpath.h"
 #include "bosonmap.h"
 #include "bosonplayerlistmanager.h"
@@ -78,9 +78,6 @@ Boson* Boson::mBoson = 0;
 
 #define ADVANCE_INTERVAL 250 // ms
 //#define COLLECT_UNIT_LOGS
-
-
-#define DISABLE_BOEVENTLOOP 1
 
 
 /**
@@ -133,9 +130,9 @@ void BoAdvanceMessageTimes::receiveAdvanceCall()
  * emitted, all units are advanced. This is the central place where unit
  * movement and friends occur.
  *
- * In this class the precise process, how advance calls are made and how many
- * calls happen after a advance message was defined, now that is made in @ref
- * BoEventLoop.
+ * The precise process how advance calls are made and how many
+ * calls happen after a advance message is made in @ref
+ * BoAdvanceControl.
  *
  * An advance message is received by @ref receiveAdvanceMessage. This will
  * result in an immediate advance call, and also in a certain number of
@@ -148,9 +145,10 @@ void BoAdvanceMessageTimes::receiveAdvanceCall()
 class BoAdvance
 {
 public:
-	BoAdvance(Boson* boson)
+	BoAdvance(Boson* boson, BoAdvanceControl* advanceControl)
 	{
 		mBoson = boson;
+		mAdvanceControl = advanceControl;
 
 		initProperties(mBoson->dataHandler());
 
@@ -200,9 +198,7 @@ public:
 
 		mCurrentAdvanceMessageTimes = new BoAdvanceMessageTimes(gameSpeed);
 		mAdvanceMessageTimes.append(mCurrentAdvanceMessageTimes);
-#if !DISABLE_BOEVENTLOOP
-		((BoEventLoop*)qApp->eventLoop())->receivedAdvanceMessage(gameSpeed);
-#endif
+		mAdvanceControl->receivedAdvanceMessage(gameSpeed);
 	}
 
 	void sendAdvance() // slot?
@@ -219,7 +215,7 @@ public:
 	 *
 	 * However the important task of calculating when the next advance call
 	 * is being made, is not done here anymore. That is now done in the @ref
-	 * BoEventLoop.
+	 * BoAdvanceControl.
 	 **/
 	void receiveAdvanceCall();
 
@@ -230,6 +226,7 @@ public:
 
 private:
 	Boson* mBoson;
+	BoAdvanceControl* mAdvanceControl;
 
 	Q3PtrList<BoAdvanceMessageTimes> mAdvanceMessageTimes;
 	BoAdvanceMessageTimes* mCurrentAdvanceMessageTimes;
@@ -285,6 +282,7 @@ public:
 		mCanvas = 0;
 		mPlayField = 0;
 
+		mAdvanceControl = 0;
 		mAdvance = 0;
 		mMessageDelayer = 0;
 
@@ -309,6 +307,7 @@ public:
 	Q3ValueList<QByteArray> mUnitLogs;
 	BoMessageLogger mMessageLogger;
 
+	BoAdvanceControl* mAdvanceControl;
 	BoAdvance* mAdvance;
 	BoMessageDelayer* mMessageDelayer;
 
@@ -540,7 +539,9 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 		this, SIGNAL(signalEditorNewUndoMessage(const BosonMessageEditorMove&, bool)));
  connect(d->mPlayerInputHandler, SIGNAL(signalEditorNewRedoMessage(const BosonMessageEditorMove&)),
 		this, SIGNAL(signalEditorNewRedoMessage(const BosonMessageEditorMove&)));
- d->mAdvance = new BoAdvance(this);
+ d->mAdvanceControl = new BoAdvanceControl(this);
+ connect(d->mAdvanceControl, SIGNAL(signalUpdateGL()), this, SIGNAL(signalUpdateGL()));
+ d->mAdvance = new BoAdvance(this, d->mAdvanceControl);
  d->mMessageDelayer = new BoMessageDelayer(this);
  d->mNetworkSynchronizer = new BosonNetworkSynchronizer();
  d->mNetworkTraffic = new BosonNetworkTraffic(this);
@@ -594,36 +595,20 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
  KCrash::setEmergencySaveFunction(emergencySave);
 #endif
 
-#if !DISABLE_BOEVENTLOOP
- if (qApp && qApp->eventLoop()) {
-	if (qApp->eventLoop()->isA("BoEventLoop")) {
-		((BoEventLoop*)qApp->eventLoop())->setAdvanceMessageInterval(ADVANCE_INTERVAL);
-		((BoEventLoop*)qApp->eventLoop())->setAdvanceObject(this);
-	} else {
-		boWarning() << k_funcinfo << " qApp->eventLoop() is not  BoEventLoop!" << endl;
-	}
- }
-#endif
+ d->mAdvanceControl->setAdvanceMessageInterval(ADVANCE_INTERVAL);
+ d->mAdvanceControl->setAdvanceObject(this); // TODO: use d->mAdvance as advance object
+
+ QTimer::singleShot(0, d->mAdvanceControl, SLOT(slotProcess()));
 }
 
 Boson::~Boson()
 {
-#if !DISABLE_BOEVENTLOOP
- if (qApp && qApp->eventLoop()) {
-	if (qApp->eventLoop()->isA("BoEventLoop")) {
-		((BoEventLoop*)qApp->eventLoop())->setAdvanceObject(0);
-	} else {
-		boWarning() << k_funcinfo << " qApp->eventLoop() is not  BoEventLoop!" << endl;
-	}
- }
-#endif
-
-
  KCrash::setEmergencySaveFunction(NULL);
  delete d->mNetworkSynchronizer;
  delete d->mGameStatistics;
  delete d->mPlayerInputHandler;
  delete d->mMessageDelayer;
+ delete d->mAdvanceControl;
  delete d->mAdvance;
  delete d->mGameTimer;
  delete d->mCanvas;
@@ -1404,7 +1389,7 @@ void Boson::networkTransmission(QDataStream& stream, int msgid, quint32 r, quint
 
  BoMessage* m = new BoMessage(stream, msgid, r, s, clientId, advanceCallsCount());
 
- if (!d->mMessageDelayer->processMessage(m)) {
+ if (!d->mMessageDelayer->processMessage(m, d->mAdvanceControl)) {
 	// the message got delayed. don't deliver it now.
 	return;
  }
@@ -1481,7 +1466,7 @@ void Boson::lock()
 
 void Boson::unlock()
 {
- d->mMessageDelayer->unlock();
+ d->mMessageDelayer->unlock(d->mAdvanceControl);
 }
 
 bool Boson::isLocked() const
@@ -1933,7 +1918,7 @@ bool Boson::loadFromLog(Q3PtrList<BoMessage>* messages)
  d->mLoadFromLogMode = true;
 
  boDebug() << k_funcinfo << "unlocking messagedelayer - processing messages now." << endl;
- d->mMessageDelayer->unlock();
+ d->mMessageDelayer->unlock(d->mAdvanceControl);
  return true;
 }
 
