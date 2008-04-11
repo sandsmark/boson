@@ -50,9 +50,10 @@
  **/
 #define BO_CHECK_NULL_RET0(p) if (!p) { BO_NULL_ERROR(p) return 0; }
 
-#define boDebug kDebug
-#define boWarning kWarning
-#define boError kError
+// make boDebug behave like kDebug
+#define boDebug KDebug(QtDebugMsg, __FILE__, __LINE__, Q_FUNC_INFO)
+#define boWarning KDebug(QtWarningMsg, __FILE__, __LINE__, Q_FUNC_INFO)
+#define boError KDebug(QtCriticalMsg, __FILE__, __LINE__, Q_FUNC_INFO)
 #define boBacktrace kBacktrace
 
 //#warning TODO: BoDebugLog support
