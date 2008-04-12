@@ -241,7 +241,6 @@ boson_target_link_libraries(modelrendering
 set(bosonmainlib_SRCS
 	bosonviewdata.cpp
 	botooltipcreator.cpp
-	#bosonglwidget.cpp
 	bosonufoglwidget.cpp
 	bomousemovediff.cpp
 	bomatrixwidget.cpp
