@@ -482,11 +482,11 @@ void BoEventManager::removeEventListener(BoEventListener* l)
  d->mEventListeners.removeRef(l);
 }
 
-static int compare_cstrings(const void* s1, const void* s2)
+static int compare_strings(const void* s1, const void* s2)
 {
  const QString* string1 = (const QString*)s1;
  const QString* string2 = (const QString*)s2;
- return (*string1 == *string2);
+ return string1->compare(*string2);
 }
 
 bool BoEventManager::knowEventName(const QString& name) const
@@ -496,7 +496,7 @@ bool BoEventManager::knowEventName(const QString& name) const
  }
  // d->mEventNames is a sorted array. we make a binary search on it.
  void* e = ::bsearch(&name, d->mEventNames.begin(), d->mEventNames.count(),
-		sizeof(QString), compare_cstrings);
+		sizeof(QString), compare_strings);
  if (!e) {
 	return false;
  }
