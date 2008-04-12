@@ -109,9 +109,9 @@ public:
 	/**
 	 * Note that we'll reparse the .3ds file! Most data are discarded in
 	 * BosonModel, so we need to do so.
-	 * @param name The text for the combo box. QString::null for the index.
+	 * @param name The text for the combo box. QString() for the index.
 	 **/
-	void addFile(const QString& file, const QString& name = QString::null);
+	void addFile(const QString& file, const QString& name = QString());
 
 	/**
 	 * Add all .3ds files found in @p dir (recursively).

@@ -150,7 +150,7 @@ void CursorPreview::slotChangeCursor(int mode, const QString& cursorDir_)
 	delete b;
 	if (!cursor() && mode != CursorKDE) { // loading *never* fails for CursorKDE. we check here anyway.
 		// load fallback cursor
-		slotChangeCursor(CursorKDE, QString::null);
+		slotChangeCursor(CursorKDE, QString());
 		return;
 	}
 	// continue to use the old cursor

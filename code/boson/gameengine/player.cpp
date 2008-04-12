@@ -376,7 +376,7 @@ bool Player::save(QDataStream& stream)
 	stream << speciesTheme()->identifier();
 	stream << speciesTheme()->teamColor();
  } else {
-	 stream << QString::null;
+	 stream << QString();
 	 stream << QColor();
  }
 
@@ -411,7 +411,7 @@ bool Player::load(QDataStream& stream)
  QColor teamColor;
  stream >> themeIdentifier;
  stream >> teamColor;
- if (themeIdentifier != QString::null) {
+ if (!themeIdentifier.isEmpty()) {
 	loadTheme(SpeciesTheme::speciesDirectory(themeIdentifier), teamColor);
  } else {
 	boError() << k_funcinfo << "NULL species theme identifier" << endl;

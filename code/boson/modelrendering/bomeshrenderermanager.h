@@ -59,7 +59,7 @@ public:
 	QStringList availableRenderers();
 
 	/**
-	 * @param className The name of the renderer, or @ref QString::null for
+	 * @param className The name of the renderer, or @ref QString() for
 	 * the first renderer found
 	 **/
 	bool makeRendererCurrent(const QString& className)
@@ -88,7 +88,7 @@ public:
 
 	/**
 	 * @return The @ref QObject::className of the @ref currentRenderer or
-	 * @ref QString::null if none is set. This name can be used in @ref
+	 * @ref QString() if none is set. This name can be used in @ref
 	 * makeRendererCurrent.
 	 **/
 	inline QString currentRendererName() const

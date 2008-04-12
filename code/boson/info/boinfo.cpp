@@ -377,7 +377,7 @@ bool BoInfo::contains(int key) const
 QString BoInfo::getString(int key) const
 {
  if (!d->mInfos.contains(key)) {
-	return QString::null;
+	return QString();
  }
  return d->mInfos[key].toString();
 }
@@ -407,7 +407,7 @@ QString BoInfo::keyToName(int key)
 {
  if (key - CompileOffset >= CompileOffset || key == CompileOffset) {
 	boError() << k_funcinfo << "Invalid key " << key << endl;
-	return QString::null;
+	return QString();
  }
  if (key > CompileOffset) {
 	return i18n("Compilation %1", keyToName(key - CompileOffset));
@@ -674,7 +674,7 @@ QString BoInfo::findLibrary(const QString& lib) const
  // in glibc or so?
  QString file = QString("/usr/lib/%1").arg(lib);
  if (!KStandardDirs::exists(file)) {
-	return QString::null;
+	return QString();
  }
  return file;
 }
@@ -835,7 +835,7 @@ QStringList BoInfo::openGLValues() const
 QString BoInfo::osType() const
 {
  if (!d->mInfos.contains(BoInfo::OSTypeString)) {
-	return QString::null;
+	return QString();
  }
  QString s = getString(BoInfo::OSTypeString);
  s.replace(QRegExp("\n"), "");
@@ -845,7 +845,7 @@ QString BoInfo::osType() const
 QString BoInfo::osVersion() const
 {
  if (!d->mInfos.contains(BoInfo::OSVersionString)) {
-	return QString::null;
+	return QString();
  }
  QString s = getString(BoInfo::OSVersionString);
  s.replace(QRegExp("\n"), "");

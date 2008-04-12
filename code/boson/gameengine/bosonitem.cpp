@@ -108,7 +108,7 @@ void BosonItemProperties::addPropertyId(int id, const QString& name)
 QString BosonItemProperties::propertyName(int id)
 {
  if (!mPropertyMap->contains(id)) {
-	return QString::null;
+	return QString();
  }
  return (*mPropertyMap)[id];
 }

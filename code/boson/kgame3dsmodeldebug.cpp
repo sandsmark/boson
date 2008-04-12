@@ -493,7 +493,7 @@ public:
 
 	QString eval(float t) const
 	{
-		return QString::null;
+		return QString();
 	}
 
 protected:

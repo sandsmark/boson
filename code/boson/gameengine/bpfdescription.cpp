@@ -97,18 +97,18 @@ QString BPFDescription::textOfElement(const QString& tagName) const
 {
  QDomElement e = element(tagName);
  if (e.isNull()) {
-	return QString::null;
+	return QString();
  }
  QDomNodeList list = e.childNodes();
  if (list.count() == 0) {
-	return QString::null;
+	return QString();
  }
  if (list.count() > 1) {
 	boWarning() << "more than one child nodes for " << tagName << endl;
  }
  if (!list.item(0).isText()) {
 	boError() << k_funcinfo << "first child of " << tagName << " is not a text node" << endl;
-	return QString::null;
+	return QString();
  }
  return list.item(0).toText().nodeValue();
 }

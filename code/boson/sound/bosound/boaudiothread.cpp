@@ -120,7 +120,7 @@ void BoAudioThread::slotReceiveStdin(int sock)
  if (g_buffer.length() > 2048) {
 	// a command of 2 KB? no, I don't believe this!
 	fprintf(stderr, "command too long\n");
-	g_buffer = QString::null;
+	g_buffer = QString();
 	return;
  }
  QFile readFile;
@@ -134,7 +134,7 @@ void BoAudioThread::slotReceiveStdin(int sock)
  }
  if (ch == '\n') {
 	QString command = g_buffer;
-	g_buffer = QString::null;
+	g_buffer = QString();
 	BoAudioCommand* cmd = parseCommand(command);
 	if (!cmd) {
 		QByteArray tmp = command.toLatin1();
@@ -233,7 +233,7 @@ bool parseInt(QString& command, int* result)
  if (index >= 0) {
 	command = command.right(command.length() - index - 1);
  } else {
-	command = QString::null;
+	command = QString();
  }
  return ok;
 }
@@ -247,7 +247,7 @@ bool parseString(QString& command, QString* result)
 	command = command.right(command.length() - index - 1);
  } else {
 	s = command;
-	command = QString::null;
+	command = QString();
  }
  // note: an empty string is perfectly valid!
  *result = s;

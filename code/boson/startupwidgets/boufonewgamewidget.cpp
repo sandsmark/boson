@@ -246,10 +246,10 @@ public:
   QString playFieldIdentifier() const
   {
     if (mSelectPlayField->selectedItem() < 0) {
-      return QString::null;
+      return QString();
     }
     if (!mIndex2PlayFieldIdentifier.contains(mSelectPlayField->selectedItem())) {
-      return QString::null;
+      return QString();
     }
     QString identifier = mIndex2PlayFieldIdentifier[mSelectPlayField->selectedItem()];
     return identifier;

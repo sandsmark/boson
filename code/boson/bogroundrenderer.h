@@ -193,7 +193,7 @@ public:
 	virtual QString debugStringForPoint(const BoVector3Fixed& pos) const
 	{
 		Q_UNUSED(pos);
-		return QString::null;
+		return QString();
 	}
 
 // helper function that sets the cell @p cellCount in @p renderCells to @p x, @p

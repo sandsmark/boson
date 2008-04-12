@@ -467,7 +467,7 @@ QString SpeciesTheme::speciesDirectory(const QString& identifier)
 		return d;
 	}
  }
- return QString::null;
+ return QString();
 }
 
 QString SpeciesTheme::identifier() const

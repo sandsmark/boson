@@ -109,15 +109,15 @@ QString UnitBase::getModelIdForItem() const
 {
  if (!owner()) {
 	BO_NULL_ERROR(owner());
-	return QString::null;
+	return QString();
  }
  if (!owner()->speciesTheme()) {
 	BO_NULL_ERROR(owner()->speciesTheme());
-	return QString::null;
+	return QString();
  }
  if (!unitProperties()) {
 	BO_NULL_ERROR(unitProperties());
-	return QString::null;
+	return QString();
  }
  return QString("%1:%2").arg("unit").arg(QString::number(unitProperties()->typeId()));
 }

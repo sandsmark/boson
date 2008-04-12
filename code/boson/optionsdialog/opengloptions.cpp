@@ -556,14 +556,14 @@ void AdvancedGLOptions::apply()
 
  if (!BoMeshRendererManager::manager()->makeRendererCurrent(mMeshRenderer->currentText())) {
 	KMessageBox::sorry(this, i18n("Failed at making mesh renderer %1 current. Trying to use a default renderer (expect a crash, if we fail)...", mMeshRenderer->currentText()));
-	if (!BoMeshRendererManager::manager()->makeRendererCurrent(QString::null)) {
+	if (!BoMeshRendererManager::manager()->makeRendererCurrent(QString())) {
 		KMessageBox::sorry(this, i18n("Failed at setting a default mesh renderer. Quitting now"));
 		kapp->exit(1);
 	}
  }
  if (!BoGroundRendererManager::manager()->makeRendererCurrent(mGroundRenderer->currentText())) {
 	KMessageBox::sorry(this, i18n("Failed at making ground renderer %1 current. Trying to use a default renderer (expect a crash, if we fail)...", mGroundRenderer->currentText()));
-	if (!BoGroundRendererManager::manager()->makeRendererCurrent(QString::null)) {
+	if (!BoGroundRendererManager::manager()->makeRendererCurrent(QString())) {
 		KMessageBox::sorry(this, i18n("Failed at setting a default ground renderer. Quitting now"));
 		kapp->exit(1);
 	}

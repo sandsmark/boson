@@ -74,7 +74,7 @@ bool BoAudioProcessController::start()
 	boWarning(200) << k_funcinfo << "process already running" << endl;
 	return true;
  }
- QString processPath = QString::null;
+ QString processPath = QString();
 #warning FIXME: check for existance ; use KStandardDirs
  processPath = "bosonaudioprocess"; // will be found in $KDEDIR/bin
 

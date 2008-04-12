@@ -192,7 +192,7 @@ void BoToolTip::setItem(BosonItem* item)
 void BoToolTip::clear()
 {
  setItem(0);
- mTip = QString::null;
+ mTip = QString();
 }
 
 void BoToolTip::update()

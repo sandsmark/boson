@@ -54,14 +54,14 @@ public:
 	 * @param subdir You can specify a subdir (e.g. "C" or "de") here. Even
 	 * sub-subdirs (e.g. "de/foobar") are allowed.
 	 **/
-	QByteArray fileData(const QString& fileName, const QString& subdir = QString::null) const;
+	QByteArray fileData(const QString& fileName, const QString& subdir = QString()) const;
 
 	/**
 	 * @return Whether the archive has a file named @p fileName. Of @þ
 	 * subdir is not empty this will search in @þ subdir, otherwise in the
 	 * @ref topLevelDir.
 	 **/
-	bool hasFile(const QString& fileName, const QString& subdir = QString::null) const
+	bool hasFile(const QString& fileName, const QString& subdir = QString()) const
 	{
 		return hasEntry(fileName, subdir, true);
 	}
@@ -72,7 +72,7 @@ public:
 	 **/
 	bool hasDirectory(const QString& dirName) const
 	{
-		return hasEntry(dirName, QString::null, false);
+		return hasEntry(dirName, QString(), false);
 	}
 
 	/**
@@ -80,12 +80,12 @@ public:
 	 * subdir is non-empty the file will end up in the specified
 	 * subdirectory.
 	 **/
-	bool writeFile(const QString& fileName, const QByteArray& data, const QString& subdir = QString::null);
+	bool writeFile(const QString& fileName, const QByteArray& data, const QString& subdir = QString());
 
 	/**
 	 * @overload
 	 **/
-	bool writeFile(const QString& fileName, const QString& data, const QString& subdir = QString::null);
+	bool writeFile(const QString& fileName, const QString& data, const QString& subdir = QString());
 
 protected:
 	/**
@@ -93,14 +93,14 @@ protected:
 	 * extracted to if you do something like tar xzvf on this archive.
 	 **/
 	const KArchiveDirectory* topLevelDir() const;
-	bool hasEntry(const QString& fileName, const QString& subdir = QString::null, bool isFile = true) const;
+	bool hasEntry(const QString& fileName, const QString& subdir = QString(), bool isFile = true) const;
 
 	/**
 	 * @param topLevelDir Mandatory. This is the unique toplevel directory
 	 * name of the archive. The toplevel dir is the dir where all data would
 	 * get extracted to if you did a "tar xzvf" on the archive.
 	 **/
-	bool writeFile(const QString& topLevelDir, const QString& fileName, qint64 size, const char* data, const QString& subdir = QString::null);
+	bool writeFile(const QString& topLevelDir, const QString& fileName, qint64 size, const char* data, const QString& subdir = QString());
 
 	/**
 	 * @return The desired (!) name of the top dir, as it should get used
@@ -189,7 +189,7 @@ public:
 	 **/
 	QByteArray heightMapData() const
 	{
-		QString dir = QString::null;
+		QString dir = QString();
 		if (hasMapDirectory()) {
 			dir = QString::fromLatin1("map");
 		}
@@ -205,7 +205,7 @@ public:
 	 **/
 	QByteArray texMapData() const
 	{
-		QString dir = QString::null;
+		QString dir = QString();
 		if (hasMapDirectory()) {
 			dir = QString::fromLatin1("map");
 		}

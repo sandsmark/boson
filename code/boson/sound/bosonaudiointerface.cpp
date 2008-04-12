@@ -408,7 +408,7 @@ void BosonSoundInterface::addEventSound(int id, const QString& file)
 	boWarning(200) << k_funcinfo << "cannot add empty filename for " << id << endl;
 	return;
  }
- BoAudioCommand* c = new BoAudioCommand(BoAudioCommand::AddGeneralSound, mSpecies, id, QString::null, file);
+ BoAudioCommand* c = new BoAudioCommand(BoAudioCommand::AddGeneralSound, mSpecies, id, QString(), file);
  audioInterface()->sendCommand(c);
 }
 

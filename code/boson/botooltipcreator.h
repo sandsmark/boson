@@ -54,8 +54,8 @@ public:
 	/**
 	 * Note that @p item can also be NULL!
 	 * @return A tooltip for an item on the @ref BosonBigDisplayBase widget.
-	 * See also @ref canCreateGLDisplayToolTip. By default this returns @ref
-	 * QString::null
+	 * See also @ref canCreateGLDisplayToolTip. By default this returns a
+	 * null string.
 	 **/
 	virtual QString createToolTip(const BosonItem* item) const;
 

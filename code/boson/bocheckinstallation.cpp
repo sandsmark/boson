@@ -56,6 +56,6 @@ QString BoCheckInstallation::checkInstallation()
 	// TODO: check version
  }
 
- return QString::null;
+ return QString();
 }
 

@@ -136,7 +136,7 @@ QStringList BoPluginManager::availablePlugins()
 QString BoPluginManager::currentPluginName() const
 {
  if (!currentPlugin()) {
-	return QString::null;
+	return QString();
  }
  return currentPlugin()->metaObject()->className();
 }
@@ -323,7 +323,7 @@ bool BoPluginManager::checkCurrentPlugin()
  if (!currentPlugin()) {
 	boDebug(800) << k_funcinfo << "getting a default plugin" << endl;
 	// pick a default plugin
-	bool ret = makePluginCurrent(QString::null);
+	bool ret = makePluginCurrent(QString());
 	if (ret) {
 		boDebug(800) << k_funcinfo << "default plugin loaded" << endl;
 	}

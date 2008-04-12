@@ -123,7 +123,7 @@ void BoTextureCopyright::setTexture(const QString& f)
 QString BoTextureCopyright::textureFile() const
 {
  if (mFile.isEmpty()) {
-	return QString::null;
+	return QString();
  }
  QFileInfo info(mFile);
  return info.fileName();
@@ -413,7 +413,7 @@ bool BoModelPixmapsGLWidget::loadModel(const QString& file)
  resetModel();
  delete d->mModel;
  d->mModel = new BosonModel(info.dirPath(true) + "/", info.fileName());
- bool ret = d->mModel->loadModel(QString::null);
+ bool ret = d->mModel->loadModel(QString());
  if (ret) {
 	d->mRenderModel->setModel(d->mModel);
  } else {
@@ -651,7 +651,7 @@ void BoModelPixmaps::reset()
  d->mGUI->mModelFile->setText(i18n("Model..."));
  mModelPixmaps.setAutoDelete(true);
  mModelPixmaps.clear();
- mModelFileName = QString::null;
+ mModelFileName = QString();
  mGLWidget->resetModel();
  d->mGUI->mTexturesFoundList->clear();
  d->mGUI->mTexturesNotFoundList->clear();
@@ -945,7 +945,7 @@ void BoModelPixmaps::slotPackageIt()
 		return;
 	}
  }
- QString fileName = BoFileDialog::getSaveFileName(QString::null, "*.tar.gz", this);
+ QString fileName = BoFileDialog::getSaveFileName(QString(), "*.tar.gz", this);
  if (fileName.isEmpty()) {
 	return;
  }

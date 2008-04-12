@@ -77,13 +77,13 @@ BosonPlayFieldPreviewData::BosonPlayFieldPreviewData(const QString& file, BPFPre
  *mPreview = BPFLoader::loadFilePreview(file);
  if (!mPreview->isLoaded()) {
 	boError() << k_funcinfo << "unable to load playFieldPreview from " << file << endl;
-	mId = QString::null;
+	mId = QString();
 	return;
  }
  mId = mPreview->identifier();
  if (mId.isEmpty()) {
 	boError() << k_funcinfo << "no identifier in " << file << endl;
-	mId = QString::null;
+	mId = QString();
 	return;
  }
 }
@@ -189,7 +189,7 @@ QString BosonPlayField::defaultPlayField()
 	return _default;
  }
  if (l.count() == 0) {
-	return QString::null;
+	return QString();
  }
  boWarning() << k_funcinfo << "cannot find " << _default<< " map - using " << l[0] << " instead" << endl;
  return l[0];
@@ -252,7 +252,7 @@ QString BosonPlayField::saveDescriptionToFile() const
 {
  if (!description()) {
 	BO_NULL_ERROR(description());
-	return QString::null;
+	return QString();
 }
  return description()->toString();
 }
@@ -297,7 +297,7 @@ QString BosonPlayField::playFieldName() const
 {
  if (!description()) {
 	BO_NULL_ERROR(description());
-	return QString::null;
+	return QString();
  }
  return description()->name();
 }
@@ -306,7 +306,7 @@ QString BosonPlayField::playFieldComment() const
 {
  if (!description()) {
 	BO_NULL_ERROR(description());
-	return QString::null;
+	return QString();
  }
  return description()->comment();
 }

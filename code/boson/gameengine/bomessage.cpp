@@ -70,7 +70,7 @@ void BoMessage::setDelivered()
 QString BoMessage::debug(KGame* game)
 {
  if (!game) {
-	return QString::null;
+	return QString();
  }
  QString m = QString("msgid=%1").arg(msgid);
  QString r = QString("receiver=%3").arg(receiver);

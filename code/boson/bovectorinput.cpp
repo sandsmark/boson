@@ -107,7 +107,7 @@ QString BoVector3Input::label() const
  if (d->mLabel) {
 	return d->mLabel->text();
  }
- return QString::null;
+ return QString();
 }
 
 // TODO: add a slider?

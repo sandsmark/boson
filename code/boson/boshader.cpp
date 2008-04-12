@@ -105,7 +105,7 @@ const QString& BoShaderManager::getFullFilename(const QString& shadername)
     {
       boError(130) << k_funcinfo << "Couldn't find any matching files for shader '" << shadername << "'" << endl;
       delete filename;
-      return QString::null;
+      return QString();
     }
     // Add the filename to the cache
     mKnownShaderFiles.insert(shadername, filename);

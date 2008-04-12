@@ -170,7 +170,7 @@ bool BoTexMapImportDialog::unchanged() const
 void BoTexMapImportDialog::slotSelectTexMapImage()
 {
  BO_CHECK_NULL_RET(d->mMap);
- QString fileName = BoFileDialog::getOpenFileName(QString::null, "*.png", this);
+ QString fileName = BoFileDialog::getOpenFileName(QString(), "*.png", this);
  if (fileName.isNull()) {
 	return;
  }

@@ -601,10 +601,10 @@ QString BoBMFLoad::cachedModelFilename(const QString& modelfile, const QString& 
     {
       // Cached model is too old
       // TODO: maybe delete the obsolete model?
-      return QString::null;
+      return QString();
     }
   }
-  return QString::null;
+  return QString();
 }
 
 QString BoBMFLoad::convertModel(const QString& modelfile, const QString& configfile)
@@ -616,7 +616,7 @@ QString BoBMFLoad::convertModel(const QString& modelfile, const QString& configf
   if(cachedmodel.isEmpty())
   {
     boError() << k_funcinfo << "Failed to get save location for cached model" << endl;
-    return QString::null;
+    return QString();
   }
   cachedmodel += QString("model-%1.bmf").arg(hash);
   // Get path for saved textures
@@ -624,7 +624,7 @@ QString BoBMFLoad::convertModel(const QString& modelfile, const QString& configf
   if(texturepath.isEmpty())
   {
     boError() << k_funcinfo << "Failed to get save location for textures" << endl;
-    return QString::null;
+    return QString();
   }
   // Find path to bobmfconverter binary
   QString converter = KGlobal::dirs()->findResource("exe", "bobmfconverter");
@@ -634,7 +634,7 @@ QString BoBMFLoad::convertModel(const QString& modelfile, const QString& configf
     if(converter.isEmpty())
     {
       boError() << k_funcinfo << "Couldn't find bobmfconverter!" << endl;
-      return QString::null;
+      return QString();
     }
   }
   // Create K3Process object
@@ -656,7 +656,7 @@ QString BoBMFLoad::convertModel(const QString& modelfile, const QString& configf
   if(!proc.start(K3Process::Block))
   {
     boError() << k_funcinfo << "Error while trying to convert the model" << endl;
-    return QString::null;
+    return QString();
   }
 
   QString modelcacheFileName = QString("%1/model-%2.bmf").arg("boson/modelcache").arg(hash);
@@ -675,7 +675,7 @@ QString BoBMFLoad::convertModel(const QString& modelfile, const QString& configf
       << "input file: " << modelfile << endl
       << "expected output file: " << modelcacheFileName << endl
       << "args: " << args << endl;
-    return QString::null;
+    return QString();
   }
 
   return cachedmodel;

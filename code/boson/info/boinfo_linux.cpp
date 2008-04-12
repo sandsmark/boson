@@ -35,10 +35,10 @@ QString readFile(QString fileName)
 {
  QFile file(fileName);
  if (!file.exists()) {
-	return QString::null;
+	return QString();
  }
  if (!file.open(QIODevice::ReadOnly)) {
-	return QString::null;
+	return QString();
  }
  QString string;
  char buf[512];
@@ -167,7 +167,7 @@ bool BoCurrentInfo::memoryInUse(QString* vmSize, QString* vmLck, QString* vmRSS,
 	QString* string = vmSize;
 	QStringList l = vm.filter(QRegExp("^VmSize:.*"));
 	if (l.count() == 0) {
-		*string = QString::null;
+		*string = QString();
 	} else {
 		*string = l[0].remove(QRegExp("^Vm\\S*\\s*"));
 	}
@@ -176,7 +176,7 @@ bool BoCurrentInfo::memoryInUse(QString* vmSize, QString* vmLck, QString* vmRSS,
 	QString* string = vmLck;
 	QStringList l = vm.filter(QRegExp("^VmLck:.*"));
 	if (l.count() == 0) {
-		*string = QString::null;
+		*string = QString();
 	} else {
 		*string = l[0].remove(QRegExp("^Vm\\S*\\s*"));
 	}
@@ -185,7 +185,7 @@ bool BoCurrentInfo::memoryInUse(QString* vmSize, QString* vmLck, QString* vmRSS,
 	QString* string = vmRSS;
 	QStringList l = vm.filter(QRegExp("^VmRSS:.*"));
 	if (l.count() == 0) {
-		*string = QString::null;
+		*string = QString();
 	} else {
 		*string = l[0].remove(QRegExp("^Vm\\S*\\s*"));
 	}
@@ -194,7 +194,7 @@ bool BoCurrentInfo::memoryInUse(QString* vmSize, QString* vmLck, QString* vmRSS,
 	QString* string = vmData;
 	QStringList l = vm.filter(QRegExp("^VmData:.*"));
 	if (l.count() == 0) {
-		*string = QString::null;
+		*string = QString();
 	} else {
 		*string = l[0].remove(QRegExp("^Vm\\S*\\s*"));
 	}
@@ -203,7 +203,7 @@ bool BoCurrentInfo::memoryInUse(QString* vmSize, QString* vmLck, QString* vmRSS,
 	QString* string = vmStk;
 	QStringList l = vm.filter(QRegExp("^VmStk:.*"));
 	if (l.count() == 0) {
-		*string = QString::null;
+		*string = QString();
 	} else {
 		*string = l[0].remove(QRegExp("^Vm\\S*\\s*"));
 	}
@@ -212,7 +212,7 @@ bool BoCurrentInfo::memoryInUse(QString* vmSize, QString* vmLck, QString* vmRSS,
 	QString* string = vmExe;
 	QStringList l = vm.filter(QRegExp("^VmExe:.*"));
 	if (l.count() == 0) {
-		*string = QString::null;
+		*string = QString();
 	} else {
 		*string = l[0].remove(QRegExp("^Vm\\S*\\s*"));
 	}
@@ -221,7 +221,7 @@ bool BoCurrentInfo::memoryInUse(QString* vmSize, QString* vmLck, QString* vmRSS,
 	QString* string = vmLib;
 	QStringList l = vm.filter(QRegExp("^VmLib:.*"));
 	if (l.count() == 0) {
-		*string = QString::null;
+		*string = QString();
 	} else {
 		*string = l[0].remove(QRegExp("^Vm\\S*\\s*"));
 	}
@@ -230,7 +230,7 @@ bool BoCurrentInfo::memoryInUse(QString* vmSize, QString* vmLck, QString* vmRSS,
 	QString* string = vmPTE;
 	QStringList l = vm.filter(QRegExp("^VmPTE:.*"));
 	if (l.count() == 0) {
-		*string = QString::null;
+		*string = QString();
 	} else {
 		*string = l[0].remove(QRegExp("^Vm\\S*\\s*"));
 	}

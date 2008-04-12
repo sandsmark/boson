@@ -35,7 +35,7 @@ public:
 	 * sufficient for this.
 	 *
 	 * @return An i18n'ed error string describing what went wrong (to be
-	 * displayed in a message box for example), or QString::null if no
+	 * displayed in a message box for example), or QString() if no
 	 * problem was found.
 	 **/
 	QString checkInstallation();

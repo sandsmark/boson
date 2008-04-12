@@ -413,7 +413,7 @@ public:
 	 * @return If the operating system was recognized (working for Linux only
 	 * currently) this returns the a string describing the OS. This is
 	 * the content of /proc/sys/kernel/ostype on linux (with newlines
-	 * removed). Otherwise returns QString::null.
+	 * removed). Otherwise returns a null string.
 	 **/
 	QString osType() const;
 
@@ -421,7 +421,7 @@ public:
 	 * @return If the operating system was recognized (working for Linux only
 	 * currently) this returns the a string describing the OS version. This is
 	 * the content of /proc/sys/kernel/ostversion on linux (with newlines
-	 * removed). Otherwise returns QString::null.
+	 * removed). Otherwise returns a null string.
 	 **/
 	QString osVersion() const;
 

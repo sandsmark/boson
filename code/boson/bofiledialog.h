@@ -41,10 +41,10 @@
 class BoFileDialog
 {
 public:
-	static QString getSaveFileName(const QString& startWith = QString::null,
-			const QString& filter = QString::null,
+	static QString getSaveFileName(const QString& startWith = QString(),
+			const QString& filter = QString(),
 			QWidget* parent = 0,
-			const QString& caption = QString::null)
+			const QString& caption = QString())
 	{
 #if BOSON_LINK_STATIC
 		return Q3FileDialog::getSaveFileName(startWith, filter, parent, 0, caption);
@@ -53,10 +53,10 @@ public:
 #endif
 	}
 
-	static QString getOpenFileName(const QString& startWith = QString::null,
-			const QString& filter = QString::null,
+	static QString getOpenFileName(const QString& startWith = QString(),
+			const QString& filter = QString(),
 			QWidget* parent = 0,
-			const QString& caption = QString::null)
+			const QString& caption = QString())
 	{
 #if BOSON_LINK_STATIC
 		return Q3FileDialog::getOpenFileName(startWith, filter, parent, 0, caption);
@@ -65,9 +65,9 @@ public:
 #endif
 	}
 
-	static QString getExistingDirectory(const QString& dir = QString::null,
+	static QString getExistingDirectory(const QString& dir = QString(),
 			QWidget* parent = 0,
-			const QString& caption = QString::null)
+			const QString& caption = QString())
 	{
 #if BOSON_LINK_STATIC
 		return Q3FileDialog::getExistingDirectory(dir, parent, 0, caption);

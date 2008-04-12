@@ -52,7 +52,7 @@ public:
 	 * @param suffix See @ref setSuffix
 	 * @param save Initial mode - see @ref setSaveMode
 	 **/
-	BoUfoLoadSaveGameWidget(bool save = true, const QString& suffix = QString("savegame"), const QString& directory = QString::null);
+	BoUfoLoadSaveGameWidget(bool save = true, const QString& suffix = QString("savegame"), const QString& directory = QString());
 
 	virtual ~BoUfoLoadSaveGameWidget();
 

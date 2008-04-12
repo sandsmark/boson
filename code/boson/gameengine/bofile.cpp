@@ -86,7 +86,7 @@ bool BoFile::checkTar() const
 QString BoFile::fileName() const
 {
  if (!mTar) {
-	return QString::null;
+	return QString();
  }
  return mTar->fileName();
 }

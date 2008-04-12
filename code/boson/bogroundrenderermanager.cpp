@@ -158,7 +158,7 @@ QString BoGroundRendererManager::currentStatisticsData() const
 {
  BoGroundRenderer* current = currentRenderer();
  if (!current) {
-	return QString::null;
+	return QString();
  }
  return current->statisticsData();
 }

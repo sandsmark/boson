@@ -289,7 +289,7 @@ public:
 	 *
 	 * @param type This must be either @ref CursorKDE or @ref CursorOpenGL.
 	 * @param cursorDir The directory where to load the data for this cursor
-	 * (e.g. textures). Can be @ref QString::null for e.g. @ref CursorKDE.
+	 * (e.g. textures). Can be @ref QString()  for e.g. @ref CursorKDE.
 	 * @param actualCursorDir If non-NULL this is set to the actual
 	 * directory that has been used for the cursor. This may differ from @p
 	 * cursorDir when @p cursorDir has been invalid or empty.
@@ -306,7 +306,7 @@ public:
 	 * This loads the cursor only if required. It is a noop if the cursor
 	 * was loaded previously already.
 	 * @param cursor Where the cursor stores its data files. May be @ref
-	 * QString::null to indicate the default theme.
+	 * QString() to indicate the default theme.
 	 * @param actualDir This is set to the cursor directory that is actually
 	 * used (it might differ from @p cursorDir).
 	 **/

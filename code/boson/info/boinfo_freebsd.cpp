@@ -49,10 +49,10 @@ QString readFile(const char* fileName)
 {
  QFile file(fileName);
  if (!file.exists()) {
-     return QString::null;
+     return QString();
  }
  if (!file.open(QIODevice::ReadOnly)) {
-     return QString::null;
+     return QString();
  }
  QString string;
  char buf[512];
