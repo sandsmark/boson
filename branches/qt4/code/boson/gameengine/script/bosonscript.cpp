@@ -135,7 +135,7 @@ QString BosonScript::scriptsPath()
   if(path.isNull())
   {
     boWarning() << k_funcinfo << "No ai.py script file found!" << endl;
-    return QString::null;
+    return QString();
   }
   path += "boson/themes/scripts/";
   return path;

@@ -77,7 +77,7 @@ QString BosonCursor::defaultTheme()
 		QString("boson/themes/cursors/%1/index.cursor").arg(theme));
  if (cursorDir.isEmpty()) {
 	boError() << k_funcinfo << "cannot find default cursor theme " << theme << endl;
-	return QString::null;
+	return QString();
  }
  cursorDir += QString::fromLatin1("boson/themes/cursors/");
  cursorDir += theme;
@@ -428,7 +428,7 @@ BosonCursor* BosonCursorCollection::loadCursor(int type, const QString& cursorDi
 	delete b;
 	if (type != CursorKDE) { // loading *never* fails for CursorKDE. we check here anyway.
 		// load fallback cursor
-		return loadCursor(CursorKDE, QString::null, cursorDir);
+		return loadCursor(CursorKDE, QString(), cursorDir);
 	}
 	boError() << k_funcinfo << "oops - loading CursorKDE failed. THIS MUST NEVER HAPPEN!" << endl;
 	return 0;

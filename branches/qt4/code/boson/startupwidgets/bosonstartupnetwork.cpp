@@ -304,7 +304,7 @@ void BosonStartupNetwork::sendChangePlayField(int index)
  QString identifier;
  if (index < 0) {
 	// warning: valid in editor mode only!
-	identifier = QString::null;
+	identifier = QString();
  } else {
 	QStringList list = boData->availablePlayFields();
 	if (index >= (int)list.count()) {

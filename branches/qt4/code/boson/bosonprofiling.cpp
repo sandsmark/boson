@@ -186,7 +186,7 @@ QString BosonProfilingItem::name() const
  if (mName) {
 	return *mName;
  }
- return QString::null;
+ return QString();
 }
 
 void BosonProfilingItem::addChild(BosonProfilingItem* child)

@@ -83,8 +83,8 @@ class BoShader
   public:
     /**
      * Creates a shader using parameter strings as sources.
-     * If one of the sources is QString::null, corresponding shader will not be
-     *  created. You can't specify QString::null for both sources though.
+     * If one of the sources is QString(), corresponding shader will not be
+     *  created. You can't specify QString() for both sources though.
      *
      * @param vertex source of the vertex shader
      * @param fragment source of the fragment shader

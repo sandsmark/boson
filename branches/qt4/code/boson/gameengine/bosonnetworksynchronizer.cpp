@@ -162,7 +162,7 @@ public:
 	 * When an error was detected, this method is called to find the
 	 * difference of two logs. If the error is in this sync message, it
 	 * should return a string describing the error. Otherwise it returns
-	 * QString::null to indicate that this sync message doesn't contain an
+	 * QString() to indicate that this sync message doesn't contain an
 	 * error.
 	 *
 	 * You can implement the logic for your subclass in @ref findLogError.
@@ -172,7 +172,7 @@ public:
 	 * implemented as non-static in order to make @ref findLogError
 	 * possible.
 	 *
-	 * @return A string describing the error or @ref QString::null to
+	 * @return A string describing the error or @ref QString() to
 	 * indicate that there is no error in the logs.
 	 **/
 	QString findError(const QByteArray& b1, const QByteArray& b2);
@@ -198,7 +198,7 @@ QString BoSyncCheckMessageBase::findError(const QByteArray& b1, const QByteArray
  KMD5 md5_2(b2);
  if (md5.hexDigest() == md5_2.hexDigest()) {
 	boDebug(370) << "error not in this part of the sync message" << endl;
-	return QString::null;
+	return QString();
  }
  boWarning(370) << k_funcinfo << "there must be an error in this log (MD5 sums to not match)!!" << endl;
 

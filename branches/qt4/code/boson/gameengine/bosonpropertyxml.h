@@ -108,7 +108,7 @@ protected slots:
 	 * into @ref value.
 	 * @param prop The property that should get saved
 	 * @param value The string that will be placed into the XML file. Set to
-	 * @ref QString::null if you can't handle this property.
+	 * @ref QString() if you can't handle this property.
 	 **/
 	void slotRequestValue(KGamePropertyBase* prop, QString& value);
 

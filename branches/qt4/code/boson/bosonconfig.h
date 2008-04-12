@@ -342,7 +342,7 @@ public:
 	BoConfigIntEntry* addDynamicEntryInt(const QString& configKey, int defaultValue = 0, bool saveConfig = true);
 	BoConfigUIntEntry* addDynamicEntryUInt(const QString& configKey, unsigned int defaultValue = 0, bool saveConfig = true);
 	BoConfigDoubleEntry* addDynamicEntryDouble(const QString& configKey, double defaultValue = 0.0, bool saveConfig = true);
-	BoConfigStringEntry* addDynamicEntryString(const QString& configKey, QString defaultValue = QString::null, bool saveConfig = true);
+	BoConfigStringEntry* addDynamicEntryString(const QString& configKey, QString defaultValue = QString(), bool saveConfig = true);
 	BoConfigColorEntry* addDynamicEntryColor(const QString& configKey, QColor defaultValue, bool saveConfig = true);
 	BoConfigIntListEntry* addDynamicEntryIntList(const QString& configKey, const Q3ValueList<int>& defaultValue, bool saveConfig = true);
 
@@ -428,7 +428,7 @@ public:
 	 * @return The value of the entry @p key, or @p _default no entry of the
 	 * correct type exists.
 	 **/
-	const QString& stringValue(const QString& key, const QString& _default = QString::null) const;
+	const QString& stringValue(const QString& key, const QString& _default = QString()) const;
 
 	/**
 	 * @return The value of the entry @p key, or @p _default no entry of the
@@ -467,7 +467,7 @@ public:
 	bool boolDefaultValue(const QString& key, bool _default = false) const;
 	int intDefaultValue(const QString& key, int _default = 0) const;
 	unsigned int uintDefaultValue(const QString& key, unsigned int _default = 0) const;
-	const QString& stringDefaultValue(const QString& key, const QString& _default = QString::null) const;
+	const QString& stringDefaultValue(const QString& key, const QString& _default = QString()) const;
 	double doubleDefaultValue(const QString& key, double _default = 0.0) const;
 	QColor colorDefaultValue(const QString& key) const;
 	QColor colorDefaultValue(const QString& key, const QColor& _default) const;

@@ -660,7 +660,7 @@ void BoUnitEditor::slotSaveUnit()
  QString dir = mUnitPath->text();
  QDir d;
  if(dir.isEmpty()) {
-	dir = BoFileDialog::getExistingDirectory(QString::null, 0,
+	dir = BoFileDialog::getExistingDirectory(QString(), 0,
 			i18n("Please select directory for your new unit"));
 	if(dir.isEmpty()) { // No directory was chosen
 		return;
@@ -813,7 +813,7 @@ void BoUnitEditor::slotOpenUnit()
 
  // Open new unit
  QString dir = BoFileDialog::getExistingDirectory();
- if((dir == QString::null) || (!QFile::exists(dir + "/index.unit"))) {
+ if((dir == QString()) || (!QFile::exists(dir + "/index.unit"))) {
 	KMessageBox::error(this, i18n("No unit configuration file was found in this directory!"), i18n("Invalid directory!"));
 	return;
  }

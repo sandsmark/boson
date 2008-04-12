@@ -49,7 +49,7 @@ public:
 	 * @ref data1
 	 * @param _data2 Just like @p _data1.
 	 **/
-	BoEvent(const QString& _name, const QString& _data1 = QString::null, const QString& _data2 = QString::null);
+	BoEvent(const QString& _name, const QString& _data1 = QString(), const QString& _data2 = QString());
 
 	/**
 	 * @overload
@@ -168,7 +168,7 @@ public:
 
 	/**
 	 * @return Optional parameter 1. The value of this depends completely on
-	 * the event. Default is @ref QString::null
+	 * the event. Default is @ref QString()
 	 **/
 	const QString& data1() const
 	{
@@ -176,7 +176,7 @@ public:
 	}
 	/**
 	 * @return Optional parameter 2. The value of this depends completely on
-	 * the event. Default is @ref QString::null
+	 * the event. Default is @ref QString()
 	 **/
 	const QString& data2() const
 	{

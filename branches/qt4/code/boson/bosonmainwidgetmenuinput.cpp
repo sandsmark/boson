@@ -62,7 +62,7 @@ static QString findSaveFileName(const QString& prefix, const QString& suffix)
 		return QFileInfo(file).absoluteFilePath();
 	}
  }
- return QString::null;
+ return QString();
 }
 
 

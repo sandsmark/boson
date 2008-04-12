@@ -475,7 +475,7 @@ void BoUfoStartEditorWidget::slotNewMapToggled(bool isNewMap)
 
  if (isNewMap) {
 	// Reset playfield
-	networkInterface()->sendChangePlayField(QString::null);
+	networkInterface()->sendChangePlayField(QString());
  }
 
  boDebug() << k_funcinfo << "DONE" << endl;

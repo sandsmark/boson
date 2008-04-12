@@ -50,13 +50,13 @@ public:
 		AddUnitSound = 51,
 		AddGeneralSound = 52
 	};
-	BoAudioCommand(int command, int dataInt = -1, const QString& dataString1 = QString::null, const QString& dataString2 = QString::null);
+	BoAudioCommand(int command, int dataInt = -1, const QString& dataString1 = QString(), const QString& dataString2 = QString());
 
 	/**
 	 * Create a command for sounds. This takes an additional species
 	 * parameter.
 	 **/
-	BoAudioCommand(int command, const QString& species, int dataInt = -1, const QString& dataString = QString::null, const QString& dataString2 = QString::null);
+	BoAudioCommand(int command, const QString& species, int dataInt = -1, const QString& dataString = QString(), const QString& dataString2 = QString());
 
 	int type() const { return mCommand; }
 	int dataInt() const { return mDataInt; }

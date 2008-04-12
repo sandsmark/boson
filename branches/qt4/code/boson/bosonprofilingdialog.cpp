@@ -341,7 +341,7 @@ void BosonProfilingDialog::slotUpdate()
  d->mItems = d->mProfiling.cloneItems();
  delete d->mTopItem;
 
- d->mTopItem = new ProfilingItem(QString::null);
+ d->mTopItem = new ProfilingItem(QString());
  for (Q3PtrListIterator<BosonProfilingItem> it(d->mItems); it.current(); ++it) {
 	d->mTopItem->insertChild(it.current());
  }

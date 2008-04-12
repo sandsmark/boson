@@ -141,7 +141,7 @@ public:
 	QStringList availablePlugins();
 
 	/**
-	 * @param className The name of the plugin , or @ref QString::null for
+	 * @param className The name of the plugin , or @ref QString() for
 	 * the first plguin found
 	 **/
 	bool makePluginCurrent(const QString& className);
@@ -158,7 +158,7 @@ public:
 
 	/**
 	 * @return The @ref QObject::className of the @ref currentPlugin or
-	 * @ref QString::null if none is set. This name can be used in @ref
+	 * @ref QString() if none is set. This name can be used in @ref
 	 * makePluginCurrent.
 	 **/
 	QString currentPluginName() const;

@@ -107,7 +107,7 @@ QString BoNumInput::label() const
  if (d->mLabel) {
 	return d->mLabel->text();
  }
- return QString::null;
+ return QString();
 }
 
 Q3HBoxLayout* BoNumInput::mainLayout() const

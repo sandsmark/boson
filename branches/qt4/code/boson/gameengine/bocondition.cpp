@@ -399,8 +399,8 @@ bool BoConditionAction::loadActionFromXML(const QDomElement& root)
  }
  delete mEventCaused;
  mEventCaused = 0;
- mScriptFile = QString::null;
- mScriptCall = QString::null;
+ mScriptFile = QString();
+ mScriptCall = QString();
 
  if (type == "Event") {
 	QDomElement actionEvent = root.namedItem("Event").toElement();

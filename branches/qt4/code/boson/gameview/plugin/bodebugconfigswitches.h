@@ -52,7 +52,7 @@ public:
 	 * Add a checkbox for the config entry @p key. The @p name is used as
 	 * text for the checkbox. If @p name is empty, @p key is used instead.
 	 **/
-	void addBooleanConfigureSwitch(const QString& key, const QString& name = QString::null);
+	void addBooleanConfigureSwitch(const QString& key, const QString& name = QString());
 
 	bool haveKey(const QString& key) const;
 

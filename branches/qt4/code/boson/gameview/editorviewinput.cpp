@@ -583,7 +583,7 @@ void EditorViewInput::slotClearUndoStack()
 	BosonMessageEditorMove* m = d->mUndoStack.pop();
 	delete m;
  }
- emit signalEditorHasUndo(QString::null);
+ emit signalEditorHasUndo(QString());
 }
 
 void EditorViewInput::slotClearRedoStack()
@@ -592,7 +592,7 @@ void EditorViewInput::slotClearRedoStack()
 	BosonMessageEditorMove* m = d->mRedoStack.pop();
 	delete m;
  }
- emit signalEditorHasRedo(QString::null);
+ emit signalEditorHasRedo(QString());
 }
 
 void EditorViewInput::slotNewUndoMessage(const BosonMessageEditorMove& undo, bool fromRedo)
@@ -682,7 +682,7 @@ void EditorViewInput::redo()
 QString EditorViewInput::messageName(const BosonMessageEditorMove* message) const
 {
  if (!message) {
-	return QString::null;
+	return QString();
  }
  QString name;
  switch (message->messageId()) {

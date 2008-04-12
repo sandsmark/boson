@@ -144,7 +144,7 @@ QString fixedApplicationDirPath(const Q3CString& _argv0)
  if ( QFile::exists(absPath) ) {
 	applicationFilePath = resolveSymlinks( absPath );
  } else {
-	applicationFilePath = QString::null;
+	applicationFilePath = QString();
  }
 
  return QFileInfo(applicationFilePath).absolutePath();
@@ -160,7 +160,7 @@ QString resolveSymlinks( const QString& path, int depth )
 
  // too deep; we give up
  if ( depth == 128 )
-	return QString::null;
+	return QString();
 
  do {
 	part = part.left( slashPos );

@@ -1342,7 +1342,7 @@ void BosonMenuInput::slotEditorImportHeightMap()
  BO_CHECK_NULL_RET(boGame->playField());
  BO_CHECK_NULL_RET(boGame->playField()->map());
  boDebug() << k_funcinfo << endl;
- QString fileName = BoFileDialog::getOpenFileName(QString::null, "*.png", 0);
+ QString fileName = BoFileDialog::getOpenFileName(QString(), "*.png", 0);
  if (fileName.isNull()) {
 	return;
  }
@@ -1378,7 +1378,7 @@ void BosonMenuInput::slotEditorExportHeightMap()
  BO_CHECK_NULL_RET(boGame->playField());
  BO_CHECK_NULL_RET(boGame->playField()->map());
  boDebug() << k_funcinfo << endl;
- QString fileName = BoFileDialog::getSaveFileName(QString::null, "*.png", 0);
+ QString fileName = BoFileDialog::getSaveFileName(QString(), "*.png", 0);
  if (fileName.isNull()) {
 	return;
  }
@@ -1443,7 +1443,7 @@ void BosonMenuInput::slotEditorExportTexMap()
  boDebug() << k_funcinfo << "tex: " << tex << endl;
  delete d;
 
- QString fileName = BoFileDialog::getSaveFileName(QString::null, "*.png", 0);
+ QString fileName = BoFileDialog::getSaveFileName(QString(), "*.png", 0);
  if (fileName.isNull()) {
 	return;
  }

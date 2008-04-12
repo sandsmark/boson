@@ -65,7 +65,7 @@ public:
 	 * heavily on the paging strategy of the operating system.
 	 *
 	 * If a value is not provided by any reason, the parameter is either
-	 * not touched at all, or set to @ref QString::null.
+	 * not touched at all, or set to a null string.
 	 *
 	 * A NULL pointer parameter is not touched by this method.
 	 *

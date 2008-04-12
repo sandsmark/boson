@@ -269,7 +269,7 @@ static bool parseAddComputerArgs(MainNoGUIStartOptions* options, KCmdLineArgs* a
 	}
  } else {
 	for (int i = 0; i < players; i++) {
-		species.append(QString::null);
+		species.append(QString());
 	}
  }
 

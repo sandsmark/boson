@@ -156,7 +156,7 @@ QString BoMeshRendererManager::currentStatisticsData() const
 {
  BoMeshRenderer* current = currentRenderer();
  if (!current) {
-	return QString::null;
+	return QString();
  }
  return current->statisticsData();
 }

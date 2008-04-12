@@ -156,7 +156,7 @@ QString BoUfoLoadSaveGameWidget::defaultDir()
 		true);
  if (dir.isEmpty()) {
 	boError() << k_funcinfo << "cannot find default dir?!" << endl;
-	return QString::null;
+	return QString();
  }
  if (dir.right(dir.length() - 1) != QString::fromLatin1("/")) {
 	dir += QString::fromLatin1("/");
@@ -328,7 +328,7 @@ void BoUfoLoadSaveGameWidget::slotLoadSave()
 	// emit the following signal. Correct solution would be to display an
 	// empty savegame button
 	if (d->mSave) {
-		emit signalSaveGame(saveFileName(), QString::null);
+		emit signalSaveGame(saveFileName(), QString());
 	}
 	return;
  }
@@ -406,7 +406,7 @@ QString BoUfoLoadSaveGameWidget::saveFileName()
  boDebug() << k_funcinfo << endl;
  if (!d->mSave) {
 	boWarning() << k_funcinfo << "not in save mode" << endl;
-	return QString::null;
+	return QString();
  }
  QString base = "ksavegame-";
  QString s;
@@ -449,7 +449,7 @@ void BoUfoLoadSaveGameWidget::slotBrowse()
 	// TODO: use the same way to enter the description as we use in
 	// slotLoadSave() !
 	// I mean once we use it at all...
-	emit signalSaveGame(file, QString::null);
+	emit signalSaveGame(file, QString());
  } else {
 	emit signalLoadGame(file);
  }

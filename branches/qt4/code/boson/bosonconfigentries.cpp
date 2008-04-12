@@ -55,7 +55,7 @@ void BosonConfig::initConfigEntries()
  addDynamicEntryBool("UseLight", true);
  addDynamicEntryBool("UseMaterials", false);
  addDynamicEntryInt("CursorMode", (int)CursorOpenGL);
- addDynamicEntryString("CursorDir", QString::null); // QString::null means use BosonCursor::defaultTheme()
+ addDynamicEntryString("CursorDir", QString()); // QString() means use BosonCursor::defaultTheme()
  addDynamicEntryInt("ToolTipUpdatePeriod", 300);
  addDynamicEntryInt("ToolTipCreator", 1); // FIXME: should be BoToolTipCreator::Extended, but I don't want to include the file here
  addDynamicEntryInt("GameLogInterval", 10);
@@ -83,7 +83,7 @@ void BosonConfig::initConfigEntries()
  addDynamicEntry(new BoConfigBoolEntry(this, "EnableATIDepthWorkaround", false));
  addDynamicEntry(new BoConfigBoolEntry(this, "EnableMesaVertexArraysWorkarounds", false));
  addDynamicEntry(new BoConfigDoubleEntry(this, "ATIDepthWorkaroundValue", 0.00390625));
- addDynamicEntry(new BoConfigStringEntry(this, "GLFont", QString::null));
+ addDynamicEntry(new BoConfigStringEntry(this, "GLFont", QString()));
  addDynamicEntry(new BoConfigBoolEntry(this, "SmoothShading", true));
  addDynamicEntry(new BoConfigStringEntry(this, "MeshRenderer", "BoMeshRendererVertexArray"));
  addDynamicEntry(new BoConfigStringEntry(this, "GroundRendererClass", "BoDefaultGroundRenderer"));

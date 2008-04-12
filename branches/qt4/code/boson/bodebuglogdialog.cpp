@@ -95,7 +95,7 @@ void BoDebugLogWidget::setMessages(const Q3PtrList<BoDebugMessage>& m)
 {
  d->mMessages->clear();
  d->mItem2Backtrace.clear();
- d->mBacktrace->setText(QString::null);
+ d->mBacktrace->setText(QString());
  Q3PtrListIterator<BoDebugMessage> it(m);
  int i = 0;
  while (it.current()) {

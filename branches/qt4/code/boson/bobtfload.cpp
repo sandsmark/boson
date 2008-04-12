@@ -272,7 +272,7 @@ QString BoBTFLoad::createBTFFile()
  QFile textureFile(file());
  if (!textureFile.open(QIODevice::ReadOnly)) {
 	boError() << k_funcinfo << "cannot open " << file() << " for reading" << endl;
-	return QString::null;
+	return QString();
  }
  KMD5 md5(textureFile.readAll());
  mMD5 = md5.hexDigest();
@@ -288,12 +288,12 @@ QString BoBTFLoad::createBTFFile()
  QImage img;
  if (!img.load(file())) {
 	boError() << k_funcinfo << "Could not load image from file " << file() << endl;
-	return QString::null;
+	return QString();
  }
 
  if (img.width() == 0 || img.height() == 0) {
 	boError() << k_funcinfo << "invalid image " << file() << endl;
-	return QString::null;
+	return QString();
  }
 
  cacheFileName = KGlobal::dirs()->saveLocation("data", "boson/texturecache/");
@@ -302,7 +302,7 @@ QString BoBTFLoad::createBTFFile()
  QFile cacheFile(cacheFileName);
  if (!cacheFile.open(QIODevice::WriteOnly)) {
 	boError() << k_funcinfo << "Could not open " << cacheFileName << " for writing" << endl;
-	return QString::null;
+	return QString();
  }
 
  QDataStream stream(&cacheFile);
@@ -321,7 +321,7 @@ QString BoBTFLoad::createBTFFile()
 	boError() << k_funcinfo << "error while saving .btf file" << endl;
 	cacheFile.close();
 	cacheFile.remove();
-	return QString::null;
+	return QString();
  }
 
  return cacheFileName;

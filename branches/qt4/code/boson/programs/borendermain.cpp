@@ -1106,7 +1106,7 @@ void ModelDisplay::initializeGL()
 #if BOSONFONT
  delete mDefaultFont;
  BoFontInfo defaultFontInfo;
- defaultFontInfo.fromString(boConfig->stringValue("GLFont", QString::null));
+ defaultFontInfo.fromString(boConfig->stringValue("GLFont", QString()));
  mDefaultFont = new BosonGLFont(defaultFontInfo);
 #endif
 

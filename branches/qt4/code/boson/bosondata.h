@@ -145,7 +145,7 @@ public:
 	/**
 	 * Replacmenet for the usual locate("data", fileName);
 	 *
-	 * @return The absolute path for @p fileName, or @ref QString::null, if
+	 * @return The absolute path for @p fileName, or a null string, if
 	 * @p fileName can't be found.
 	 **/
 	QString locateDataFile(const QString& fileName) const;

@@ -41,16 +41,16 @@
 
 QString BoToolTipCreator::createToolTip(const BosonItem* ) const
 {
- return QString::null;
+ return QString();
 }
 
 QString BoToolTipCreatorBasic::createToolTip(const BosonItem* item) const
 {
  if (!item) {
-	return QString::null;
+	return QString();
  }
  if (!RTTI::isUnit(item->rtti())) {
-	return QString::null;
+	return QString();
  }
  Unit* u = (Unit*)item;
  return u->name();
@@ -59,10 +59,10 @@ QString BoToolTipCreatorBasic::createToolTip(const BosonItem* item) const
 QString BoToolTipCreatorExtended::createToolTip(const BosonItem* item) const
 {
  if (!item) {
-	return QString::null;
+	return QString();
  }
  if (!RTTI::isUnit(item->rtti())) {
-	return QString::null;
+	return QString();
  }
  QString tip;
 
@@ -108,7 +108,7 @@ QString BoToolTipCreatorExtended::createToolTip(const BosonItem* item) const
 QString BoToolTipCreatorDebug::createToolTip(const BosonItem* item) const
 {
  if (!item) {
-	return QString::null;
+	return QString();
  }
  // debugging tooltips are not restricted in size, although we should *try* to
  // keep em short. but it is more important that all necessary data is

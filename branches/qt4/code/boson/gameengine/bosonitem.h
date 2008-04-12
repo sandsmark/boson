@@ -94,7 +94,7 @@ public:
 	static int propertyId(const QString& name);
 
 	/**
-	 * @return A name for the specified property id or QString::null if not
+	 * @return A name for the specified property id or QString() if not
 	 * found. See also @ref addPropertyId
 	 **/
 	static QString propertyName(int id);

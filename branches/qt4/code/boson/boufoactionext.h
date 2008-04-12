@@ -42,11 +42,11 @@ public:
 	/**
 	 * @param key The @ref BosonConfig key that is used for @ref
 	 * BosonConfig::setBoolValue and @ref BosonConfig::boolValue. You can
-	 * use @ref QString::null here, then @p name is used for the key. You
+	 * use @ref QString() here, then @p name is used for the key. You
 	 * have to make sure that such a key actually exists and that it is a
 	 * boolean config option!
 	 **/
-	BoUfoConfigToggleAction(const QString& text, const KShortcut& cut, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const char* name, QString key = QString::null);
+	BoUfoConfigToggleAction(const QString& text, const KShortcut& cut, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const char* name, QString key = QString());
 	~BoUfoConfigToggleAction();
 
 	virtual void setChecked(bool c);

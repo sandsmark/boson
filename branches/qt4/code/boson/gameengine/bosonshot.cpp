@@ -105,17 +105,17 @@ QString BosonShot::getModelIdForItem() const
 {
   if(!properties())
   {
-    return QString::null;
+    return QString();
   }
   if(!owner())
   {
     BO_NULL_ERROR(owner());
-    return QString::null;
+    return QString();
   }
   if(!owner()->speciesTheme())
   {
     BO_NULL_ERROR(owner()->speciesTheme());
-    return QString::null;
+    return QString();
   }
   return QString("%1:%2").arg("shot").arg(properties()->modelFileName());
 }
@@ -1087,12 +1087,12 @@ QString BosonShotFragment::getModelIdForItem() const
   if(!owner())
   {
     BO_NULL_ERROR(owner());
-    return QString::null;
+    return QString();
   }
   if(!owner()->speciesTheme())
   {
     BO_NULL_ERROR(owner()->speciesTheme());
-    return QString::null;
+    return QString();
   }
   return QString("%1:%2").arg("shot").arg("fragment");
 }
