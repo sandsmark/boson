@@ -98,9 +98,7 @@ public:
 	inline const_iterator end() const { return mList.end(); }
 //	unsigned int contains(BosonItem* item) const { return mList.contains(item); } // FIXME: gcc does not accept const BosonItem* item
 
-	// TODO: rename to contains(), once we made sure that the uint return
-	// value is not used (i.e. once boson compiles with containsBool())
-	bool containsBool(BosonItem* item) const { return mList.contains(item); } // FIXME: gcc does not accept const BosonItem* item
+	bool contains(BosonItem* item) const { return mList.contains(item); } // FIXME: gcc does not accept const BosonItem* item
 //	int findIndex(BosonItem* item) const { return mList.findIndex(item); } // FIXME: gcc does not accept const BosonItem* item
 	BosonItem* findItem(quint32 id) const;
 	void clear() { mList.clear(); }

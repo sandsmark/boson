@@ -153,7 +153,7 @@ BosonItem::~BosonItem()
  unselect();
  if (canvas()) {
 	canvas()->removeFromCells(this);
-	if (canvas()->allItems()->containsBool(this)) {
+	if (canvas()->allItems()->contains(this)) {
 		// must happen BEFORE the item is deleted!
 		boError() << k_funcinfo << "the item has not yet been removed from the canvas!!" << endl;
 	}

@@ -1159,7 +1159,7 @@ void Unit::advanceAttack(unsigned int advanceCallsCount)
 	// AB: warning - this does a lookup on all items and therefore is slow!
 	// --> but we need it as a simple test on the pointer causes trouble if
 	// that pointer is already deleted. any nice solutions?
-	if (!canvas()->allItems()->containsBool(target)) {
+	if (!canvas()->allItems()->contains(target)) {
 		boDebug(300) << "Target seems to be destroyed!" << endl;
 		currentSuborderDone(true);
 		return;
