@@ -304,7 +304,7 @@ void UnitMover::advanceFollow(unsigned int advanceCallsCount)
 	// AB: warning - this does a lookup on all items and therefore is slow!
 	// --> but we need it as a simple test on the pointer causes trouble if
 	// that pointer is already deleted. any nice solutions?
-	if (!canvas()->allItems()->containsBool(target)) {
+	if (!canvas()->allItems()->contains(target)) {
 		boDebug(401) << k_funcinfo << "Unit seems to be destroyed!" << endl;
 		unit()->currentSuborderDone(true);
 		return;

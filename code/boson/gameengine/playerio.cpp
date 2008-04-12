@@ -401,7 +401,7 @@ BoItemList* PlayerIO::unitsAtCells(const Q3PtrVector<const Cell>* cells) const
 		if (!(((Unit*)s)->visibleStatus(playerId()) & (UnitBase::VS_Visible | UnitBase::VS_Earlier))) {
 			continue;
 		}
-		if (!collisions->containsBool(s)) {
+		if (!collisions->contains(s)) {
 			collisions->append(s);
 		}
 	}
