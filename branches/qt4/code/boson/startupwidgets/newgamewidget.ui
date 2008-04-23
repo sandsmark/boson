@@ -1,6 +1,6 @@
 <ui version="4.0" >
  <class>NewGameWidget</class>
- <widget class="QWidget" name="Form" >
+ <widget class="QWidget" name="NewGameWidget" >
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -10,7 +10,7 @@
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>Form</string>
+   <string>New Game</string>
   </property>
   <layout class="QVBoxLayout" >
    <item>

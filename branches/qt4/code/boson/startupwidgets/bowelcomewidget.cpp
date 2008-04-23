@@ -24,6 +24,7 @@
 BoWelcomeWidget::BoWelcomeWidget(QWidget* parent)
 	: QWidget(parent)
 {
+ setupUi(this);
  connect(mOptions, SIGNAL(clicked()), this, SIGNAL(signalPreferences()));
  connect(mLoadGame, SIGNAL(clicked()), this, SIGNAL(signalLoadGame()));
  connect(mStartSPGame, SIGNAL(clicked()), this, SIGNAL(signalNewSPGame()));

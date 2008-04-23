@@ -28,6 +28,7 @@
 BoLoadingWidget::BoLoadingWidget(QWidget* parent)
     : QWidget(parent)
 {
+  setupUi(this);
   mLastGLUpdate.start();
 }
 
