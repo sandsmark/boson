@@ -56,10 +56,10 @@
 #warning TODO: implement!
 #define HAVE_CHAT_WIDGET 0
 
-class PlayFieldSelection
+class PlayFieldSelectionQt
 {
 public:
-  PlayFieldSelection(QListWidget* campaign, QListWidget* playField)
+  PlayFieldSelectionQt(QListWidget* campaign, QListWidget* playField)
   {
     BO_CHECK_NULL_RET(campaign);
     BO_CHECK_NULL_RET(playField);
@@ -288,7 +288,7 @@ public:
       mPlayerColor = 0;
     }
 
-    PlayFieldSelection* mPlayFieldSelection;
+    PlayFieldSelectionQt* mPlayFieldSelection;
     QMap<int, KPlayer*> mItem2Player;
     QMap<int, QString> mItem2Map; // "item" is an index in the listbox now
 
@@ -312,8 +312,19 @@ BoNewGameWidget::BoNewGameWidget(BosonStartupNetwork* interface, QWidget* parent
  BO_CHECK_NULL_RET(boGame);
  BO_CHECK_NULL_RET(interface);
  d = new BoNewGameWidgetPrivate;
- setupUi(this);
  mNetworkInterface = interface;
+
+ setupUi(this);
+ connect(mPlayerDesiredSide, SIGNAL(activated(int)), this, SLOT(slotPlayerSideChanged(int)));
+ connect(mAddAIPlayer, SIGNAL(clicked()), this, SLOT(slotAddComputerPlayer()));
+ connect(mSelectCampaign, SIGNAL(currentRowChanged(int)), this, SLOT(slotCampaignSelected(int)));
+ connect(mCancel, SIGNAL(clicked()), this, SLOT(slotCancel()));
+ connect(mPlayerName, SIGNAL(clicked()), this, SLOT(slotPlayerNameChanged()));
+ connect(mConnectedPlayersList, SIGNAL(currentRowChanged(int)), this, SLOT(slotPlayerSelected(int)));
+ connect(mPlayerSpecies, SIGNAL(activated(int)), this, SLOT(slotPlayerSpeciesChanged(int)));
+ connect(mSelectMap, SIGNAL(currentRowChanged(int)), this, SLOT(slotPlayFieldSelected(int)));
+ connect(mRemovePlayer, SIGNAL(clicked()), this, SLOT(slotRemovePlayer()));
+ connect(mStartGame, SIGNAL(clicked()), this, SLOT(slotStartGame()));
 
  mSelectedPlayer = 0;
  mMaxPlayers = 0;
@@ -321,7 +332,7 @@ BoNewGameWidget::BoNewGameWidget(BosonStartupNetwork* interface, QWidget* parent
  mInited = false; // Will become true once localplayer gets added
  d->mComputerPlayerNumber = 1;
 
- d->mPlayFieldSelection = new PlayFieldSelection(mSelectCampaign, mSelectMap);
+ d->mPlayFieldSelection = new PlayFieldSelectionQt(mSelectCampaign, mSelectMap);
 
  d->mPlayerColor = new BoColorChooser(mPlayerColorContainer);
  QHBoxLayout* colorContainerLayout = new QHBoxLayout(mPlayerColorContainer);
@@ -451,6 +462,7 @@ void BoNewGameWidget::initPlayFields()
     }
     d->mPlayFieldSelection->addCampaign(campaign);
  }
+ boDebug() << "foo3";
 }
 
 void BoNewGameWidget::initSpecies()
@@ -896,23 +908,17 @@ void BoNewGameWidget::slotPlayerColorChanged(int index)
  }
 }
 
-void BoNewGameWidget::slotPlayFieldSelected(int first, int last)
+void BoNewGameWidget::slotPlayFieldSelected(int row)
 {
- // AB: first and last are barely usable. there is no way to find out _which_
- // one of these is selected _currently_. better just ignore them.
- Q_UNUSED(first);
- Q_UNUSED(last);
+ Q_UNUSED(row);
  d->mPlayFieldSelection->updateCurrentPlayField();
  QString identifier = d->mPlayFieldSelection->playFieldIdentifier();
  networkInterface()->sendChangePlayField(identifier);
 }
 
-void BoNewGameWidget::slotCampaignSelected(int first, int last)
+void BoNewGameWidget::slotCampaignSelected(int row)
 {
- // AB: first and last are barely usable. there is no way to find out _which_
- // one of these is selected _currently_. better just ignore them.
- Q_UNUSED(first);
- Q_UNUSED(last);
+ Q_UNUSED(row);
  d->mPlayFieldSelection->updateCurrentPlayField();
  QString identifier = d->mPlayFieldSelection->playFieldIdentifier();
  networkInterface()->sendChangePlayField(identifier);
@@ -1001,16 +1007,6 @@ void BoNewGameWidget::slotRemovePlayer()
  if (mSelectedPlayer != localPlayer()) {
     networkInterface()->removePlayer(mSelectedPlayer);
  }
-}
-
-void BoNewGameWidget::slotPlayerSelected(int first, int last)
-{
- // AB: first and last are barely usable. there is no way to find out _which_
- // one of these is selected _currently_. better just ignore them.
- Q_UNUSED(first);
- Q_UNUSED(last);
- int selected = mConnectedPlayersList->currentRow();
- slotPlayerSelected(selected);
 }
 
 void BoNewGameWidget::slotPlayerSelected(int index)
