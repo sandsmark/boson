@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2008 Andreas Beckermann (b_mann@gmx.de)
     Copyright (C) 2001-2005 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
@@ -17,16 +17,13 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
-#ifndef BOSONUFOGAMEWIDGETS_H
-#define BOSONUFOGAMEWIDGETS_H
+#ifndef BOSONGAMEWIDGETS_H
+#define BOSONGAMEWIDGETS_H
 
-#include "../boufo/boufo.h"
 #include "../bo3dtools.h"
-//Added by qt3to4:
 #include <Q3ValueList>
 #include <Q3PtrList>
-
-#include "bosongamewidgets.h"
+#include <QWidget>
 
 class BosonCanvas;
 class PlayerIO;
@@ -36,16 +33,16 @@ class BosonCursor;
 class BosonGameFPSCounter;
 template<class T> class Q3PtrList;
 
-class BosonUfoPlacementPreviewWidgetPrivate;
+class BosonPlacementPreviewWidgetPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonUfoPlacementPreviewWidget : public BoUfoCustomWidget
+class BosonPlacementPreviewWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	BosonUfoPlacementPreviewWidget();
-	virtual ~BosonUfoPlacementPreviewWidget();
+	BosonPlacementPreviewWidget(QWidget* parent);
+	virtual ~BosonPlacementPreviewWidget();
 
 	void setGameGLMatrices(const BoGLMatrices*);
 	void setCanvas(BosonCanvas* canvas);
@@ -83,20 +80,36 @@ protected:
 	void renderPlacementPreview();
 
 private:
-	BosonUfoPlacementPreviewWidgetPrivate* d;
+	BosonPlacementPreviewWidgetPrivate* d;
 };
 
 
-class BosonUfoLineVisualizationWidgetPrivate;
+class BoLineVisualization
+{
+public:
+	BoLineVisualization()
+	{
+		color.set(1.0f, 1.0f, 1.0f, 1.0f);
+		timeout = 60;
+		pointsize = 1.0f;
+	}
+
+	Q3ValueList<BoVector3Fixed> points;
+	BoVector4Float color;
+	int timeout;
+	float pointsize;
+};
+
+class BosonLineVisualizationWidgetPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonUfoLineVisualizationWidget : public BoUfoCustomWidget
+class BosonLineVisualizationWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	BosonUfoLineVisualizationWidget();
-	virtual ~BosonUfoLineVisualizationWidget();
+	BosonLineVisualizationWidget(QWidget* parent);
+	virtual ~BosonLineVisualizationWidget();
 
 	void setGameGLMatrices(const BoGLMatrices*);
 	void setCanvas(const BosonCanvas* mCanvas);
@@ -115,21 +128,21 @@ protected:
 	void addLineVisualization(BoLineVisualization v);
 
 private:
-	BosonUfoLineVisualizationWidgetPrivate* d;
+	BosonLineVisualizationWidgetPrivate* d;
 };
 
 
 
-class BosonUfoCursorWidgetPrivate;
+class BosonCursorWidgetPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonUfoCursorWidget : public BoUfoCustomWidget
+class BosonCursorWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	BosonUfoCursorWidget();
-	virtual ~BosonUfoCursorWidget();
+	BosonCursorWidget(QWidget* parent);
+	virtual ~BosonCursorWidget();
 
 	virtual void paintWidget();
 
@@ -155,21 +168,21 @@ signals:
 	void signalSetCursor(BosonCursor* cursor);
 
 private:
-	BosonUfoCursorWidgetPrivate* d;
+	BosonCursorWidgetPrivate* d;
 };
 
 
 
-class BosonUfoSelectionRectWidgetPrivate;
+class BosonSelectionRectWidgetPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonUfoSelectionRectWidget : public BoUfoCustomWidget
+class BosonSelectionRectWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	BosonUfoSelectionRectWidget();
-	virtual ~BosonUfoSelectionRectWidget();
+	BosonSelectionRectWidget(QWidget* parent);
+	virtual ~BosonSelectionRectWidget();
 
 	virtual void paintWidget();
 
@@ -183,12 +196,12 @@ public slots:
 
 
 private:
-	BosonUfoSelectionRectWidgetPrivate* d;
+	BosonSelectionRectWidgetPrivate* d;
 };
 
 
-class FPSGraphDataUfo;
-class BosonUfoFPSGraphWidgetPrivate;
+class FPSGraphData;
+class BosonFPSGraphWidgetPrivate;
 /**
  * @short A widget to paint a graph from FPS (or other) data
  * This widget paints a graph (i.e. a set of connected lines) from FPS data.
@@ -198,12 +211,12 @@ class BosonUfoFPSGraphWidgetPrivate;
  *
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonUfoFPSGraphWidget : public BoUfoCustomWidget
+class BosonFPSGraphWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	BosonUfoFPSGraphWidget();
-	~BosonUfoFPSGraphWidget();
+	BosonFPSGraphWidget(QWidget* parent);
+	~BosonFPSGraphWidget();
 
 	virtual void paintWidget();
 
@@ -211,26 +224,26 @@ public:
 	void setGameFPSCounter(const BosonGameFPSCounter* c);
 
 protected:
-	void paintFPS(const FPSGraphDataUfo& data);
+	void paintFPS(const FPSGraphData& data);
 
 protected slots:
 	void slotAddData();
 
 private:
-	BosonUfoFPSGraphWidgetPrivate* d;
+	BosonFPSGraphWidgetPrivate* d;
 };
 
 
-class BosonUfoProfilingGraphWidgetPrivate;
+class BosonProfilingGraphWidgetPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonUfoProfilingGraphWidget : public BoUfoCustomWidget
+class BosonProfilingGraphWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	BosonUfoProfilingGraphWidget();
-	~BosonUfoProfilingGraphWidget();
+	BosonProfilingGraphWidget(QWidget* parent);
+	~BosonProfilingGraphWidget();
 
 	virtual void paintWidget();
 
@@ -242,10 +255,10 @@ protected slots:
 
 protected:
 	void resetProfilingTypes();
-	void ensureLabels(unsigned int count);
+	void ensureLabels(int count);
 
 private:
-	BosonUfoProfilingGraphWidgetPrivate* d;
+	BosonProfilingGraphWidgetPrivate* d;
 };
 
 

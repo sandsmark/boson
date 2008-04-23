@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2008 Andreas Beckermann (b_mann@gmx.de)
     Copyright (C) 2001-2005 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
@@ -18,8 +18,8 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "bosonufogamewidgets.h"
-#include "bosonufogamewidgets.moc"
+#include "bosongamewidgets.h"
+#include "bosongamewidgets.moc"
 
 #include "../bomemory/bodummymemory.h"
 #include "../no_player.h"
@@ -39,15 +39,17 @@
 #include "../bosonprofiling.h"
 #include "../bosonfpscounter.h"
 #include "../bosonviewdata.h"
+#include "../bolayeredwidget.h"
 #include "bodebug.h"
 
 #include <klocale.h>
 
 #include <qtimer.h>
-#include <q3valuelist.h>
-#include <q3valuevector.h>
-//Added by qt3to4:
-#include <Q3PtrList>
+#include <QLabel>
+#include <QCheckBox>
+#include <QSlider>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
 
 
 class PlacementPreview
@@ -177,10 +179,10 @@ private:
 	bool mUseCollisionDetection;
 };
 
-class BosonUfoPlacementPreviewWidgetPrivate
+class BosonPlacementPreviewWidgetPrivate
 {
 public:
-	BosonUfoPlacementPreviewWidgetPrivate()
+	BosonPlacementPreviewWidgetPrivate()
 	{
 		mGameGLMatrices = 0;
 		mCanvas = 0;
@@ -195,56 +197,56 @@ public:
 	bool mShowPreview;
 };
 
-BosonUfoPlacementPreviewWidget::BosonUfoPlacementPreviewWidget()
-		: BoUfoCustomWidget()
+BosonPlacementPreviewWidget::BosonPlacementPreviewWidget(QWidget* parent)
+		: QWidget(parent)
 {
- setName("BosonUfoPlacementPreviewWidget");
- d = new BosonUfoPlacementPreviewWidgetPrivate;
+ setObjectName("BosonPlacementPreviewWidget");
+ d = new BosonPlacementPreviewWidgetPrivate;
  d->mShowPreview = false;
 }
 
-BosonUfoPlacementPreviewWidget::~BosonUfoPlacementPreviewWidget()
+BosonPlacementPreviewWidget::~BosonPlacementPreviewWidget()
 {
  quitGame();
  delete d;
 }
 
-void BosonUfoPlacementPreviewWidget::setGameGLMatrices(const BoGLMatrices* m)
+void BosonPlacementPreviewWidget::setGameGLMatrices(const BoGLMatrices* m)
 {
  d->mGameGLMatrices = m;
 }
 
-void BosonUfoPlacementPreviewWidget::setCanvas(BosonCanvas* canvas)
+void BosonPlacementPreviewWidget::setCanvas(BosonCanvas* canvas)
 {
  d->mCanvas = canvas;
 }
 
-const BosonCanvas* BosonUfoPlacementPreviewWidget::canvas() const
+const BosonCanvas* BosonPlacementPreviewWidget::canvas() const
 {
  return d->mCanvas;
 }
 
-void BosonUfoPlacementPreviewWidget::setCursorCanvasVectorPointer(const BoVector3Fixed* v)
+void BosonPlacementPreviewWidget::setCursorCanvasVectorPointer(const BoVector3Fixed* v)
 {
  d->mCursorCanvasVector = v;
 }
 
-const BoVector3Fixed& BosonUfoPlacementPreviewWidget::cursorCanvasVector() const
+const BoVector3Fixed& BosonPlacementPreviewWidget::cursorCanvasVector() const
 {
  return *d->mCursorCanvasVector;
 }
 
-void BosonUfoPlacementPreviewWidget::setLocalPlayerIO(PlayerIO* io)
+void BosonPlacementPreviewWidget::setLocalPlayerIO(PlayerIO* io)
 {
  d->mLocalPlayerIO = io;
 }
 
-PlayerIO* BosonUfoPlacementPreviewWidget::localPlayerIO() const
+PlayerIO* BosonPlacementPreviewWidget::localPlayerIO() const
 {
  return d->mLocalPlayerIO;
 }
 
-void BosonUfoPlacementPreviewWidget::slotLockAction(bool locked, int actionType)
+void BosonPlacementPreviewWidget::slotLockAction(bool locked, int actionType)
 {
  if (!locked) {
 	if (actionType != ActionInvalid) {
@@ -260,12 +262,12 @@ void BosonUfoPlacementPreviewWidget::slotLockAction(bool locked, int actionType)
  }
 }
 
-void BosonUfoPlacementPreviewWidget::quitGame()
+void BosonPlacementPreviewWidget::quitGame()
 {
  d->mPlacementPreview.clear();
 }
 
-void BosonUfoPlacementPreviewWidget::paintWidget()
+void BosonPlacementPreviewWidget::paintWidget()
 {
  PROFILE_METHOD;
  if (Bo3dTools::checkError()) {
@@ -304,7 +306,7 @@ void BosonUfoPlacementPreviewWidget::paintWidget()
  }
 }
 
-void BosonUfoPlacementPreviewWidget::renderPlacementPreview()
+void BosonPlacementPreviewWidget::renderPlacementPreview()
 {
  BO_CHECK_NULL_RET(localPlayerIO());
  BO_CHECK_NULL_RET(canvas());
@@ -412,7 +414,7 @@ void BosonUfoPlacementPreviewWidget::renderPlacementPreview()
  glPopAttrib();
 }
 
-void BosonUfoPlacementPreviewWidget::setPlacementPreviewData(const UnitProperties* prop, bool canPlace, bool freeMode, bool useCollisionDetection)
+void BosonPlacementPreviewWidget::setPlacementPreviewData(const UnitProperties* prop, bool canPlace, bool freeMode, bool useCollisionDetection)
 {
  d->mPlacementPreview.clear();
  if (!prop) {
@@ -446,7 +448,7 @@ void BosonUfoPlacementPreviewWidget::setPlacementPreviewData(const UnitPropertie
  d->mPlacementPreview.setUseCollisionDetection(useCollisionDetection);
 }
 
-void BosonUfoPlacementPreviewWidget::setPlacementCellPreviewData(unsigned int textureCount, unsigned char* alpha, bool canPlace)
+void BosonPlacementPreviewWidget::setPlacementCellPreviewData(unsigned int textureCount, unsigned char* alpha, bool canPlace)
 {
  // we clear anyway - the new texture will be set below
  d->mPlacementPreview.clear();
@@ -467,12 +469,12 @@ void BosonUfoPlacementPreviewWidget::setPlacementCellPreviewData(unsigned int te
  d->mPlacementPreview.setCanvasVector(cursorCanvasVector());
 }
 
-void BosonUfoPlacementPreviewWidget::slotSetPlacementPreviewData(const UnitProperties* prop, bool canPlace, bool freeMode, bool useCollisionDetection)
+void BosonPlacementPreviewWidget::slotSetPlacementPreviewData(const UnitProperties* prop, bool canPlace, bool freeMode, bool useCollisionDetection)
 {
  setPlacementPreviewData(prop, canPlace, freeMode, useCollisionDetection);
 }
 
-void BosonUfoPlacementPreviewWidget::slotSetPlacementCellPreviewData(unsigned int textureCount, unsigned char* alpha, bool canPlace)
+void BosonPlacementPreviewWidget::slotSetPlacementCellPreviewData(unsigned int textureCount, unsigned char* alpha, bool canPlace)
 {
  setPlacementCellPreviewData(textureCount, alpha, canPlace);
 }
@@ -481,10 +483,10 @@ void BosonUfoPlacementPreviewWidget::slotSetPlacementCellPreviewData(unsigned in
 
 
 
-class BosonUfoLineVisualizationWidgetPrivate
+class BosonLineVisualizationWidgetPrivate
 {
 public:
-	BosonUfoLineVisualizationWidgetPrivate()
+	BosonLineVisualizationWidgetPrivate()
 	{
 		mGameGLMatrices = 0;
 		mCanvas = 0;
@@ -494,11 +496,11 @@ public:
 	const BosonCanvas* mCanvas;
 };
 
-BosonUfoLineVisualizationWidget::BosonUfoLineVisualizationWidget()
-	: BoUfoCustomWidget()
+BosonLineVisualizationWidget::BosonLineVisualizationWidget(QWidget* parent)
+	: QWidget(parent)
 {
- setName("BosonUfoLineVisualizationWidget");
- d = new BosonUfoLineVisualizationWidgetPrivate();
+ setObjectName("BosonLineVisualizationWidget");
+ d = new BosonLineVisualizationWidgetPrivate();
 
  connect(BosonPathVisualization::pathVisualization(),
 		SIGNAL(signalAddLineVisualization( const Q3ValueList<BoVector3Fixed>&, const BoVector4Float&, bofixed, int, bofixed)),
@@ -506,27 +508,27 @@ BosonUfoLineVisualizationWidget::BosonUfoLineVisualizationWidget()
 		SLOT(slotAddLineVisualization(const Q3ValueList<BoVector3Fixed>&, const BoVector4Float&, bofixed, int, bofixed)));
 }
 
-BosonUfoLineVisualizationWidget::~BosonUfoLineVisualizationWidget()
+BosonLineVisualizationWidget::~BosonLineVisualizationWidget()
 {
  delete d;
 }
 
-void BosonUfoLineVisualizationWidget::setGameGLMatrices(const BoGLMatrices* m)
+void BosonLineVisualizationWidget::setGameGLMatrices(const BoGLMatrices* m)
 {
  d->mGameGLMatrices = m;
 }
 
-void BosonUfoLineVisualizationWidget::setCanvas(const BosonCanvas* canvas)
+void BosonLineVisualizationWidget::setCanvas(const BosonCanvas* canvas)
 {
  d->mCanvas = canvas;
 }
 
-const BosonCanvas* BosonUfoLineVisualizationWidget::canvas() const
+const BosonCanvas* BosonLineVisualizationWidget::canvas() const
 {
  return d->mCanvas;
 }
 
-void BosonUfoLineVisualizationWidget::paintWidget()
+void BosonLineVisualizationWidget::paintWidget()
 {
  PROFILE_METHOD;
  if (Bo3dTools::checkError()) {
@@ -572,12 +574,12 @@ void BosonUfoLineVisualizationWidget::paintWidget()
  }
 }
 
-void BosonUfoLineVisualizationWidget::addLineVisualization(BoLineVisualization v)
+void BosonLineVisualizationWidget::addLineVisualization(BoLineVisualization v)
 {
  d->mLineVisualizationList.append(v);
 }
 
-void BosonUfoLineVisualizationWidget::slotAddLineVisualization(const Q3ValueList<BoVector3Fixed>& points, const BoVector4Float& color, bofixed pointSize, int timeout, bofixed zOffset)
+void BosonLineVisualizationWidget::slotAddLineVisualization(const Q3ValueList<BoVector3Fixed>& points, const BoVector4Float& color, bofixed pointSize, int timeout, bofixed zOffset)
 {
  if (!canvas()) {
 	return;
@@ -594,12 +596,12 @@ void BosonUfoLineVisualizationWidget::slotAddLineVisualization(const Q3ValueList
  addLineVisualization(viz);
 }
 
-void BosonUfoLineVisualizationWidget::slotAdvance(unsigned int, bool)
+void BosonLineVisualizationWidget::slotAdvance(unsigned int, bool)
 {
  advanceLineVisualization();
 }
 
-void BosonUfoLineVisualizationWidget::advanceLineVisualization()
+void BosonLineVisualizationWidget::advanceLineVisualization()
 {
  Q3ValueList<BoLineVisualization>::iterator it;
  for (it = d->mLineVisualizationList.begin(); it != d->mLineVisualizationList.end(); ++it) {
@@ -614,10 +616,10 @@ void BosonUfoLineVisualizationWidget::advanceLineVisualization()
 
 
 
-class BosonUfoCursorWidgetPrivate
+class BosonCursorWidgetPrivate
 {
 public:
-	BosonUfoCursorWidgetPrivate()
+	BosonCursorWidgetPrivate()
 	{
 		mGameGLMatrices = 0;
 		mCursorCollection = 0;
@@ -629,38 +631,38 @@ public:
 	const QPoint* mCursorWidgetPos;
 };
 
-BosonUfoCursorWidget::BosonUfoCursorWidget()
-	: BoUfoCustomWidget()
+BosonCursorWidget::BosonCursorWidget(QWidget* parent)
+	: QWidget(parent)
 {
- setName("BosonUfoCursorWidget");
- d = new BosonUfoCursorWidgetPrivate();
+ setObjectName("BosonCursorWidget");
+ d = new BosonCursorWidgetPrivate();
  d->mCursorCollection = new BosonCursorCollection(this);
  connect(d->mCursorCollection, SIGNAL(signalSetWidgetCursor(BosonCursor*)),
 		this, SIGNAL(signalSetWidgetCursor(BosonCursor*)));
 }
 
-BosonUfoCursorWidget::~BosonUfoCursorWidget()
+BosonCursorWidget::~BosonCursorWidget()
 {
  delete d->mCursorCollection;
  delete d;
 }
 
-void BosonUfoCursorWidget::setGameGLMatrices(const BoGLMatrices* m)
+void BosonCursorWidget::setGameGLMatrices(const BoGLMatrices* m)
 {
  d->mGameGLMatrices = m;
 }
 
-void BosonUfoCursorWidget::setCursorWidgetPos(const QPoint* pos)
+void BosonCursorWidget::setCursorWidgetPos(const QPoint* pos)
 {
  d->mCursorWidgetPos = pos;
 }
 
-BosonCursor* BosonUfoCursorWidget::cursor() const
+BosonCursor* BosonCursorWidget::cursor() const
 {
  return d->mCursorCollection->cursor();
 }
 
-void BosonUfoCursorWidget::paintWidget()
+void BosonCursorWidget::paintWidget()
 {
  PROFILE_METHOD;
  BO_CHECK_NULL_RET(d->mCursorWidgetPos);
@@ -704,7 +706,7 @@ void BosonUfoCursorWidget::paintWidget()
  }
 }
 
-void BosonUfoCursorWidget::slotChangeCursor(int mode, const QString& cursorDir)
+void BosonCursorWidget::slotChangeCursor(int mode, const QString& cursorDir)
 {
  if (boGame) {
 	if (!boGame->gameMode()) {
@@ -723,10 +725,10 @@ void BosonUfoCursorWidget::slotChangeCursor(int mode, const QString& cursorDir)
 
 
 
-class BosonUfoSelectionRectWidgetPrivate
+class BosonSelectionRectWidgetPrivate
 {
 public:
-	BosonUfoSelectionRectWidgetPrivate()
+	BosonSelectionRectWidgetPrivate()
 	{
 		mGameGLMatrices = 0;
 	}
@@ -735,35 +737,35 @@ public:
 	QRect mSelectionRect;
 };
 
-BosonUfoSelectionRectWidget::BosonUfoSelectionRectWidget()
-	: BoUfoCustomWidget()
+BosonSelectionRectWidget::BosonSelectionRectWidget(QWidget* parent)
+	: QWidget(parent)
 {
- setName("BosonUfoSelectionRectWidget");
- d = new BosonUfoSelectionRectWidgetPrivate();
+ setObjectName("BosonSelectionRectWidget");
+ d = new BosonSelectionRectWidgetPrivate();
  d->mSelectionRectVisible = false;
 }
 
-BosonUfoSelectionRectWidget::~BosonUfoSelectionRectWidget()
+BosonSelectionRectWidget::~BosonSelectionRectWidget()
 {
  delete d;
 }
 
-void BosonUfoSelectionRectWidget::setGameGLMatrices(const BoGLMatrices* m)
+void BosonSelectionRectWidget::setGameGLMatrices(const BoGLMatrices* m)
 {
  d->mGameGLMatrices = m;
 }
 
-void BosonUfoSelectionRectWidget::slotSelectionRectVisible(bool v)
+void BosonSelectionRectWidget::slotSelectionRectVisible(bool v)
 {
  d->mSelectionRectVisible = v;
 }
 
-void BosonUfoSelectionRectWidget::slotSelectionRectChanged(const QRect& r)
+void BosonSelectionRectWidget::slotSelectionRectChanged(const QRect& r)
 {
  d->mSelectionRect = r;
 }
 
-void BosonUfoSelectionRectWidget::paintWidget()
+void BosonSelectionRectWidget::paintWidget()
 {
  PROFILE_METHOD;
  BO_CHECK_NULL_RET(d->mGameGLMatrices);
@@ -819,10 +821,10 @@ void BosonUfoSelectionRectWidget::paintWidget()
 
 
 // AB: note that this can be used for things other than FPS, too
-class FPSGraphDataUfo // Ufo suffix to avoid conflicts with the same class in bosongamewidgets.cpp
+class FPSGraphData
 {
 public:
-	FPSGraphDataUfo();
+	FPSGraphData();
 
 	void addData(float data);
 	float fullWidth() const;
@@ -835,7 +837,7 @@ public:
 	QColor mColor;
 };
 
-FPSGraphDataUfo::FPSGraphDataUfo()
+FPSGraphData::FPSGraphData()
 {
  mMin = 0.0f;
  mMax = 100.0f;
@@ -843,16 +845,16 @@ FPSGraphDataUfo::FPSGraphDataUfo()
  mColor = Qt::red;
 }
 
-void FPSGraphDataUfo::addData(float data)
+void FPSGraphData::addData(float data)
 {
  mData.append(data);
 }
 
-float FPSGraphDataUfo::fullWidth() const
+float FPSGraphData::fullWidth() const
 {
  return mData.count() * mDataWidth;
 }
-void FPSGraphDataUfo::ensureMaxWidth(float width)
+void FPSGraphData::ensureMaxWidth(float width)
 {
  while (fullWidth() > width) {
 	mData.pop_front();
@@ -860,10 +862,10 @@ void FPSGraphDataUfo::ensureMaxWidth(float width)
 }
 
 
-class BosonUfoFPSGraphWidgetPrivate
+class BosonFPSGraphWidgetPrivate
 {
 public:
-	BosonUfoFPSGraphWidgetPrivate()
+	BosonFPSGraphWidgetPrivate()
 	{
 		mGameGLMatrices = 0;
 		mGameFPSCounter = 0;
@@ -871,15 +873,15 @@ public:
 	const BoGLMatrices* mGameGLMatrices;
 	const BosonGameFPSCounter* mGameFPSCounter;
 
-	FPSGraphDataUfo mFPSData;
-	FPSGraphDataUfo mSkippedFPSData;
+	FPSGraphData mFPSData;
+	FPSGraphData mSkippedFPSData;
 };
 
-BosonUfoFPSGraphWidget::BosonUfoFPSGraphWidget()
-	: BoUfoCustomWidget()
+BosonFPSGraphWidget::BosonFPSGraphWidget(QWidget* parent)
+	: QWidget(parent)
 {
- setName("BosonUfoFPSGraphWidget");
- d = new BosonUfoFPSGraphWidgetPrivate();
+ setObjectName("BosonFPSGraphWidget");
+ d = new BosonFPSGraphWidgetPrivate();
  QTimer* timer = new QTimer(this);
  connect(timer, SIGNAL(timeout()),
 		this, SLOT(slotAddData()));
@@ -890,22 +892,22 @@ BosonUfoFPSGraphWidget::BosonUfoFPSGraphWidget()
  timer->start(100);
 }
 
-BosonUfoFPSGraphWidget::~BosonUfoFPSGraphWidget()
+BosonFPSGraphWidget::~BosonFPSGraphWidget()
 {
  delete d;
 }
 
-void BosonUfoFPSGraphWidget::setGameGLMatrices(const BoGLMatrices* m)
+void BosonFPSGraphWidget::setGameGLMatrices(const BoGLMatrices* m)
 {
  d->mGameGLMatrices = m;
 }
 
-void BosonUfoFPSGraphWidget::setGameFPSCounter(const BosonGameFPSCounter* c)
+void BosonFPSGraphWidget::setGameFPSCounter(const BosonGameFPSCounter* c)
 {
  d->mGameFPSCounter = c;
 }
 
-void BosonUfoFPSGraphWidget::paintWidget()
+void BosonFPSGraphWidget::paintWidget()
 {
  PROFILE_METHOD;
  BO_CHECK_NULL_RET(d->mGameGLMatrices);
@@ -949,7 +951,7 @@ void BosonUfoFPSGraphWidget::paintWidget()
  }
 }
 
-void BosonUfoFPSGraphWidget::paintFPS(const FPSGraphDataUfo& data)
+void BosonFPSGraphWidget::paintFPS(const FPSGraphData& data)
 {
  glColor3ub(data.mColor.red(), data.mColor.green(), data.mColor.blue());
 
@@ -969,7 +971,7 @@ void BosonUfoFPSGraphWidget::paintFPS(const FPSGraphDataUfo& data)
  // TODO: add a label describing this data
 }
 
-void BosonUfoFPSGraphWidget::slotAddData()
+void BosonFPSGraphWidget::slotAddData()
 {
  if (d->mGameFPSCounter) {
 	double skippedFps;
@@ -1013,16 +1015,16 @@ public:
 	double mLength;
 };
 
-class BosonUfoProfilingGraphWidgetPrivate
+class BosonProfilingGraphWidgetPrivate
 {
 public:
-	BosonUfoProfilingGraphWidgetPrivate()
+	BosonProfilingGraphWidgetPrivate()
 	{
 		mGameGLMatrices = 0;
 
 		mUpdateTimer = 0;
 
-		mLayeredPane = 0;
+		mLayeredWidget = 0;
 		mLabelsWidget = 0;
 		mEnableUpdates = 0;
 		mUpdateInterval = 0;
@@ -1035,78 +1037,69 @@ public:
 
 	QTimer* mUpdateTimer;
 
-	Q3ValueList<QColor> mAvailableColors;
+	QList<QColor> mAvailableColors;
 
-	BoUfoLayeredPane* mLayeredPane;
-	BoUfoWidget* mLabelsWidget;
-	Q3PtrList<BoUfoLabel> mLabels;
-	BoUfoCheckBox* mEnableUpdates;
-	BoUfoSlider* mUpdateInterval;
-	BoUfoLabel* mUpdateIntervalLabel;
-	BoUfoCheckBox* mOneLinePerType;
+	BoLayeredWidget* mLayeredWidget;
+	QWidget* mLabelsWidget;
+	QList<QLabel*> mLabels;
+	QCheckBox* mEnableUpdates;
+	QSlider* mUpdateInterval;
+	QLabel* mUpdateIntervalLabel;
+	QCheckBox* mOneLinePerType;
 };
 
-BosonUfoProfilingGraphWidget::BosonUfoProfilingGraphWidget()
-	: BoUfoCustomWidget()
+BosonProfilingGraphWidget::BosonProfilingGraphWidget(QWidget* parent)
+	: QWidget(parent)
 {
- setName("BosonUfoProfilingGraphWidget");
- d = new BosonUfoProfilingGraphWidgetPrivate();
+ setObjectName("BosonProfilingGraphWidget");
+ d = new BosonProfilingGraphWidgetPrivate();
  d->mUpdateTimer = new QTimer(this);
  connect(d->mUpdateTimer, SIGNAL(timeout()),
 		this, SLOT(slotUpdateData()));
  d->mUpdateTimer->start(100);
 
- setLayoutClass(BoUfoWidget::UFullLayout);
- d->mLayeredPane = new BoUfoLayeredPane();
- d->mLayeredPane->setLayoutClass(BoUfoWidget::UFullLayout);
- addWidget(d->mLayeredPane);
+ QVBoxLayout* topLayout = new QVBoxLayout(this);
+ d->mLayeredWidget = new BoLayeredWidget(this);
+ topLayout->addWidget(d->mLayeredWidget);
 
- d->mLabelsWidget = new BoUfoWidget();
- d->mLayeredPane->addWidget(d->mLabelsWidget);
- d->mLabelsWidget->setLayoutClass(BoUfoWidget::NoLayout); // we use setPos() for the labels.
+ d->mLabelsWidget = new QWidget(d->mLayeredWidget);
 
+ QWidget* control = new QWidget(d->mLayeredWidget);
+ QHBoxLayout* controlLayout = new QHBoxLayout(control);
+ controlLayout->addStretch(1);
 
- BoUfoWidget* control = new BoUfoWidget();
- d->mLayeredPane->addWidget(control);
- control->setLayoutClass(BoUfoWidget::UHBoxLayout);
- BoUfoWidget* stretch = new BoUfoWidget();
- stretch->setStretch(1);
- control->addWidget(stretch);
+ QVBoxLayout* vboxLayout = new QVBoxLayout(controlLayout);
+ vboxLayout->addSpacing(100);
 
- BoUfoVBox* vbox = new BoUfoVBox();
- control->addWidget(vbox);
- vbox->addSpacing(100);
-
- d->mEnableUpdates = new BoUfoCheckBox();
+ d->mEnableUpdates = new QCheckBox(control);
  d->mEnableUpdates->setText(i18n("Enable Updates"));
  d->mEnableUpdates->setChecked(true);
- d->mEnableUpdates->setForegroundColor(Qt::white);
- vbox->addWidget(d->mEnableUpdates);
+// d->mEnableUpdates->setForegroundColor(Qt::white);
+ vboxLayout->addWidget(d->mEnableUpdates);
 
- BoUfoHBox* hbox = new BoUfoHBox();
- vbox->addWidget(hbox);
- BoUfoLabel* intervalLabel = new BoUfoLabel(i18n("Update interval (ms): "));
- intervalLabel->setForegroundColor(Qt::white);
- hbox->addWidget(intervalLabel);
- d->mUpdateInterval = new BoUfoSlider();
- hbox->addWidget(d->mUpdateInterval);
- d->mUpdateIntervalLabel = new BoUfoLabel();
- d->mUpdateIntervalLabel->setForegroundColor(Qt::white);
- hbox->addWidget(d->mUpdateIntervalLabel);
+ QWidget* hbox = new QWidget(control);
+ vboxLayout->addWidget(hbox);
+ QHBoxLayout* hboxLayout = new QHBoxLayout(hbox);
+ QLabel* intervalLabel = new QLabel(i18n("Update interval (ms): "), hbox);
+// intervalLabel->setForegroundColor(Qt::white);
+ hboxLayout->addWidget(intervalLabel);
+ d->mUpdateInterval = new QSlider(hbox);
+ hboxLayout->addWidget(d->mUpdateInterval);
+ d->mUpdateIntervalLabel = new QLabel(hbox);
+// d->mUpdateIntervalLabel->setForegroundColor(Qt::white);
+ hboxLayout->addWidget(d->mUpdateIntervalLabel);
  connect(d->mUpdateInterval, SIGNAL(signalValueChanged(int)),
 		this, SLOT(slotSetUpdateInterval(int)));
  d->mUpdateInterval->setRange(20, 4000);
  d->mUpdateInterval->setValue(1000);
 
- d->mOneLinePerType = new BoUfoCheckBox();
+ d->mOneLinePerType = new QCheckBox(control);
  d->mOneLinePerType->setText(i18n("Display sum of elapsed time"));
  d->mOneLinePerType->setChecked(true);
- d->mOneLinePerType->setForegroundColor(Qt::white);
- vbox->addWidget(d->mOneLinePerType);
+// d->mOneLinePerType->setForegroundColor(Qt::white);
+ vboxLayout->addWidget(d->mOneLinePerType);
 
- stretch = new BoUfoWidget();
- stretch->setStretch(1);
- vbox->addWidget(stretch);
+ vboxLayout->addStretch(1);
 
 
 
@@ -1144,14 +1137,15 @@ BosonUfoProfilingGraphWidget::BosonUfoProfilingGraphWidget()
  d->mAvailableColors.append(QColor(255, 255, 255));
 }
 
-BosonUfoProfilingGraphWidget::~BosonUfoProfilingGraphWidget()
+BosonProfilingGraphWidget::~BosonProfilingGraphWidget()
 {
  d->mItems.setAutoDelete(true);
  d->mItems.clear();
  resetProfilingTypes();
  delete d;
 }
-void BosonUfoProfilingGraphWidget::resetProfilingTypes()
+
+void BosonProfilingGraphWidget::resetProfilingTypes()
 {
  // make sure no item still references one of the types
  d->mItems.setAutoDelete(true);
@@ -1163,17 +1157,17 @@ void BosonUfoProfilingGraphWidget::resetProfilingTypes()
  }
  d->mProfilingTypes.clear();
 
- for (Q3PtrListIterator<BoUfoLabel> it(d->mLabels); it.current(); ++it) {
-	it.current()->hide();
+ foreach (QLabel* label, d->mLabels) {
+	label->hide();
  }
 }
 
-void BosonUfoProfilingGraphWidget::setGameGLMatrices(const BoGLMatrices* m)
+void BosonProfilingGraphWidget::setGameGLMatrices(const BoGLMatrices* m)
 {
  d->mGameGLMatrices = m;
 }
 
-void BosonUfoProfilingGraphWidget::paintWidget()
+void BosonProfilingGraphWidget::paintWidget()
 {
  PROFILE_METHOD;
  BO_CHECK_NULL_RET(d->mGameGLMatrices);
@@ -1181,10 +1175,10 @@ void BosonUfoProfilingGraphWidget::paintWidget()
 	boError() << k_funcinfo << "GL error at the beginning of this method" << endl;
  }
  if (!boConfig->boolValue("debug_profiling_graph")) {
-	d->mLayeredPane->hide();
+	d->mLayeredWidget->hide();
 	return;
  }
- d->mLayeredPane->show();
+ d->mLayeredWidget->show();
 
  glMatrixMode(GL_PROJECTION);
  glPushMatrix();
@@ -1231,17 +1225,20 @@ void BosonUfoProfilingGraphWidget::paintWidget()
  glEnd();
 
 
- Q3PtrListIterator<BoUfoLabel> labelIt(d->mLabels);
+ int labelIndex = 0;
  QMap<QString, ProfilingGraphType*>::iterator typeIt = d->mProfilingTypes.begin();
  while (typeIt != d->mProfilingTypes.end()) {
-	// AB: warning: libufo uses a different coordinate system (y flipped)
-	// than we do! we must consider that here
+	if (labelIndex >= d->mLabels.count()) {
+		boError() << "oops: labelIndex out of range";
+		break;
+	}
 	int x = 100;
 	int y = height() - (*typeIt)->mY;
-	labelIt.current()->setPos(x, y);
-	labelIt.current()->setSize(labelIt.current()->preferredWidth(), labelIt.current()->preferredHeight());
-	++labelIt;
+	d->mLabels[labelIndex]->move(x, y);
+//	d->mLabels[labelIndex]->setSize(d->mLabels[labelIndex]->preferredWidth(), d->mLabels[labelIndex]->preferredHeight());
+	d->mLabels[labelIndex]->resize(d->mLabels[labelIndex]->sizeHint());
 	++typeIt;
+	labelIndex++;
  }
 
  glPopAttrib();
@@ -1255,10 +1252,10 @@ void BosonUfoProfilingGraphWidget::paintWidget()
  }
 }
 
-void BosonUfoProfilingGraphWidget::slotUpdateData()
+void BosonProfilingGraphWidget::slotUpdateData()
 {
  BO_CHECK_NULL_RET(d->mGameGLMatrices);
- if (!d->mEnableUpdates->checked()) {
+ if (!d->mEnableUpdates->isChecked()) {
 	return;
  }
  PROFILE_METHOD
@@ -1278,7 +1275,7 @@ void BosonUfoProfilingGraphWidget::slotUpdateData()
  Q3PtrList<const BosonProfilingItem> itemList;
  boProfiling->getItemsSinceSorted(&itemList, since);
 
- bool oneLinePerType = d->mOneLinePerType->checked();
+ bool oneLinePerType = d->mOneLinePerType->isChecked();
 
  QMap<ProfilingGraphType*, unsigned long int> elapsedSumOfType;
  unsigned long int displayTime = compareTimes(since, now);
@@ -1327,44 +1324,51 @@ void BosonUfoProfilingGraphWidget::slotUpdateData()
  }
 
  ensureLabels(d->mProfilingTypes.count());
- Q3PtrListIterator<BoUfoLabel> labelIt(d->mLabels);
- Q3ValueList<QColor>::iterator colorIt = d->mAvailableColors.begin();
+ int labelIndex = 0;
+ int colorIndex = 0;
  QMap<QString, ProfilingGraphType*>::iterator typeIt = d->mProfilingTypes.begin();
  while (typeIt != d->mProfilingTypes.end()) {
-//	(*typeIt)->mColor = *colorIt;
+	if (labelIndex >= d->mLabels.count()) {
+		boError() << "oops: labelIndex out of range";
+		break;
+	}
+	if (colorIndex >= d->mAvailableColors.count()) {
+		boError() << "oops: colorIndex out of range";
+		break;
+	}
+//	(*typeIt)->mColor = d->mAvailableColors[colorIndex];
 	(*typeIt)->mColor = Qt::white;
 
-	labelIt.current()->setText((*typeIt)->mName);
-	labelIt.current()->show();
+	d->mLabels[labelIndex]->setText((*typeIt)->mName);
+	d->mLabels[labelIndex]->show();
 
 	// AB: we use the last color for all remaining types
-	++colorIt;
-	if (colorIt == d->mAvailableColors.end()) {
-		--colorIt;
+	colorIndex++;
+	if (colorIndex == d->mAvailableColors.count()) {
+		colorIndex--;
 	}
 
 	++typeIt;
-	++labelIt;
+	labelIndex++;
  }
- while (labelIt.current()) {
-	labelIt.current()->hide();
-	++labelIt;
+ while (labelIndex < d->mLabels.count()) {
+	d->mLabels[labelIndex]->hide();
+	labelIndex++;
  }
 }
 
-void BosonUfoProfilingGraphWidget::ensureLabels(unsigned int count)
+void BosonProfilingGraphWidget::ensureLabels(int count)
 {
  while (d->mLabels.count() < count) {
-	BoUfoLabel* label = new BoUfoLabel();
+	QLabel* label = new QLabel(d->mLabelsWidget);
 	d->mLabels.append(label);
-	d->mLabelsWidget->addWidget(label);
-	label->setForegroundColor(Qt::white);
+//	label->setForegroundColor(Qt::white);
 
 	label->hide();
  }
 }
 
-void BosonUfoProfilingGraphWidget::slotSetUpdateInterval(int interval)
+void BosonProfilingGraphWidget::slotSetUpdateInterval(int interval)
 {
  d->mUpdateIntervalLabel->setText(QString::number(interval));
  if (interval < 0) {

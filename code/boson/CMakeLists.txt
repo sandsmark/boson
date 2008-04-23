@@ -199,6 +199,7 @@ set(gameview_SRCS
 	gameview/bosonufocanvaswidget.cpp
 	gameview/bosoncanvaswidget.cpp
 	gameview/bosonufogamewidgets.cpp
+	gameview/bosongamewidgets.cpp
 	gameview/bosongameview.cpp
 	gameview/bosonqtgameview.cpp
 	gameview/bosongamevieweventlistener.cpp
