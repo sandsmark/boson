@@ -104,7 +104,7 @@ BoQtStartupWidget::BoQtStartupWidget(QWidget* parent) : QWidget(parent)
 void BoQtStartupWidget::init()
 {
  d = new BoQtStartupWidgetPrivate;
- d->mWidgetStack = new QStackedWidget();
+ d->mWidgetStack = new QStackedWidget(this);
 
  connect(d->mWidgetStack, SIGNAL(currentChanged(int)),
 		this, SLOT(slotVisibleWidgetChanged(int)));
