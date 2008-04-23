@@ -65,10 +65,10 @@ static QString planeDebugString(const BoPlane& plane)
  return QString("((%1,%2,%3),%4)").arg(plane.normal().x()).arg(plane.normal().y()).arg(plane.normal().z()).arg(plane.distanceFromOrigin());
 }
 
-class CPUTimes
+class CPUTimesUfo // "Ufo" suffix to avoid conflicts with CPUTimes in bosongamegui.cpp
 {
 public:
-	CPUTimes()
+	CPUTimesUfo()
 	{
 		mUTime = 0;
 		mSTime = 0;
@@ -77,7 +77,7 @@ public:
 	}
 	bool update();
 
-	CPUTimes& operator=(const CPUTimes& t)
+	CPUTimesUfo& operator=(const CPUTimesUfo& t)
 	{
 		mUpdated = t.mUpdated;
 		mUTime = t.mUTime;
@@ -101,39 +101,39 @@ public:
 		}
 		return ms;
 	}
-	unsigned int msecsSince(const CPUTimes& old) const
+	unsigned int msecsSince(const CPUTimesUfo& old) const
 	{
 		return msecsSince(old.mUpdated);
 	}
-	unsigned long int dutime(const CPUTimes& old) const
+	unsigned long int dutime(const CPUTimesUfo& old) const
 	{
 		if (mUTime < old.mUTime) {
 			return 0;
 		}
 		return mUTime - old.mUTime;
 	}
-	unsigned long int dstime(const CPUTimes& old) const
+	unsigned long int dstime(const CPUTimesUfo& old) const
 	{
 		if (mSTime < old.mSTime) {
 			return 0;
 		}
 		return mSTime - old.mSTime;
 	}
-	unsigned long int dcutime(const CPUTimes& old) const
+	unsigned long int dcutime(const CPUTimesUfo& old) const
 	{
 		if (mCUTime < old.mCUTime) {
 			return 0;
 		}
 		return mCUTime - old.mCUTime;
 	}
-	unsigned long int dcstime(const CPUTimes& old) const
+	unsigned long int dcstime(const CPUTimesUfo& old) const
 	{
 		if (mCSTime < old.mCSTime) {
 			return 0;
 		}
 		return mCSTime - old.mCSTime;
 	}
-	float utimePercent(const CPUTimes& old) const
+	float utimePercent(const CPUTimesUfo& old) const
 	{
 		int ms = msecsSince(old);
 		if (ms == 0) {
@@ -144,7 +144,7 @@ public:
 		float percent = (dms * 100.0f) / ((float)ms);
 		return percent;
 	}
-	float stimePercent(const CPUTimes& old) const
+	float stimePercent(const CPUTimesUfo& old) const
 	{
 		int ms = msecsSince(old);
 		if (ms == 0) {
@@ -155,7 +155,7 @@ public:
 		float percent = (dms * 100.0f) / ((float)ms);
 		return percent;
 	}
-	float cutimePercent(const CPUTimes& old) const
+	float cutimePercent(const CPUTimesUfo& old) const
 	{
 		int ms = msecsSince(old);
 		if (ms == 0) {
@@ -166,7 +166,7 @@ public:
 		float percent = (dms * 100.0f) / ((float)ms);
 		return percent;
 	}
-	float cstimePercent(const CPUTimes& old) const
+	float cstimePercent(const CPUTimesUfo& old) const
 	{
 		int ms = msecsSince(old);
 		if (ms == 0) {
@@ -177,7 +177,7 @@ public:
 		float percent = (dms * 100.0f) / ((float)ms);
 		return percent;
 	}
-	float allTimePercent(const CPUTimes& old) const
+	float allTimePercent(const CPUTimesUfo& old) const
 	{
 		int ms = msecsSince(old);
 		if (ms == 0) {
@@ -200,10 +200,10 @@ private:
 	long int mCSTime;
 };
 
-bool CPUTimes::update()
+bool CPUTimesUfo::update()
 {
  BoCurrentInfo info;
- CPUTimes times;
+ CPUTimesUfo times;
  if (!info.cpuTime(&mUTime, &mSTime, &mCUTime, &mCSTime)) {
 	mUpdated = QTime::currentTime();
 	return false;
@@ -270,8 +270,8 @@ public:
 	const GLint* mViewport;
 	PlayerIO* mLocalPlayerIO;
 	BosonGameFPSCounter* mFPSCounter;
-	CPUTimes mCPUTimes;
-	CPUTimes mCPUTimes2;
+	CPUTimesUfo mCPUTimes;
+	CPUTimesUfo mCPUTimes2;
 
 	// pointers to widgets in the BosonUfoGameGUIHelper
 	BoUfoHBox* mResourcesBox;
@@ -844,7 +844,7 @@ void BosonUfoGameGUI::updateUfoLabelCPUUsage()
 	return;
  }
 
- CPUTimes times;
+ CPUTimesUfo times;
  if (!times.update()) {
 	d->mCPUUsage->setText("CPU Usage: cannot read data on your system");
 	return;

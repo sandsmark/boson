@@ -54,13 +54,13 @@
 #include "../bogroundrenderermanager.h"
 #include "../modelrendering/bomeshrenderermanager.h"
 #include "../bolight.h"
-#include "minimap/bosonufominimap.h"
+#include "minimap/bosonminimap.h"
 #include "../info/boinfo.h"
 #include "../speciesdata.h"
 #include "../bowaterrenderer.h"
 #include "../botexture.h"
 #include "../boufo/boufoaction.h"
-#include "bosonufogamegui.h"
+#include "bosongamegui.h"
 #include "bosonlocalplayerinput.h"
 #include "../gameengine/bosonplayfield.h"
 #include "../bosondata.h"
@@ -736,7 +736,7 @@ public:
 		mLayeredPane = 0;
 		mLayeredWidget = 0;
 		mCanvasWidget = 0;
-		mUfoGameGUI = 0;
+		mGameGUI = 0;
 		mToolTipLabel = 0;
 		mUfoCursorWidget = 0;
 		mUfoSelectionRectWidget = 0;
@@ -777,7 +777,7 @@ public:
 	BosonCanvasWidget* mCanvasWidget;
 	BosonPlacementPreviewWidget* mPlacementPreviewWidget;
 	BosonLineVisualizationWidget* mLineVisualizationWidget;
-	BosonUfoGameGUI* mUfoGameGUI;
+	BosonGameGUI* mGameGUI;
 	BoUfoLabel* mToolTipLabel;
 	BosonUfoCursorWidget* mUfoCursorWidget;
 	BosonUfoSelectionRectWidget* mUfoSelectionRectWidget;
@@ -787,7 +787,7 @@ public:
 	BosonGameFPSCounter* mFPSCounter;
 	BoUfoActionCollection* mActionCollection;
 	BoGLToolTip* mToolTips;
-	BosonUfoMiniMap* mGLMiniMap;
+	BosonMiniMap* mGLMiniMap;
 	PlayerIO* mLocalPlayerIO;
 	BosonQtGameViewScriptConnector* mScriptConnector;
 	SelectionRect* mSelectionRect;
@@ -1125,7 +1125,7 @@ void BosonQtGameView::updateCursorCanvasVector(const QPoint& cursorGameViewPos)
 void BosonQtGameView::setGameFPSCounter(BosonGameFPSCounter* counter)
 {
  d->mFPSCounter = counter;
- d->mUfoGameGUI->setGameFPSCounter(gameFPSCounter());
+ d->mGameGUI->setGameFPSCounter(gameFPSCounter());
  d->mUfoFPSGraphWidget->setGameFPSCounter(gameFPSCounter());
 }
 
@@ -1315,6 +1315,17 @@ void BosonQtGameView::initGUI()
  d->mLineVisualizationWidget->setGameGLMatrices(d->mGameGLMatrices);
  d->mLineVisualizationWidget->setCanvas(canvas());
 
+ d->mGameGUI = new BosonGameGUI(d->mModelviewMatrix, d->mProjectionMatrix, d->mViewFrustum, d->mViewport, d->mLayeredWidget);
+ d->mGameGUI->setCursorWidgetPos(d->mCursorPos.gameViewPosPointer());
+ d->mGameGUI->setCursorCanvasVector(d->mCursorPos.canvasVectorPointer());
+ d->mGameGUI->setCursorRootPos(d->mCursorPos.rootPanePosPointer());
+ d->mGameGUI->setSelection(selection());
+ d->mGameGUI->setCanvas(canvas());
+ d->mGameGUI->setCamera(camera());
+ d->mGLMiniMap = d->mGameGUI->miniMapWidget();
+ connect(this, SIGNAL(signalSelectionChanged(BoSelection*)),
+		d->mGameGUI, SIGNAL(signalSelectionChanged(BoSelection*)));
+
 }
 
 void BosonQtGameView::initUfoGUI()
@@ -1350,7 +1361,6 @@ void BosonQtGameView::initUfoGUI()
  d->mUfoLineVisualizationWidget = new BosonUfoLineVisualizationWidget();
  d->mUfoLineVisualizationWidget->setGameGLMatrices(d->mGameGLMatrices);
  d->mUfoLineVisualizationWidget->setCanvas(canvas());
-#endif
 
  d->mUfoGameGUI = new BosonUfoGameGUI(d->mModelviewMatrix, d->mProjectionMatrix, d->mViewFrustum, d->mViewport);
  d->mUfoGameGUI->setCursorWidgetPos(d->mCursorPos.gameViewPosPointer());
@@ -1362,6 +1372,7 @@ void BosonQtGameView::initUfoGUI()
  d->mGLMiniMap = d->mUfoGameGUI->miniMapWidget();
  connect(this, SIGNAL(signalSelectionChanged(BoSelection*)),
 		d->mUfoGameGUI, SIGNAL(signalSelectionChanged(BoSelection*)));
+#endif
 
 #if !QT_PORT
  d->mToolTipLabel = new BoUfoLabel();
@@ -1398,8 +1409,8 @@ void BosonQtGameView::initUfoGUI()
  d->mLayeredPane->addWidget(d->mUfoCanvasWidget);
  d->mLayeredPane->addWidget(d->mUfoPlacementPreviewWidget);
  d->mLayeredPane->addWidget(d->mUfoLineVisualizationWidget);
-#endif
  d->mLayeredPane->addWidget(d->mUfoGameGUI);
+#endif
 #if !QT_PORT
  d->mLayeredPane->addWidget(d->mToolTipLabel);
 #endif
@@ -1437,7 +1448,7 @@ void BosonQtGameView::setCanvas(BosonCanvas* canvas)
 	d->mInput->setCanvas(mCanvas);
  }
  d->mLineVisualizationWidget->setCanvas(mCanvas);
- d->mUfoGameGUI->setCanvas(mCanvas);
+ d->mGameGUI->setCanvas(mCanvas);
  d->mCanvasWidget->setCanvas(mCanvas);
  d->mPlacementPreviewWidget->setCanvas(mCanvas);
  resetGameViewPlugin(); // setCanvas()
@@ -1488,7 +1499,7 @@ void BosonQtGameView::setCanvas(BosonCanvas* canvas)
  }
 
  if (!boGame->gameMode()) { // AB: is this valid at this point?
-	d->mUfoGameGUI->setGroundTheme(mCanvas->map()->groundTheme());
+	d->mGameGUI->setGroundTheme(mCanvas->map()->groundTheme());
  }
 
 }
@@ -1504,12 +1515,12 @@ void BosonQtGameView::bosonObjectCreated(Boson* boson)
  connect(boson, SIGNAL(signalGameOver()),
 		this, SLOT(slotGameOver()));
 
- d->mUfoGameGUI->bosonObjectCreated(boson);
+ d->mGameGUI->bosonObjectCreated(boson);
 }
 
 void BosonQtGameView::bosonObjectAboutToBeDestroyed(Boson* boson)
 {
- d->mUfoGameGUI->bosonObjectAboutToBeDestroyed(boson);
+ d->mGameGUI->bosonObjectAboutToBeDestroyed(boson);
 }
 
 
@@ -1583,7 +1594,7 @@ void BosonQtGameView::setLocalPlayerIO(PlayerIO* io)
  }
 
  boDebug() << "local player: " << localPlayerIO();
- d->mUfoGameGUI->setLocalPlayerIO(localPlayerIO());
+ d->mGameGUI->setLocalPlayerIO(localPlayerIO());
  d->mCanvasWidget->setLocalPlayerIO(localPlayerIO());
  d->mPlacementPreviewWidget->setLocalPlayerIO(localPlayerIO());
  resetGameViewPlugin(); // setLocalPlayerIO()
@@ -1787,22 +1798,22 @@ void BosonQtGameView::resetGameViewPlugin(bool gameMode)
 
 void BosonQtGameView::addChatMessage(const QString& message)
 {
- d->mUfoGameGUI->addChatMessage(message);
+ d->mGameGUI->addChatMessage(message);
 }
 
 void BosonQtGameView::slotEditorShowPlaceFacilities()
 {
- d->mUfoGameGUI->slotShowPlaceFacilities(localPlayerIO());
+ d->mGameGUI->slotShowPlaceFacilities(localPlayerIO());
 }
 
 void BosonQtGameView::slotEditorShowPlaceMobiles()
 {
- d->mUfoGameGUI->slotShowPlaceMobiles(localPlayerIO());
+ d->mGameGUI->slotShowPlaceMobiles(localPlayerIO());
 }
 
 void BosonQtGameView::slotEditorShowPlaceGround()
 {
- d->mUfoGameGUI->slotShowPlaceGround();
+ d->mGameGUI->slotShowPlaceGround();
 }
 
 void BosonQtGameView::slotEditorDeleteSelectedUnits()
@@ -1864,7 +1875,7 @@ void BosonQtGameView::resetGameMode()
  delete d->mInput;
  d->mInput = 0;
 
- d->mUfoGameGUI->setGameMode(true);
+ d->mGameGUI->setGameMode(true);
  resetGameViewPlugin(true);
 
  if (localPlayerIO()) {
@@ -1881,7 +1892,7 @@ void BosonQtGameView::resetGameMode()
 
 void BosonQtGameView::setGameMode(bool mode)
 {
- BO_CHECK_NULL_RET(actionCollection());
+ //BO_CHECK_NULL_RET(actionCollection());
  resetGameMode();
  d->mGameMode = mode;
  if (d->mInput) {
@@ -1895,7 +1906,7 @@ void BosonQtGameView::setGameMode(bool mode)
 	setDisplayInput(new EditorViewInput());
  }
  setInputInitialized(true);
- d->mUfoGameGUI->setGameMode(mode);
+ d->mGameGUI->setGameMode(mode);
  resetGameViewPlugin(mode);
 
  slotAddMenuInput();
@@ -2156,9 +2167,9 @@ void BosonQtGameView::setDisplayInput(BosonGameViewInputBase* input)
  d->mInput->setLocalPlayerIO(localPlayerIO());
  d->mInput->setCursorCanvasVector(d->mCursorPos.canvasVectorPointer());
 
- connect(d->mUfoGameGUI, SIGNAL(signalPlaceGround(unsigned int, unsigned char*)),
+ connect(d->mGameGUI, SIGNAL(signalPlaceGround(unsigned int, unsigned char*)),
 		input, SLOT(slotPlaceGround(unsigned int, unsigned char*)));
- connect(d->mUfoGameGUI, SIGNAL(signalPlaceUnit(unsigned int, Player*)),
+ connect(d->mGameGUI, SIGNAL(signalPlaceUnit(unsigned int, Player*)),
 		input, SLOT(slotPlaceUnit(unsigned int, Player*)));
 
  connect(input, SIGNAL(signalSetPlacementPreviewData(const UnitProperties*, bool, bool, bool)),
@@ -2522,15 +2533,7 @@ void BosonQtGameView::paint()
  // widget, as we would expect in OpenGL. the menubar is "cut off", we do not
  // have to take it into account here.
  glPushAttrib(GL_VIEWPORT_BIT);
-#if !QT_PORT
- QRect rect = widgetViewportRect();
- // TODO: It'd be sufficient to just set d->mViewport
- setViewport(rect.x(), rect.y(), rect.width(), rect.height());
-#else
-#warning TODO: viewport
- boDebug() << "setting viewport: " << x() << y() << width() << height();
  setViewport(x(), y(), width(), height());// AB: FIXME: x(), y() must be in GLOBAL coordinates!
-#endif
  glPopAttrib(); // normal ufo widgets dont need/like our viewport
 
  // apply the camera to the scene, if necessary. we do not need to keep the
@@ -2549,7 +2552,7 @@ void BosonQtGameView::paint()
 
  glPopMatrix();
 
- d->mUfoGameGUI->updateUfoLabels();
+ d->mGameGUI->updateLabels();
  if (d->mGameViewPlugin) {
 	d->mGameViewPlugin->updateBeforePaint();
  }
@@ -2610,15 +2613,7 @@ void BosonQtGameView::paintEvent(QPaintEvent*)
  // widget, as we would expect in OpenGL. the menubar is "cut off", we do not
  // have to take it into account here.
  glPushAttrib(GL_VIEWPORT_BIT);
-#if !QT_PORT
- QRect rect = widgetViewportRect();
- // TODO: It'd be sufficient to just set d->mViewport
- setViewport(rect.x(), rect.y(), rect.width(), rect.height());
-#else
-#warning TODO: viewport
- boDebug() << "setting viewport: " << x() << y() << width() << height();
  setViewport(x(), y(), width(), height());// AB: FIXME: x(), y() must be in GLOBAL coordinates!
-#endif
  glPopAttrib(); // normal ufo widgets dont need/like our viewport
 
  // apply the camera to the scene, if necessary. we do not need to keep the
@@ -2637,7 +2632,7 @@ void BosonQtGameView::paintEvent(QPaintEvent*)
 
  glPopMatrix();
 
- d->mUfoGameGUI->updateUfoLabels();
+ d->mGameGUI->updateLabels();
  if (d->mGameViewPlugin) {
 	d->mGameViewPlugin->updateBeforePaint();
  }
