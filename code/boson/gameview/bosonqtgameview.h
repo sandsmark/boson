@@ -563,7 +563,6 @@ public:
 	void advanceEffects(int ticks);
 
 	virtual void paint();
-	virtual void paintWidget();
 
 public slots:
 	/**

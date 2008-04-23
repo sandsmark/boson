@@ -74,12 +74,13 @@ public:
 
 	void setPreview(const QImage& image);
 
-	virtual void paintWidget();
-
 protected slots:
 	void slotWidgetResized();
 	void slotMouseEvent(QMouseEvent* e);
 	void slotWheelEvent(QWheelEvent* e);
+
+protected:
+	virtual void paintEvent(QPaintEvent*);
 
 private:
 	BoMapPreviewDisplayPrivate* d;

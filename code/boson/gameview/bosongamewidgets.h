@@ -52,8 +52,6 @@ public:
 	void setLocalPlayerIO(PlayerIO* io);
 	PlayerIO* localPlayerIO() const;
 
-	virtual void paintWidget();
-
 	void quitGame();
 
 	/**
@@ -78,6 +76,7 @@ public slots:
 
 protected:
 	void renderPlacementPreview();
+	virtual void paintEvent(QPaintEvent* e);
 
 private:
 	BosonPlacementPreviewWidgetPrivate* d;
@@ -115,8 +114,6 @@ public:
 	void setCanvas(const BosonCanvas* mCanvas);
 	const BosonCanvas* canvas() const;
 
-	virtual void paintWidget();
-
 public slots:
 	void slotAdvance(unsigned int advanceCallsCount, bool advanceFlag);
 
@@ -126,6 +123,7 @@ protected slots:
 protected:
 	void advanceLineVisualization();
 	void addLineVisualization(BoLineVisualization v);
+	virtual void paintEvent(QPaintEvent* e);
 
 private:
 	BosonLineVisualizationWidgetPrivate* d;
@@ -143,8 +141,6 @@ class BosonCursorWidget : public QWidget
 public:
 	BosonCursorWidget(QWidget* parent);
 	virtual ~BosonCursorWidget();
-
-	virtual void paintWidget();
 
 	void setGameGLMatrices(const BoGLMatrices*);
 	void setCursorWidgetPos(const QPoint* pos);
@@ -167,6 +163,9 @@ signals:
 	 **/
 	void signalSetCursor(BosonCursor* cursor);
 
+protected:
+	virtual void paintEvent(QPaintEvent* e);
+
 private:
 	BosonCursorWidgetPrivate* d;
 };
@@ -184,8 +183,6 @@ public:
 	BosonSelectionRectWidget(QWidget* parent);
 	virtual ~BosonSelectionRectWidget();
 
-	virtual void paintWidget();
-
 	void setGameGLMatrices(const BoGLMatrices*);
 	void setCanvas(BosonCanvas* mCanvas);
 	BosonCanvas* canvas() const;
@@ -194,6 +191,8 @@ public slots:
 	void slotSelectionRectVisible(bool visible);
 	void slotSelectionRectChanged(const QRect& rect);
 
+protected:
+	virtual void paintEvent(QPaintEvent* e);
 
 private:
 	BosonSelectionRectWidgetPrivate* d;
@@ -218,13 +217,12 @@ public:
 	BosonFPSGraphWidget(QWidget* parent);
 	~BosonFPSGraphWidget();
 
-	virtual void paintWidget();
-
 	void setGameGLMatrices(const BoGLMatrices*);
 	void setGameFPSCounter(const BosonGameFPSCounter* c);
 
 protected:
 	void paintFPS(const FPSGraphData& data);
+	virtual void paintEvent(QPaintEvent* e);
 
 protected slots:
 	void slotAddData();
@@ -245,8 +243,6 @@ public:
 	BosonProfilingGraphWidget(QWidget* parent);
 	~BosonProfilingGraphWidget();
 
-	virtual void paintWidget();
-
 	void setGameGLMatrices(const BoGLMatrices*);
 
 protected slots:
@@ -256,6 +252,7 @@ protected slots:
 protected:
 	void resetProfilingTypes();
 	void ensureLabels(int count);
+	virtual void paintEvent(QPaintEvent* e);
 
 private:
 	BosonProfilingGraphWidgetPrivate* d;

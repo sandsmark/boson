@@ -98,7 +98,7 @@ void BoMapPreviewDisplay::setPreview(const QImage& image)
  d->mViewport->setDataSize(d->mPreview.width(), d->mPreview.height());
 }
 
-void BoMapPreviewDisplay::paintWidget()
+void BoMapPreviewDisplay::paintEvent(QPaintEvent*)
 {
  if (width() <= 0 || height() <= 0) {
 	return;
