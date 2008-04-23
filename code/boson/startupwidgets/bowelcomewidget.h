@@ -29,6 +29,14 @@ class BoWelcomeWidget : public QWidget, Ui::WelcomeWidget
 public:
 	BoWelcomeWidget(QWidget* parent = 0);
 	~BoWelcomeWidget();
+
+signals:
+	void signalPreferences();
+	void signalLoadGame();
+	void signalNewSPGame();
+	void signalNewMPGame();
+	void signalStartEditor();
+	void signalQuit();
 };
 
 #endif
