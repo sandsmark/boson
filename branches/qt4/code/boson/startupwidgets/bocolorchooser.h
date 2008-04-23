@@ -1,0 +1,82 @@
+/*
+    This file is part of the Boson game
+    Copyright (C) 2005-2008 Andreas Beckermann (b_mann@gmx.de)
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+*/
+
+#ifndef BOCOLORCHOOSER_H
+#define BOCOLORCHOOSER_H
+
+#include "../boufo/boufo.h"
+#include <QMouseEvent>
+#include <Q3ValueList>
+#include <QWidget>
+
+class QColor;
+template<class T> class Q3ValueVector;
+template<class T> class Q3ValueList;
+
+class BoColorChooserPrivate;
+class BoColorChooser : public QWidget
+{
+	Q_OBJECT
+public:
+	BoColorChooser(QWidget* parent = 0);
+	~BoColorChooser();
+
+	void showButtons(int count);
+	unsigned int buttonCount() const;
+
+	/**
+	 * Note that this does not influence whether a button is taken!
+	 * The taken flag applies to a button, not to a color.
+	 **/
+	void setColors(const Q3ValueVector<QColor>& colors);
+	void setColors(const Q3ValueList<QColor>& colors);
+
+	void setTaken(int index, bool taken);
+	/**
+	 * @overload
+	 **/
+	void setTaken(const QColor& color, bool taken);
+	bool isTaken(int index) const;
+	void setAllTaken(bool taken);
+
+	int indexOfColor(const QColor&) const;
+	QColor colorOfIndex(int i) const;
+
+	void highlightColor(int i);
+	void highlightColor(const QColor&);
+	void unhighlightColor(int i);
+	void unhighlightColor(const QColor&);
+
+signals:
+	void signalColorSelected(int index);
+	void signalColorSelected(const QColor& color);
+
+protected:
+	void applyColors();
+
+protected slots:
+	void slotButtonClicked(int i);
+	void slotMouseButtonReleased(QMouseEvent* e);
+
+private:
+	BoColorChooserPrivate* d;
+};
+
+#endif
+

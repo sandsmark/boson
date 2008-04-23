@@ -1,0 +1,284 @@
+<ui version="4.0" >
+ <class>NewGameWidget</class>
+ <widget class="QWidget" name="Form" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>793</width>
+    <height>895</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" >
+   <item>
+    <layout class="QHBoxLayout" >
+     <item>
+      <widget class="QGroupBox" name="groupBox" >
+       <property name="title" >
+        <string>Choose Map</string>
+       </property>
+       <layout class="QHBoxLayout" >
+        <item>
+         <layout class="QVBoxLayout" >
+          <item>
+           <layout class="QVBoxLayout" >
+            <item>
+             <widget class="QLabel" name="label_2" >
+              <property name="text" >
+               <string>Available campaigns:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QListWidget" name="mSelectCampaign" />
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" >
+            <item>
+             <widget class="QLabel" name="label" >
+              <property name="text" >
+               <string>Available missions:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QListWidget" name="mSelectMap" />
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" >
+          <item>
+           <widget class="QWidget" native="1" name="mMapBox" >
+            <layout class="QVBoxLayout" >
+             <item>
+              <layout class="QHBoxLayout" >
+               <item>
+                <widget class="QLabel" name="label_3" >
+                 <property name="text" >
+                  <string>Battlefield dimensions:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="mMapSize" >
+                 <property name="text" >
+                  <string>(map size)</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <item>
+                <widget class="QLabel" name="label_4" >
+                 <property name="text" >
+                  <string>Possible warlords:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="mMapPlayers" >
+                 <property name="text" >
+                  <string>(map players)</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" >
+               <item>
+                <widget class="QLabel" name="label_5" >
+                 <property name="text" >
+                  <string>Mission Overview:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QTextEdit" name="mMapDescription" >
+                 <property name="enabled" >
+                  <bool>false</bool>
+                 </property>
+                 <property name="sizePolicy" >
+                  <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="acceptDrops" >
+                  <bool>false</bool>
+                 </property>
+                 <property name="readOnly" >
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" native="1" name="mMapPreviewContainer" >
+            <property name="sizePolicy" >
+             <sizepolicy vsizetype="MinimumExpanding" hsizetype="Preferred" >
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" >
+       <item>
+        <widget class="QGroupBox" name="mPlayerOptionsBox" >
+         <property name="title" >
+          <string>Player Options</string>
+         </property>
+         <layout class="QVBoxLayout" >
+          <item>
+           <layout class="QHBoxLayout" >
+            <item>
+             <widget class="QLabel" name="label_6" >
+              <property name="text" >
+               <string>Name</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="mPlayerName" />
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" >
+            <item>
+             <widget class="QLabel" name="label_7" >
+              <property name="text" >
+               <string>Color</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QWidget" native="1" name="mPlayerColorContainer" />
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" >
+            <item>
+             <widget class="QLabel" name="label_8" >
+              <property name="text" >
+               <string>Species</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="mPlayerSpecies" />
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" >
+            <item>
+             <widget class="QLabel" name="label_9" >
+              <property name="text" >
+               <string>Side</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="mPlayerDesiredSide" />
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="mStartExplored" >
+            <property name="text" >
+             <string>Start with explored map</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_3" >
+         <property name="title" >
+          <string>Connected Players</string>
+         </property>
+         <layout class="QVBoxLayout" >
+          <item>
+           <widget class="QListWidget" name="mConnectedPlayersList" />
+          </item>
+          <item>
+           <widget class="QPushButton" name="mAddAIPlayer" >
+            <property name="text" >
+             <string>&amp;Add computer player</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="mRemovePlayer" >
+            <property name="text" >
+             <string>&amp;Remove player</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <item>
+      <widget class="QPushButton" name="mCancel" >
+       <property name="text" >
+        <string>&amp;Cancel</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="mStartGame" >
+       <property name="text" >
+        <string>S&amp;tart Mission</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

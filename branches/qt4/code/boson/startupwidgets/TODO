@@ -1,0 +1,3 @@
+the startup widgets had a quick and dirty port from BoUfo to Qt4.
+
+i believe we need to rewrite most of them from scratch, except for the .ui files.
