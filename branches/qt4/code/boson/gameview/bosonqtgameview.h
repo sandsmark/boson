@@ -1,7 +1,7 @@
 /*
     This file is part of the Boson game
     Copyright (C) 1999-2000 Thomas Capricelli (capricel@email.enst.fr)
-    Copyright (C) 2001-2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2008 Andreas Beckermann (b_mann@gmx.de)
     Copyright (C) 2001-2006 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
@@ -18,17 +18,15 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
-#ifndef BOSONGAMEVIEW_H
-#define BOSONGAMEVIEW_H
+#ifndef BOSONQTGAMEVIEW_H
+#define BOSONQTGAMEVIEW_H
 
-#include "../boufo/boufo.h"
+//#include "../boufo/boufo.h"
 #include "../bo3dtools.h"
-//Added by qt3to4:
 #include <QMouseEvent>
 #include <QEvent>
 #include <QWheelEvent>
-
-#include "bosonqtgameview.h"
+#include <QWidget>
 
 class BoGameCamera;
 class BoAutoGameCamera;
@@ -52,15 +50,48 @@ class KGameIO;
 class QDomElement;
 class Boson;
 class BosonLocalPlayerInput;
-class BosonUfoCanvasWidget;
+class BosonCanvasWidget;
 
 
 
-class SelectionRectBoUfo : public QObject
+/**
+ * Small class that takes care of scrolling when the cursor is at the edge of
+ * the window
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BoCursorEdgeScrolling : public QObject
 {
 	Q_OBJECT
 public:
-	SelectionRectBoUfo();
+	BoCursorEdgeScrolling(QObject* parent);
+	~BoCursorEdgeScrolling();
+
+	void setCamera(BoGameCamera* camera) { mCamera = camera; }
+	BoGameCamera* camera() const { return mCamera; }
+	void setMatrices(const BoGLMatrices* matrices) { mMatrices = matrices; }
+	const BoGLMatrices* matrices() const { return mMatrices; }
+
+	void quitGame();
+
+protected:
+	virtual bool eventFilter(QObject* o, QEvent* e);
+
+protected slots:
+	void slotCursorEdgeTimeout();
+
+private:
+	BoGameCamera* mCamera;
+	const BoGLMatrices* mMatrices;
+	QTimer* mCursorEdgeTimer;
+	int mCursorEdgeCounter;
+};
+
+
+class SelectionRect : public QObject
+{
+	Q_OBJECT
+public:
+	SelectionRect();
 	void setMatrices(const BoGLMatrices* m)
 	{
 		mMatrices = m;
@@ -86,7 +117,7 @@ public:
 	/**
 	 * @return A list of items that are currently in the selection rect
 	 **/
-	BoItemList* items(const BosonUfoCanvasWidget* canvasWidget) const;
+	BoItemList* items(const BosonCanvasWidget* canvasWidget) const;
 
 signals:
 	void signalVisible(bool);
@@ -100,17 +131,369 @@ private:
 };
 
 
+/**
+ * @author Andreas Beckermann <b_mann@gmx.de
+ **/
+class BoMouseEvent
+{
+public:
+	BoMouseEvent()
+	{
+		mX = 0.0;
+		mY = 0.0;
+		mZ = 0.0;
+		mControlModifier = false;
+		mShiftModifier = false;
+		mAltModifier = false;
+		mUnitAtEventPos = 0;
+	}
 
-class BosonGameViewPrivate;
+	~BoMouseEvent()
+	{
+	}
+
+	void setGameViewWidgetPos(const QPoint& pos)
+	{
+		mWidgetPos = pos;
+	}
+	const QPoint& gameViewWidgetPos() const
+	{
+		return mWidgetPos;
+	}
+	void setGroundCanvasVector(const BoVector3Fixed& pos)
+	{
+		mGroundCanvasVector = pos;
+		mGroundCanvasPos = QPoint((int)pos.x(), (int)pos.y());
+	}
+	void setUnitAtEventPos(Unit* unit)
+	{
+		mUnitAtEventPos = unit;
+	}
+
+	const QPoint& groundCanvasPos() const
+	{
+		return mGroundCanvasPos;
+	}
+	const BoVector3Fixed& groundCanvasVector() const
+	{
+		return mGroundCanvasVector;
+	}
+	Unit* unitAtEventPos() const
+	{
+		return mUnitAtEventPos;
+	}
+
+	void setGroundWorldPos(GLfloat x, GLfloat y, GLfloat z)
+	{
+		mX = x;
+		mY = y;
+		mZ = z;
+	}
+
+	void groundWorldPos(GLfloat* x, GLfloat* y, GLfloat* z) const
+	{
+		*x = mX;
+		*y = mY;
+		*z = mZ;
+	}
+
+	void setControlModifier(bool b)
+	{
+		mControlModifier = b;
+	}
+	bool controlButton() const
+	{
+		return mControlModifier;
+	}
+	void setShiftModifier(bool b)
+	{
+		mShiftModifier = b;
+	}
+	bool shiftButton() const
+	{
+		return mShiftModifier;
+	}
+	void setAltModifier(bool b)
+	{
+		mAltModifier = b;
+	}
+	bool altButton() const
+	{
+		return mAltModifier;
+	}
+
+	bool forceAttack() const
+	{
+		// TODO: make configurable
+		return mControlModifier;
+	}
+
+private:
+	QPoint mWidgetPos;
+	QPoint mGroundCanvasPos;
+	BoVector3Fixed mGroundCanvasVector;
+	GLfloat mX;
+	GLfloat mY;
+	GLfloat mZ;
+
+	bool mControlModifier;
+	bool mShiftModifier;
+	bool mAltModifier;
+
+	Unit* mUnitAtEventPos;
+};
+
+
+/**
+ * @short The current mouse position
+ *
+ * This class should always contain the current mouse position in the formats
+ * required by Boson. The position is set using @ref set, which should be called
+ * whenever a mouse move event occurs.
+ *
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BoCursorPos
+{
+public:
+	void set(const QPoint& gameView, const QPoint& rootPane, const BoVector3Fixed& canvas)
+	{
+		mCursorGameViewPos = gameView;
+		mCursorBoUfoRootPanePos = rootPane;
+		mCursorCanvasVector = canvas;
+	}
+
+	/**
+	 * @return The cursor position relative to the game view, i.e. the main
+	 * widget of Boson. This is in X11-like coordinates, that means (0,0)
+	 * describes the top-left corner of the widget
+	 **/
+	const QPoint& gameViewPos() const
+	{
+		return mCursorGameViewPos;
+	}
+
+	/**
+	 * @return Like @ref gameViewPos, but as a pointer. This pointer is
+	 * guaranteed to always contain the current @ref gameViewPos, as long as
+	 * this object exists.
+	 **/
+	const QPoint* gameViewPosPointer() const
+	{
+		return &mCursorGameViewPos;
+	}
+
+	/**
+	 * @return The current cursor position relative to the libufo root pane,
+	 * that is to @ref BoUfoManager::rootPane. These can be useful to be
+	 * used within @ref BoUfoWidget::mapFromRoot widget other than the game
+	 * view. Note that libufo uses X11-like coordinates, i.e. (0,0) is the
+	 * top-left corner.
+	 **/
+	const QPoint& rootPanePos() const
+	{
+		return mCursorBoUfoRootPanePos;
+	}
+	/**
+	 * @return Like @ref rootPanePos, but as a pointer that is guaranteed to
+	 * always contain the current @ref rootPanePos as long as this object
+	 * exists.
+	 **/
+	const QPoint* rootPanePosPointer() const
+	{
+		return &mCursorBoUfoRootPanePos;
+	}
+
+	/**
+	 * @return The current cursor position in 3d canvas-coordinates
+	 **/
+	const BoVector3Fixed& canvasVector() const
+	{
+		return mCursorCanvasVector;
+	}
+
+	/**
+	 * @return Like @ref rootPanePos, but as a pointer that is guaranteed to
+	 * always contain the current @ref rootPanePos as long as this object
+	 * exists.
+	 **/
+	const BoVector3Fixed* canvasVectorPointer() const
+	{
+		return &mCursorCanvasVector;
+	}
+
+private:
+	QPoint mCursorGameViewPos;
+	QPoint mCursorBoUfoRootPanePos;
+	BoVector3Fixed mCursorCanvasVector;
+};
+
+
+/**
+ * This class emulates a state machine with the events "button press", "button
+ * release", and "mouse move", and the guards "ALT pressed", "Shift pressed",
+ * and "Qt::CTRL pressed". I.e. the guards are the currently pressed modifiers.
+ *
+ * The state diagram would look something like the following:
+ * <pre>
+ * Start: "button press": enter state "Pressed"
+ * Start: "button release": stay in "Start" (error)
+ * Start: "mouse move": stay in "Start"
+ *
+ * Pressed: "button press": stay in "Pressed" (error)
+ * Pressed: "button release": execute action depending on the guards and enter "Start"
+ * Pressed: "mouse move" if camera modifier is pressed: execute camera action
+ *                                                      and enter "PressedCamera"
+ * Pressed: "mouse move" otherwise: execute mouse move action and enter
+ *                                  "PressedMoved"
+ *
+ * PressedCamera: "button press": Stay in "PressedCamera" (error)
+ * PressedCamera: "button release": Enter "Start"
+ * PressedCamera: "mouse move" if camera modifier is pressed: execute mouse move
+ *                              action and stay in "PressedCamera"
+ * PressedCamera: "mouse move" otherwise: execute mouse move action and enter
+ *                                        "PressedMoved"
+ *
+ * PressedMoved: "button press": Stay in "PressedMoved" (error)
+ * PressedMoved: "button release": Execute action depending on the guards and
+ *                                 enter "Start"
+ * PressedMoved: "mouse move" if camera modifier is pressed: Execute camera
+ *                                 action and enter "PressedCamera"
+ * PressedMoved: "mouse move" otherwise: Execute mouse move action and stay in
+ *                                       "PressedMoved"
+ * </pre>
+ * (the diagram looks much less complex in an actual diagram, instead of the
+ * textual representation)
+ **/
+class BoMouseButtonState
+{
+public:
+	BoMouseButtonState();
+	virtual ~BoMouseButtonState();
+
+	/**
+	 * Should be called when the mouse button that is responsible for this
+	 * state is being pressed.
+	 *
+	 * This enters this state.
+	 **/
+	void pressButton(const QPoint& widgetPos);
+
+	/**
+	 * Should be called when the mouse button that is responsible for this
+	 * state is being released.
+	 *
+	 * This leaves this state.
+	 **/
+	void releaseButton(const BoMouseEvent& modifiers, bool doubleRelease = false);
+
+	/**
+	 * Should be called when the mouse is moved
+	 **/
+	void mouseMoved(const BoMouseEvent& modifiers);
+
+protected:
+	/**
+	 * Called when the button is released, i.e. when this state is left.
+	 * Now the action that belongs to this object should be executed. Note
+	 * that when this method is called, the mouse was not moved since the
+	 * button was pressed. See also @ref actionAfterMove.
+	 *
+	 * For example after a LMB release a unit might get selected or after a
+	 * RMB release the selection may be ordered to move or attack.
+	 **/
+	virtual void action(const BoMouseEvent& modifiers) = 0;
+
+	/**
+	 * Like @ref action, but responds to double clicks (i.e. double
+	 * button releases).
+	 *
+	 * By default this calls @ref action
+	 **/
+	virtual void actionDouble(const BoMouseEvent& modifiers);
+
+	/**
+	 * Called when the button is released and the mouse was moved after the
+	 * button was pressed. Now a corresponding action should be executed.
+	 *
+	 * For example after a LMB release the selection rect may get used to
+	 * select a group of units.
+	 **/
+	virtual void actionAfterMove(const BoMouseEvent& modifiers) = 0;
+
+	/**
+	 * Called when the mouse is moved while the camera modifier is pressed.
+	 * A reimplementation should modify the camera in some way
+	 * or do nothing.
+	 *
+	 * For example LMB move + camera modifier may zoom the camera ; RMB move +
+	 * camera modifier may rotate it.
+	 **/
+	virtual void cameraAction(const BoMouseEvent&) = 0;
+
+	/**
+	 * Called when the mouse is mvoed with the camera modifier not being
+	 * pressed. A Reimplmenetation should do the normal mouse move action.
+	 *
+	 * For example LMB move may resize the selection rect and RMB move may move
+	 * the camera.
+	 **/
+	virtual void moveAction(const BoMouseEvent&) = 0;
+
+
+	/**
+	 * @return The position where @ref pressButton was called
+	 **/
+	const QPoint& startedAtWidgetPos() const { return mStartWidgetPos; }
+
+	/**
+	 * @return The position where @ref mouseMoved or @ref pressButton
+	 * whichever happened most recently, was called the last time. If no
+	 * call to @ref mouseMoved was made, this equals @ref
+	 * startedAtWidgetPos.
+	 **/
+	const QPoint& currentWidgetPos() const { return mCurrentWidgetPos; }
+
+	/**
+	 * @return The amount of pixels in x direction that were moved by the
+	 * last @ref mouseMoved call. 0 if no such call was made since the last
+	 * @ref pressButton call.
+	 **/
+	int currentWidgetPosDiffX() const { return mCurrentWidgetPosDiffX; }
+
+	/**
+	 * @return The amount of pixels in y direction that were moved by the
+	 * last @ref mouseMoved call. 0 if no such call was made since the last
+	 * @ref pressButton call.
+	 **/
+	int currentWidgetPosDiffY() const { return mCurrentWidgetPosDiffY; }
+
+private:
+	bool mButtonIsReleased;
+	bool mIsMove;
+	bool mIsCameraAction;
+
+	QPoint mStartWidgetPos;
+
+	QPoint mCurrentWidgetPos;
+
+	int mCurrentWidgetPosDiffX;
+	int mCurrentWidgetPosDiffY;
+};
+
+
+
+
+class BosonQtGameViewPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonGameView : public BoUfoCustomWidget
+class BosonQtGameView : public QWidget
 {
 	Q_OBJECT
 public:
-	BosonGameView();
-	virtual ~BosonGameView();
+	BosonQtGameView(QWidget* parent = 0);
+	virtual ~BosonQtGameView();
 
 	void bosonObjectCreated(Boson* boson);
 	void bosonObjectAboutToBeDestroyed(Boson* boson);
@@ -337,6 +720,8 @@ protected:
 	void resetGameViewPlugin();
 	void resetGameViewPlugin(bool gameMode);
 
+	virtual void paintEvent(QPaintEvent* e);
+	virtual void resizeEvent(QResizeEvent* e);
 
 protected slots:
 	void slotPlugLocalPlayerInput();
@@ -371,7 +756,6 @@ protected slots:
 	void slotScroll(int);
 	void slotCenterOnSelectionGroup(int);
 
-	void slotWidgetResized();
 
 	void slotMouseEvent(QMouseEvent* e);
 	void slotWheelEvent(QWheelEvent* e);
@@ -383,10 +767,11 @@ protected slots:
 
 private:
 	void init();
+	void initGUI();
 	void initUfoGUI();
 
 private:
-	BosonGameViewPrivate* d;
+	BosonQtGameViewPrivate* d;
 
 	BosonCanvas* mCanvas;
 	BosonCursor* mCursor;
@@ -397,17 +782,17 @@ private:
 
 /**
  * This class connects to the relevant signals of @ref BosonScriptInterface. All
- * communication between @ref BosonScript and @ref BosonGameView happens
+ * communication between @ref BosonScript and @ref BosonQtGameView happens
  * trough the interface class and this class.
  *
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonGameViewScriptConnectorBoUfo : public QObject
+class BosonQtGameViewScriptConnector : public QObject
 {
 	Q_OBJECT
 public:
-	BosonGameViewScriptConnectorBoUfo(BosonGameView* parent);
-	~BosonGameViewScriptConnectorBoUfo();
+	BosonQtGameViewScriptConnector(BosonQtGameView* parent);
+	~BosonQtGameViewScriptConnector();
 
 	/**
 	 * Make this object resond to the signals of @p script. Note that only
@@ -470,7 +855,7 @@ protected:
 	void reconnect(const QObject*, const char*, const QObject*, const char*);
 
 private:
-	BosonGameView* mDisplay;
+	BosonQtGameView* mDisplay;
 };
 
 

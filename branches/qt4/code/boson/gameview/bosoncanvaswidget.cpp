@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2008 Andreas Beckermann (b_mann@gmx.de)
     Copyright (C) 2001-2006 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
@@ -18,8 +18,8 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "bosonufocanvaswidget.h"
-#include "bosonufocanvaswidget.moc"
+#include "bosoncanvaswidget.h"
+#include "bosoncanvaswidget.moc"
 
 #include "../bomemory/bodummymemory.h"
 #include "../no_player.h"
@@ -59,12 +59,80 @@
 #include <qdom.h>
 
 
+BosonItemEffects::BosonItemEffects(BosonItem* item)
+{
+ mItem = item;
+ mEffects = new Q3PtrList<BosonEffect>();
+}
+
+BosonItemEffects::~BosonItemEffects()
+{
+ clearEffects();
+ delete mEffects;
+}
+
+const Q3PtrList<BosonEffect>& BosonItemEffects::effects() const
+{
+ return *mEffects;
+}
+
+void BosonItemEffects::setEffects(const Q3PtrList<BosonEffect>& effects, Q3PtrList<BosonEffect>* takeOwnership)
+{
+ clearEffects();
+// boDebug() << k_funcinfo << effects.count() << endl;
+ for (Q3PtrListIterator<BosonEffect> it(effects); it.current(); ++it) {
+	addEffect(it.current(), takeOwnership);
+ }
+}
+
+void BosonItemEffects::addEffect(BosonEffect* e, Q3PtrList<BosonEffect>* takeOwnership)
+{
+ e->setOwnerId(mItem->id());
+ mEffects->append(e);
+ if (takeOwnership) {
+	takeOwnership->append(e);
+ }
+}
+
+void BosonItemEffects::removeEffect(BosonEffect* e)
+{
+ mEffects->removeRef(e);
+}
+
+void BosonItemEffects::clearEffects()
+{
+ for (Q3PtrListIterator<BosonEffect> it(*mEffects); it.current(); ++it) {
+	it.current()->setOwnerId(0);
+ }
+ mEffects->clear();
+}
+
+void BosonItemEffects::updateEffectsPosition()
+{
+ BoVector3Fixed pos(item()->centerX(), item()->centerY(), item()->z());
+ pos.canvasToWorld();
+ for (Q3PtrListIterator<BosonEffect> it(*mEffects); it.current(); ++it) {
+	it.current()->setPosition(pos);
+ }
+ mItem->setEffectsPositionDirty(false);
+}
+
+void BosonItemEffects::updateEffectsRotation()
+{
+ BoVector3Fixed rotation(item()->xRotation(), item()->yRotation(), item()->rotation());
+ for (Q3PtrListIterator<BosonEffect> it(*mEffects); it.current(); ++it) {
+	it.current()->setRotation(rotation);
+ }
+ mItem->setEffectsRotationDirty(false);
+}
 
 
-class BosonUfoCanvasWidgetPrivate
+
+
+class BosonCanvasWidgetPrivate
 {
 public:
-	BosonUfoCanvasWidgetPrivate()
+	BosonCanvasWidgetPrivate()
 	{
 		mGameGLMatrices = 0;
 		mCanvasRenderer = 0;
@@ -89,12 +157,12 @@ public:
 	BoGroundQuadTreeNode* mGroundQuadTree;
 };
 
-BosonUfoCanvasWidget::BosonUfoCanvasWidget()
-		: BoUfoCustomWidget()
+BosonCanvasWidget::BosonCanvasWidget(QWidget* parent)
+		: QWidget(parent)
 {
- setName("BosonUfoCanvasWidget");
+ setName("BosonCanvasWidget");
 
- d = new BosonUfoCanvasWidgetPrivate();
+ d = new BosonCanvasWidgetPrivate();
  BosonEffectPropertiesManager::initStatic();
  d->mEffectManager = new BosonEffectManager();
 
@@ -104,7 +172,7 @@ BosonUfoCanvasWidget::BosonUfoCanvasWidget()
  connect(this, SIGNAL(signalWidgetResized()), d->mCanvasRenderer, SLOT(slotWidgetResized()));
 }
 
-BosonUfoCanvasWidget::~BosonUfoCanvasWidget()
+BosonCanvasWidget::~BosonCanvasWidget()
 {
  quitGame();
  delete d->mGroundQuadTree;
@@ -114,7 +182,7 @@ BosonUfoCanvasWidget::~BosonUfoCanvasWidget()
  delete d;
 }
 
-bool BosonUfoCanvasWidget::initializeItems()
+bool BosonCanvasWidget::initializeItems()
 {
  if (!boViewData) {
 	BO_NULL_ERROR(boViewData);
@@ -149,24 +217,24 @@ bool BosonUfoCanvasWidget::initializeItems()
  return true;
 }
 
-void BosonUfoCanvasWidget::setGameGLMatrices(const BoGLMatrices* m)
+void BosonCanvasWidget::setGameGLMatrices(const BoGLMatrices* m)
 {
  d->mGameGLMatrices = m;
  d->mCanvasRenderer->setGameGLMatrices(d->mGameGLMatrices);
 }
 
-void BosonUfoCanvasWidget::setCamera(BoGameCamera* c)
+void BosonCanvasWidget::setCamera(BoGameCamera* c)
 {
  d->mCamera = c;
 }
 
-void BosonUfoCanvasWidget::setLocalPlayerIO(PlayerIO* io)
+void BosonCanvasWidget::setLocalPlayerIO(PlayerIO* io)
 {
  d->mLocalPlayerIO = io;
  d->mCanvasRenderer->setLocalPlayerIO(d->mLocalPlayerIO);
 }
 
-void BosonUfoCanvasWidget::setCanvas(const BosonCanvas* canvas)
+void BosonCanvasWidget::setCanvas(const BosonCanvas* canvas)
 {
  if (d->mCanvas) {
 	disconnect(d->mCanvas, 0, this, 0);
@@ -201,7 +269,7 @@ void BosonUfoCanvasWidget::setCanvas(const BosonCanvas* canvas)
  }
 }
 
-void BosonUfoCanvasWidget::initItemEffects()
+void BosonCanvasWidget::initItemEffects()
 {
  if (d->mEffects.count() > 0) {
 	boDebug() << k_funcinfo << "effects already initialized. most likely loaded from xml - we are loading a game, no initializing required." << endl;
@@ -220,12 +288,12 @@ void BosonUfoCanvasWidget::initItemEffects()
  }
 }
 
-void BosonUfoCanvasWidget::setParticlesDirty(bool dirty)
+void BosonCanvasWidget::setParticlesDirty(bool dirty)
 {
  d->mCanvasRenderer->setParticlesDirty(dirty);
 }
 
-void BosonUfoCanvasWidget::quitGame()
+void BosonCanvasWidget::quitGame()
 {
  delete d->mGroundQuadTree;
  d->mGroundQuadTree = 0;
@@ -253,24 +321,24 @@ void BosonUfoCanvasWidget::quitGame()
 		this, 0);
 }
 
-void BosonUfoCanvasWidget::addEffect(BosonEffect* e)
+void BosonCanvasWidget::addEffect(BosonEffect* e)
 {
  d->mEffects.append(e);
 }
 
-void BosonUfoCanvasWidget::addEffects(const Q3PtrList<BosonEffect>& effects)
+void BosonCanvasWidget::addEffects(const Q3PtrList<BosonEffect>& effects)
 {
  for (Q3PtrListIterator<BosonEffect> it(effects); it.current(); ++it) {
 	addEffect(it.current());
  }
 }
 
-void BosonUfoCanvasWidget::createEffect(unsigned int id, const BoVector3Fixed& pos, bofixed zrot)
+void BosonCanvasWidget::createEffect(unsigned int id, const BoVector3Fixed& pos, bofixed zrot)
 {
  addEffects(d->mEffectManager->newEffects(id, pos, zrot));
 }
 
-void BosonUfoCanvasWidget::createAttachedEffect(int itemid, unsigned int effectid, BoVector3Fixed offset, bofixed zrot)
+void BosonCanvasWidget::createAttachedEffect(int itemid, unsigned int effectid, BoVector3Fixed offset, bofixed zrot)
 {
  BosonItem* item = d->mCanvas->findItem(itemid);
  if (!item) {
@@ -284,7 +352,7 @@ void BosonUfoCanvasWidget::createAttachedEffect(int itemid, unsigned int effecti
  effects->setEffects(d->mEffectManager->newEffects(effectid, offset, zrot), &d->mEffects);
 }
 
-void BosonUfoCanvasWidget::slotAdvance(unsigned int advanceCallsCount, bool advanceFlag)
+void BosonCanvasWidget::slotAdvance(unsigned int advanceCallsCount, bool advanceFlag)
 {
  Q_UNUSED(advanceFlag);
  PROFILE_METHOD
@@ -297,7 +365,7 @@ void BosonUfoCanvasWidget::slotAdvance(unsigned int advanceCallsCount, bool adva
  boProfiling->pop();
 }
 
-void BosonUfoCanvasWidget::animateItems(unsigned int advanceCallsCount)
+void BosonCanvasWidget::animateItems(unsigned int advanceCallsCount)
 {
  Q_UNUSED(advanceCallsCount);
  for (Q3PtrListIterator<BosonItemContainer> it(boViewData->allItemContainers()); it.current(); ++it) {
@@ -308,7 +376,7 @@ void BosonUfoCanvasWidget::animateItems(unsigned int advanceCallsCount)
  }
 }
 
-void BosonUfoCanvasWidget::advanceEffects(float elapsed)
+void BosonCanvasWidget::advanceEffects(float elapsed)
 {
  BO_CHECK_NULL_RET(d->mCanvas);
  Q3PtrList<BosonEffect> removeEffects;
@@ -363,7 +431,7 @@ void BosonUfoCanvasWidget::advanceEffects(float elapsed)
  }
 }
 
-void BosonUfoCanvasWidget::cameraChanged()
+void BosonCanvasWidget::cameraChanged()
 {
  setParticlesDirty(true);
  BO_CHECK_NULL_RET(d->mCamera);
@@ -376,7 +444,7 @@ void BosonUfoCanvasWidget::cameraChanged()
  }
 }
 
-bool BosonUfoCanvasWidget::loadEffectsFromXML(const QDomElement& root)
+bool BosonCanvasWidget::loadEffectsFromXML(const QDomElement& root)
 {
  if (!d->mCanvas) {
 	BO_NULL_ERROR(d->mCanvas);
@@ -464,7 +532,7 @@ bool BosonUfoCanvasWidget::loadEffectsFromXML(const QDomElement& root)
  return ret;
 }
 
-bool BosonUfoCanvasWidget::saveEffectsAsXML(QDomElement& root) const
+bool BosonCanvasWidget::saveEffectsAsXML(QDomElement& root) const
 {
  QDomDocument doc = root.ownerDocument();
 
@@ -479,7 +547,7 @@ bool BosonUfoCanvasWidget::saveEffectsAsXML(QDomElement& root) const
  return true;
 }
 
-void BosonUfoCanvasWidget::slotShotFired(BosonShot* shot, BosonWeapon* weapon)
+void BosonCanvasWidget::slotShotFired(BosonShot* shot, BosonWeapon* weapon)
 {
  BO_CHECK_NULL_RET(boViewData);
  BO_CHECK_NULL_RET(shot);
@@ -495,7 +563,7 @@ void BosonUfoCanvasWidget::slotShotFired(BosonShot* shot, BosonWeapon* weapon)
  boViewData->speciesData(weapon->speciesTheme())->playSound(weapon->properties(), SoundWeaponShoot);
 }
 
-void BosonUfoCanvasWidget::slotShotHit(BosonShot* shot)
+void BosonCanvasWidget::slotShotHit(BosonShot* shot)
 {
  BO_CHECK_NULL_RET(shot);
  BosonItemContainer* c = boViewData->itemContainer(shot);
@@ -559,7 +627,7 @@ void BosonUfoCanvasWidget::slotShotHit(BosonShot* shot)
  effects->clearEffects();
 }
 
-void BosonUfoCanvasWidget::slotUnitDestroyed(Unit* unit)
+void BosonCanvasWidget::slotUnitDestroyed(Unit* unit)
 {
  BO_CHECK_NULL_RET(boViewData);
  BO_CHECK_NULL_RET(unit);
@@ -588,7 +656,7 @@ void BosonUfoCanvasWidget::slotUnitDestroyed(Unit* unit)
  addEffects(d->mEffectManager->newDestroyedEffects(unit->unitProperties(), centerPos[0], centerPos[1], centerPos[2]));
 }
 
-void BosonUfoCanvasWidget::slotFragmentCreated(BosonShotFragment* fragment)
+void BosonCanvasWidget::slotFragmentCreated(BosonShotFragment* fragment)
 {
  BosonItemContainer* c = boViewData->itemContainer(fragment);
  BO_CHECK_NULL_RET(c);
@@ -603,12 +671,12 @@ void BosonUfoCanvasWidget::slotFragmentCreated(BosonShotFragment* fragment)
  effects->setEffects(d->mEffectManager->newExplodingFragmentFlyEffects(fragment->unitProperties(), pos), &d->mEffects);
 }
 
-void BosonUfoCanvasWidget::slotFacilityConstructed(Unit* unit)
+void BosonCanvasWidget::slotFacilityConstructed(Unit* unit)
 {
  addFacilityConstructedEffects(unit);
 }
 
-void BosonUfoCanvasWidget::addFacilityConstructedEffects(Unit* unit)
+void BosonCanvasWidget::addFacilityConstructedEffects(Unit* unit)
 {
  BO_CHECK_NULL_RET(unit);
  BosonItemContainer* c = boViewData->itemContainer(unit);
@@ -622,7 +690,7 @@ void BosonUfoCanvasWidget::addFacilityConstructedEffects(Unit* unit)
  effects->setEffects(d->mEffectManager->newConstructedEffects(unit->unitProperties(), x, y, z), &d->mEffects);
 }
 
-void BosonUfoCanvasWidget::slotAddItemContainerData(BosonItemContainer* c)
+void BosonCanvasWidget::slotAddItemContainerData(BosonItemContainer* c)
 {
  BO_CHECK_NULL_RET(c);
 
@@ -691,7 +759,7 @@ void BosonUfoCanvasWidget::slotAddItemContainerData(BosonItemContainer* c)
  }
 }
 
-void BosonUfoCanvasWidget::slotRemoveItemContainerData(BosonItemContainer* c)
+void BosonCanvasWidget::slotRemoveItemContainerData(BosonItemContainer* c)
 {
  BO_CHECK_NULL_RET(c);
  BosonItemEffects* effects = c->effects();
@@ -705,12 +773,12 @@ void BosonUfoCanvasWidget::slotRemoveItemContainerData(BosonItemContainer* c)
  delete itemRenderer;
 }
 
-Q3ValueList<BosonItem*> BosonUfoCanvasWidget::itemsAtWidgetRect(const QRect& widgetRect) const
+Q3ValueList<BosonItem*> BosonCanvasWidget::itemsAtWidgetRect(const QRect& widgetRect) const
 {
  return emulatePickItems(widgetRect);
 }
 
-Q3ValueList<Unit*> BosonUfoCanvasWidget::unitsAtWidgetRect(const QRect& widgetRect) const
+Q3ValueList<Unit*> BosonCanvasWidget::unitsAtWidgetRect(const QRect& widgetRect) const
 {
  Q3ValueList<Unit*> units;
  Q3ValueList<BosonItem*> items = itemsAtWidgetRect(widgetRect);
@@ -722,7 +790,7 @@ Q3ValueList<Unit*> BosonUfoCanvasWidget::unitsAtWidgetRect(const QRect& widgetRe
  return units;
 }
 
-Unit* BosonUfoCanvasWidget::unitAtWidgetPos(const QPoint& widgetPos) const
+Unit* BosonCanvasWidget::unitAtWidgetPos(const QPoint& widgetPos) const
 {
  Q3ValueList<Unit*> units = unitsAtWidgetRect(QRect(widgetPos, QSize(1, 1)));
  if (units.count() == 0) {
@@ -734,7 +802,7 @@ Unit* BosonUfoCanvasWidget::unitAtWidgetPos(const QPoint& widgetPos) const
  return units[0];
 }
 
-Q3ValueList<BosonItem*> BosonUfoCanvasWidget::emulatePickItems(const QRect& pickRect) const
+Q3ValueList<BosonItem*> BosonCanvasWidget::emulatePickItems(const QRect& pickRect) const
 {
  return d->mCanvasRenderer->emulatePickItems(pickRect);
 }
@@ -818,7 +886,7 @@ public:
  *
  * However it works and as long as it does, I don't intend to do so.
  */
-bool BosonUfoCanvasWidget::emulatePickGroundPos(const QPoint& pickPos, BoVector3Float* worldPos) const
+bool BosonCanvasWidget::emulatePickGroundPos(const QPoint& pickPos, BoVector3Float* worldPos) const
 {
  PROFILE_METHOD
  if (!worldPos) {
@@ -1013,15 +1081,15 @@ bool BosonUfoCanvasWidget::emulatePickGroundPos(const QPoint& pickPos, BoVector3
  return true;
 }
 
-void BosonUfoCanvasWidget::paintWidget()
+void BosonCanvasWidget::paintEvent(QPaintEvent* e)
 {
+ Q_UNUSED(e);
  PROFILE_METHOD;
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "GL error at the beginning of this method" << endl;
  }
  d->mCanvasRenderer->setCamera(d->mCamera);
 
- // Store the original libufo matrices and set our 3d matrices
  glMatrixMode(GL_PROJECTION);
  glPushMatrix();
  glLoadMatrixf(d->mGameGLMatrices->projectionMatrix().data());
@@ -1035,11 +1103,19 @@ void BosonUfoCanvasWidget::paintWidget()
 		d->mGameGLMatrices->viewport()[2],
 		d->mGameGLMatrices->viewport()[3]);
 
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "GL error foo0";
+ }
  d->mCanvasRenderer->paintGL(boViewData->allItemContainers(), d->mEffects);
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "GL error foo1";
+ }
 
  glPopAttrib();
 
-  // Restore the original libufo matrices
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "GL error foo";
+ }
  glMatrixMode(GL_PROJECTION);
  glPopMatrix();
  glMatrixMode(GL_MODELVIEW);
@@ -1051,7 +1127,7 @@ void BosonUfoCanvasWidget::paintWidget()
 
 
 #include "../gameengine/bosonshot.h" // for an explosion hack below
-BosonItemRenderer* BosonUfoCanvasWidget::createItemRendererFor(const BosonItemContainer* c)
+BosonItemRenderer* BosonCanvasWidget::createItemRendererFor(const BosonItemContainer* c)
 {
  BO_CHECK_NULL_RET0(c);
  BO_CHECK_NULL_RET0(c->item());

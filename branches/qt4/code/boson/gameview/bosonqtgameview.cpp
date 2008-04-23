@@ -1,7 +1,7 @@
 /*
     This file is part of the Boson game
     Copyright (C) 1999-2000 Thomas Capricelli (capricel@email.enst.fr)
-    Copyright (C) 2001-2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2008 Andreas Beckermann (b_mann@gmx.de)
     Copyright (C) 2001-2006 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
@@ -19,8 +19,8 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "bosongameview.h"
-#include "bosongameview.moc"
+#include "bosonqtgameview.h"
+#include "bosonqtgameview.moc"
 
 #include "../bomemory/bodummymemory.h"
 #include "../no_player.h"
@@ -80,6 +80,7 @@
 #include "../bosonviewdata.h"
 #include "bosongamevieweventlistener.h"
 #include "bosoneffectpropertiesparticle.h"
+#include "../bolayeredwidget.h"
 
 #include <kgame/kgameio.h>
 #include <kgame/kplayer.h>
@@ -97,12 +98,15 @@
 #include <q3valuevector.h>
 #include <qapplication.h>
 #include <QTime>
-//Added by qt3to4:
 #include <QWheelEvent>
 #include <QMouseEvent>
 #include <Q3ValueList>
 #include <QEvent>
 #include <Q3PtrList>
+#include <QVBoxLayout>
+
+// helps to grep for places where qt port is incomplete
+#define QT_PORT 1
 
 
 #warning d->mMouseMoveDiff.start() mostly removed. probably fix displayInput()->actionLoced() actions !
@@ -194,19 +198,95 @@ private:
 	QTime mTimeSinceLastPress;
 };
 
+BoMouseButtonState::BoMouseButtonState()
+{
+ mButtonIsReleased = true;
+ mIsMove = false;
+ mIsCameraAction = false;
+
+ mCurrentWidgetPosDiffX = 0;
+ mCurrentWidgetPosDiffY = 0;
+}
+
+BoMouseButtonState::~BoMouseButtonState()
+{
+}
+
+void BoMouseButtonState::pressButton(const QPoint& pos)
+{
+ mButtonIsReleased = false;
+
+ mStartWidgetPos = pos;
+
+ mCurrentWidgetPos = mStartWidgetPos;
+
+ mCurrentWidgetPosDiffX = 0;
+ mCurrentWidgetPosDiffY = 0;
+}
+
+void BoMouseButtonState::releaseButton(const BoMouseEvent& modifiers, bool doubleRelease)
+{
+ if (mButtonIsReleased) {
+	return;
+ }
+ mButtonIsReleased = true;
+
+ if (mIsMove) {
+	if (!mIsCameraAction) {
+		actionAfterMove(modifiers);
+	}
+ } else {
+	if (doubleRelease) {
+		actionDouble(modifiers);
+	} else {
+		action(modifiers);
+	}
+ }
+ mIsMove = false;
+ mIsCameraAction = false;
+}
+
+void BoMouseButtonState::mouseMoved(const BoMouseEvent& e)
+{
+ if (mButtonIsReleased) {
+	return;
+ }
+
+ // diff = currentPos - oldPos
+ mCurrentWidgetPosDiffX = e.gameViewWidgetPos().x() - currentWidgetPos().x();
+ mCurrentWidgetPosDiffY = e.gameViewWidgetPos().y() - currentWidgetPos().y();
+
+ // update currentPos
+ mCurrentWidgetPos = e.gameViewWidgetPos();
+
+ mIsMove = true;
+ mIsCameraAction = cameraModifier(e);
+ if (mIsCameraAction) {
+	cameraAction(e);
+ } else {
+	moveAction(e);
+ }
+}
+
+void BoMouseButtonState::actionDouble(const BoMouseEvent& modifiers)
+{
+ action(modifiers);
+}
+
+
 
 
 class BoGameViewMouseState : public BoMouseButtonState
 {
 public:
-	BoGameViewMouseState(BosonGameView* gameView, const BoGLMatrices* matrices)
+	BoGameViewMouseState(BosonQtGameView* gameView, const BoGLMatrices* matrices)
 		: BoMouseButtonState()
 	{
 		mGameView = gameView;
 		mGameGLMatrices = matrices;
 	}
 
-	BosonGameView* gameView() const { return mGameView; }
+	BosonQtGameView* gameView() const { return mGameView; }
 	BoSelection* selection() const { return gameView()->selection(); }
 	PlayerIO* localPlayerIO() const { return gameView()->localPlayerIO(); }
 	BoGameCamera* camera() const { return gameView()->camera(); }
@@ -222,26 +302,26 @@ public:
 	}
 
 private:
-	BosonGameView* mGameView;
+	BosonQtGameView* mGameView;
 	const BoGLMatrices* mGameGLMatrices;
 };
 
-class BoLeftMouseButtonState : public BoGameViewMouseState
+class BoLeftMouseButtonStateQt : public BoGameViewMouseState
 {
 public:
-	BoLeftMouseButtonState(BosonGameView* v, const BoGLMatrices* m) : BoGameViewMouseState(v, m)
+	BoLeftMouseButtonStateQt(BosonQtGameView* v, const BoGLMatrices* m) : BoGameViewMouseState(v, m)
 	{
 		mSelectionRect = 0;
-		mUfoCanvasWidget = 0;
+		mCanvasWidget = 0;
 	}
 
-	void setSelectionRect(SelectionRectBoUfo* r)
+	void setSelectionRect(SelectionRect* r)
 	{
 		mSelectionRect = r;
 	}
-	void setUfoCanvasWidget(const BosonUfoCanvasWidget* w)
+	void setCanvasWidget(const BosonCanvasWidget* w)
 	{
-		mUfoCanvasWidget = w;
+		mCanvasWidget = w;
 	}
 
 protected:
@@ -252,14 +332,14 @@ protected:
 	virtual void moveAction(const BoMouseEvent&);
 
 private:
-	SelectionRectBoUfo* mSelectionRect;
-	const BosonUfoCanvasWidget* mUfoCanvasWidget;
+	SelectionRect* mSelectionRect;
+	const BosonCanvasWidget* mCanvasWidget;
 };
 
-class BoRightMouseButtonState : public BoGameViewMouseState
+class BoRightMouseButtonStateQt : public BoGameViewMouseState
 {
 public:
-	BoRightMouseButtonState(BosonGameView* v, const BoGLMatrices* m) : BoGameViewMouseState(v, m)
+	BoRightMouseButtonStateQt(BosonQtGameView* v, const BoGLMatrices* m) : BoGameViewMouseState(v, m)
 	{
 	}
 
@@ -271,10 +351,10 @@ protected:
 	virtual void moveAction(const BoMouseEvent&);
 };
 
-class BoMiddleMouseButtonState : public BoGameViewMouseState
+class BoMiddleMouseButtonStateQt : public BoGameViewMouseState
 {
 public:
-	BoMiddleMouseButtonState(BosonGameView* v, const BoGLMatrices* m) : BoGameViewMouseState(v, m)
+	BoMiddleMouseButtonStateQt(BosonQtGameView* v, const BoGLMatrices* m) : BoGameViewMouseState(v, m)
 	{
 	}
 
@@ -286,12 +366,12 @@ protected:
 	virtual void moveAction(const BoMouseEvent&);
 };
 
-void BoLeftMouseButtonState::action(const BoMouseEvent& e)
+void BoLeftMouseButtonStateQt::action(const BoMouseEvent& e)
 {
  BO_CHECK_NULL_RET(displayInput());
  BO_CHECK_NULL_RET(localPlayerIO());
  BO_CHECK_NULL_RET(boViewData);
- BO_CHECK_NULL_RET(mUfoCanvasWidget);
+ BO_CHECK_NULL_RET(mCanvasWidget);
 
  if (displayInput()->actionLocked()) {
 	// basically the same as a normal RMB
@@ -299,7 +379,7 @@ void BoLeftMouseButtonState::action(const BoMouseEvent& e)
 	return;
  }
 
- Unit* unit = mUfoCanvasWidget->unitAtWidgetPos(startedAtWidgetPos());
+ Unit* unit = mCanvasWidget->unitAtWidgetPos(startedAtWidgetPos());
  bool playSelectSound = false;
 
  if (e.controlButton()) {
@@ -331,7 +411,7 @@ void BoLeftMouseButtonState::action(const BoMouseEvent& e)
  }
 }
 
-void BoLeftMouseButtonState::actionDouble(const BoMouseEvent& e)
+void BoLeftMouseButtonStateQt::actionDouble(const BoMouseEvent& e)
 {
  BO_CHECK_NULL_RET(displayInput());
 
@@ -349,15 +429,15 @@ void BoLeftMouseButtonState::actionDouble(const BoMouseEvent& e)
  }
 }
 
-void BoLeftMouseButtonState::actionAfterMove(const BoMouseEvent& e)
+void BoLeftMouseButtonStateQt::actionAfterMove(const BoMouseEvent& e)
 {
  BO_CHECK_NULL_RET(displayInput());
  BO_CHECK_NULL_RET(localPlayerIO());
  BO_CHECK_NULL_RET(boViewData);
  BO_CHECK_NULL_RET(mSelectionRect);
- BO_CHECK_NULL_RET(mUfoCanvasWidget);
+ BO_CHECK_NULL_RET(mCanvasWidget);
 
- BoItemList* items = mSelectionRect->items(mUfoCanvasWidget);
+ BoItemList* items = mSelectionRect->items(mCanvasWidget);
  bool playSelectionSoundForLeader = false;
  if (e.controlButton()) {
 	if (selection()->count() > 0) {
@@ -380,13 +460,13 @@ void BoLeftMouseButtonState::actionAfterMove(const BoMouseEvent& e)
  }
 }
 
-void BoLeftMouseButtonState::cameraAction(const BoMouseEvent& e)
+void BoLeftMouseButtonStateQt::cameraAction(const BoMouseEvent& e)
 {
  Q_UNUSED(e);
  camera()->changeDistance(currentWidgetPosDiffY());
 }
 
-void BoLeftMouseButtonState::moveAction(const BoMouseEvent& e)
+void BoLeftMouseButtonStateQt::moveAction(const BoMouseEvent& e)
 {
  BO_CHECK_NULL_RET(mSelectionRect);
  if (!displayInput()->actionLocked()) {
@@ -411,7 +491,7 @@ void BoLeftMouseButtonState::moveAction(const BoMouseEvent& e)
 }
 
 
-void BoRightMouseButtonState::action(const BoMouseEvent& e)
+void BoRightMouseButtonStateQt::action(const BoMouseEvent& e)
 {
  if (displayInput()->actionLocked()) {
 	displayInput()->unlockAction();
@@ -421,18 +501,18 @@ void BoRightMouseButtonState::action(const BoMouseEvent& e)
  }
 }
 
-void BoRightMouseButtonState::actionDouble(const BoMouseEvent& e)
+void BoRightMouseButtonStateQt::actionDouble(const BoMouseEvent& e)
 {
  action(e);
 }
 
-void BoRightMouseButtonState::actionAfterMove(const BoMouseEvent& e)
+void BoRightMouseButtonStateQt::actionAfterMove(const BoMouseEvent& e)
 {
  Q_UNUSED(e);
  // no action should be taken here (RMB move is ended)
 }
 
-void BoRightMouseButtonState::cameraAction(const BoMouseEvent& e)
+void BoRightMouseButtonStateQt::cameraAction(const BoMouseEvent& e)
 {
  Q_UNUSED(e);
  BO_CHECK_NULL_RET(camera());
@@ -440,7 +520,7 @@ void BoRightMouseButtonState::cameraAction(const BoMouseEvent& e)
  camera()->changeXRotation(currentWidgetPosDiffY());
 }
 
-void BoRightMouseButtonState::moveAction(const BoMouseEvent& e)
+void BoRightMouseButtonStateQt::moveAction(const BoMouseEvent& e)
 {
  if (boConfig->boolValue("RMBMove")) {
 	// problem is that QCursor::setPos() also causes
@@ -468,7 +548,7 @@ void BoRightMouseButtonState::moveAction(const BoMouseEvent& e)
 }
 
 
-void BoMiddleMouseButtonState::action(const BoMouseEvent& e)
+void BoMiddleMouseButtonStateQt::action(const BoMouseEvent& e)
 {
  // we ignore all modifiers here, currently.
  if (boConfig->boolValue("MMBMove")) {
@@ -482,39 +562,39 @@ void BoMiddleMouseButtonState::action(const BoMouseEvent& e)
  }
 }
 
-void BoMiddleMouseButtonState::actionDouble(const BoMouseEvent& e)
+void BoMiddleMouseButtonStateQt::actionDouble(const BoMouseEvent& e)
 {
  action(e);
 }
 
-void BoMiddleMouseButtonState::actionAfterMove(const BoMouseEvent& e)
+void BoMiddleMouseButtonStateQt::actionAfterMove(const BoMouseEvent& e)
 {
  action(e);
 }
 
-void BoMiddleMouseButtonState::cameraAction(const BoMouseEvent& e)
+void BoMiddleMouseButtonStateQt::cameraAction(const BoMouseEvent& e)
 {
  Q_UNUSED(e);
 }
 
-void BoMiddleMouseButtonState::moveAction(const BoMouseEvent& e)
+void BoMiddleMouseButtonStateQt::moveAction(const BoMouseEvent& e)
 {
  Q_UNUSED(e);
 }
 
 
-SelectionRectBoUfo::SelectionRectBoUfo() : QObject(0)
+SelectionRect::SelectionRect() : QObject(0)
 {
  mVisible = false;
 }
 
-void SelectionRectBoUfo::widgetRect(QRect* rect) const
+void SelectionRect::widgetRect(QRect* rect) const
 {
  QRect r(mStartPos, mEndPos);
  *rect = r.normalize();
 }
 
-void SelectionRectBoUfo::setStartWidgetPos(const QPoint& pos)
+void SelectionRect::setStartWidgetPos(const QPoint& pos)
 {
  mStartPos = pos;
  setEndWidgetPos(mStartPos);
@@ -522,7 +602,7 @@ void SelectionRectBoUfo::setStartWidgetPos(const QPoint& pos)
  // AB: no need to emit signalChanged(), as setEndWidgetPos() does so
 }
 
-void SelectionRectBoUfo::setEndWidgetPos(const QPoint& pos)
+void SelectionRect::setEndWidgetPos(const QPoint& pos)
 {
  mEndPos = pos;
 
@@ -531,29 +611,29 @@ void SelectionRectBoUfo::setEndWidgetPos(const QPoint& pos)
  emit signalChanged(rect);
 }
 
-void SelectionRectBoUfo::setVisible(bool v)
+void SelectionRect::setVisible(bool v)
 {
  mVisible = v;
  emit signalVisible(isVisible());
 }
 
-void SelectionRectBoUfo::quitGame()
+void SelectionRect::quitGame()
 {
  setVisible(false);
  setEndWidgetPos(startPos());
 }
 
 
-BoItemList* SelectionRectBoUfo::items(const BosonUfoCanvasWidget* ufoCanvasWidget) const
+BoItemList* SelectionRect::items(const BosonCanvasWidget* canvasWidget) const
 {
- if (!ufoCanvasWidget) {
-	BO_NULL_ERROR(ufoCanvasWidget);
+ if (!canvasWidget) {
+	BO_NULL_ERROR(canvasWidget);
 	return new BoItemList();
  }
  QRect widgetRect_;
  widgetRect(&widgetRect_);
 
- Q3ValueList<BosonItem*> items = ufoCanvasWidget->itemsAtWidgetRect(widgetRect_);
+ Q3ValueList<BosonItem*> items = canvasWidget->itemsAtWidgetRect(widgetRect_);
 
  BoItemList* list = new BoItemList();
  for (Q3ValueList<BosonItem*>::iterator it = items.begin(); it != items.end(); ++it) {
@@ -563,6 +643,86 @@ BoItemList* SelectionRectBoUfo::items(const BosonUfoCanvasWidget* ufoCanvasWidge
  return list;
 }
 
+
+BoCursorEdgeScrolling::BoCursorEdgeScrolling(QObject* parent) : QObject(parent)
+{
+ mCursorEdgeCounter = 0;
+ mCursorEdgeTimer = new QTimer(this);
+ connect(mCursorEdgeTimer, SIGNAL(timeout()),
+		this, SLOT(slotCursorEdgeTimeout()));
+ qApp->installEventFilter(this);
+}
+
+BoCursorEdgeScrolling::~BoCursorEdgeScrolling()
+{
+}
+
+void BoCursorEdgeScrolling::quitGame()
+{
+ mCursorEdgeTimer->stop();
+ mCursorEdgeCounter = 0;
+}
+
+bool BoCursorEdgeScrolling::eventFilter(QObject* o, QEvent* e)
+{
+ switch (e->type()) {
+	case QEvent::MouseMove:
+		if (!mCursorEdgeTimer->isActive()) {
+			slotCursorEdgeTimeout();
+		}
+		break;
+	default:
+		break;
+ }
+ return QObject::eventFilter(o, e);
+}
+
+void BoCursorEdgeScrolling::slotCursorEdgeTimeout()
+{
+ BO_CHECK_NULL_RET(camera());
+ if (!boGame) {
+	return;
+ }
+ if (boGame->gameStatus() == KGame::Init) {
+	// probably startup screen visible
+	return;
+ }
+ float x = 0;
+ float y = 0;
+ const int sensity = boConfig->uintValue("CursorEdgeSensity");
+
+#warning FIXME: dont use mainWidget() here, use the ufo widget instead
+ QWidget* w = qApp->mainWidget();
+ BO_CHECK_NULL_RET(w);
+ QPoint pos = w->mapFromGlobal(QCursor::pos());
+
+ const int move = 20; // FIXME hardcoded - use BosonConfig instead
+ if (pos.x() <= sensity && pos.x() > -1) {
+	x = -move;
+ } else if (pos.x() >= w->width() - sensity && pos.x() <= w->width()) {
+	x = move;
+ }
+ if (pos.y() <= sensity && pos.y() > -1) {
+	y = -move;
+ } else if (pos.y() >= w->height() - sensity && pos.y() <= w->height()) {
+	y = move;
+ }
+ if (!x && !y || !sensity) {
+	mCursorEdgeTimer->stop();
+	mCursorEdgeCounter = 0;
+ } else {
+	GLfloat dx, dy;
+	Bo3dTools::mapDistance(matrices()->modelviewMatrix(), matrices()->projectionMatrix(), matrices()->viewport(),
+			(int)x, (int)y, &dx, &dy);
+	if (!mCursorEdgeTimer->isActive()) {
+		mCursorEdgeTimer->start(20);
+	}
+	mCursorEdgeCounter++;
+	if (mCursorEdgeCounter > 30) {
+		camera()->changeLookAt(BoVector3Float(dx, dy, 0));
+	}
+ }
+}
 
 /**
  * This class is a simple container class for the @ref BoUfoGameGUI class. It
@@ -583,14 +743,16 @@ public:
 
 
 
-class BosonGameViewPrivate
+class BosonQtGameViewPrivate
 {
 public:
-	BosonGameViewPrivate()
+	BosonQtGameViewPrivate()
 	{
 		mViewData = 0;
 		mLayeredPane = 0;
+		mLayeredWidget = 0;
 		mUfoCanvasWidget = 0;
+		mCanvasWidget = 0;
 		mUfoGameGUI = 0;
 		mToolTipLabel = 0;
 		mUfoCursorWidget = 0;
@@ -628,7 +790,9 @@ public:
 
 	BosonViewData* mViewData;
 	BoUfoLayeredPane* mLayeredPane;
+	BoLayeredWidget* mLayeredWidget;
 	BosonUfoCanvasWidget* mUfoCanvasWidget;
+	BosonCanvasWidget* mCanvasWidget;
 	BosonUfoPlacementPreviewWidget* mUfoPlacementPreviewWidget;
 	BosonUfoLineVisualizationWidget* mUfoLineVisualizationWidget;
 	BosonUfoGameGUI* mUfoGameGUI;
@@ -643,8 +807,8 @@ public:
 	BoGLToolTip* mToolTips;
 	BosonUfoMiniMap* mGLMiniMap;
 	PlayerIO* mLocalPlayerIO;
-	BosonGameViewScriptConnectorBoUfo* mScriptConnector;
-	SelectionRectBoUfo* mSelectionRect;
+	BosonQtGameViewScriptConnector* mScriptConnector;
+	SelectionRect* mSelectionRect;
 	KGameMouseIO* mMouseIO;
 	BosonGameViewInputBase* mInput;
 	bool mInputInitialized;
@@ -671,31 +835,33 @@ public:
 	BosonGameViewEventListener* mEventListener;
 
 	BoMouseDoubleClickRecognizer mDoubleClickRecognizer;
-	BoLeftMouseButtonState* mLeftButtonState;
-	BoMiddleMouseButtonState* mMiddleButtonState;
-	BoRightMouseButtonState* mRightButtonState;
+	BoLeftMouseButtonStateQt* mLeftButtonState;
+	BoMiddleMouseButtonStateQt* mMiddleButtonState;
+	BoRightMouseButtonStateQt* mRightButtonState;
 
 	bool mGameMode;
 };
 
-BosonGameView::BosonGameView()
-		: BoUfoCustomWidget()
+BosonQtGameView::BosonQtGameView(QWidget* parent)
+		: QWidget(parent)
 {
  init();
 }
 
-BosonGameView::~BosonGameView()
+BosonQtGameView::~BosonQtGameView()
 {
  boDebug() << k_funcinfo << endl;
 
  quitGame();
  delete d->mEventListener;
  boDebug() << k_funcinfo << "quitGame() done" << endl;
+#if !QT_PORT
  if (!removeWidget(d->mLayeredPane)) { // AB: do NOT delete it directly!
 	// AB: probably d->mLayeredPane is not a direct child of this widget
 	// anymore?
 	boError() << k_funcinfo << "could not remove layered pane. maybe widget design is changed?" << endl;
  }
+#endif
  boDebug() << k_funcinfo << "layered pane removed" << endl;
  delete d->mActionCollection;
  delete d->mSelectionRect;
@@ -703,7 +869,9 @@ BosonGameView::~BosonGameView()
  delete d->mSelectionGroups;
  delete mSelection;
  delete d->mGameGLMatrices;
+#if !QTimer
  delete d->mToolTips;
+#endif
  d->mGameViewPlugin = 0;
  BoGroundRendererManager::manager()->unsetCurrentRenderer();
  BoMeshRendererManager::manager()->unsetCurrentRenderer();
@@ -723,16 +891,16 @@ BosonGameView::~BosonGameView()
  boDebug() << k_funcinfo << "done" << endl;
 }
 
-void BosonGameView::init()
+void BosonQtGameView::init()
 {
  PROFILE_METHOD
- d = new BosonGameViewPrivate;
+ d = new BosonQtGameViewPrivate;
  mCanvas = 0;
  d->mGameMode = true;
  d->mInputInitialized = false;
  d->mFPSCounter = 0;
 
- setName("BosonGameView");
+ setName("BosonQtGameView");
 
  d->mViewData = new BosonViewData(this);
  BosonViewData::setGlobalViewData(d->mViewData);
@@ -763,11 +931,13 @@ void BosonGameView::init()
  BoGroundRendererManager::manager()->setViewFrustum(&d->mViewFrustum);
  resetGameViewPlugin(); // set GL matrices
 
+#if !QT_PORT
  d->mToolTips = new BoGLToolTip(this);
  connect(this, SIGNAL(signalCursorCanvasVectorChanged(const BoVector3Fixed&)),
 		d->mToolTips, SLOT(slotSetCursorCanvasVector(const BoVector3Fixed&)));
+#endif
 
- d->mSelectionRect = new SelectionRectBoUfo();
+ d->mSelectionRect = new SelectionRect();
  d->mSelectionRect->setMatrices(d->mGameGLMatrices);
 
  d->mCursorEdgeScrolling = new BoCursorEdgeScrolling(this);
@@ -780,12 +950,12 @@ void BosonGameView::init()
  d->mSelectionGroups = new BoSelectionGroup(10, this);
  d->mSelectionGroups->setSelection(selection());
 
- d->mScriptConnector = new BosonGameViewScriptConnectorBoUfo(this);
+ d->mScriptConnector = new BosonQtGameViewScriptConnector(this);
 
- d->mLeftButtonState = new BoLeftMouseButtonState(this, d->mGameGLMatrices);
+ d->mLeftButtonState = new BoLeftMouseButtonStateQt(this, d->mGameGLMatrices);
  d->mLeftButtonState->setSelectionRect(d->mSelectionRect);
- d->mMiddleButtonState = new BoMiddleMouseButtonState(this, d->mGameGLMatrices);
- d->mRightButtonState = new BoRightMouseButtonState(this, d->mGameGLMatrices);
+ d->mMiddleButtonState = new BoMiddleMouseButtonStateQt(this, d->mGameGLMatrices);
+ d->mRightButtonState = new BoRightMouseButtonStateQt(this, d->mGameGLMatrices);
 
 
 
@@ -823,10 +993,8 @@ void BosonGameView::init()
 
 
 
- initUfoGUI();
+ initGUI();
 
- connect(this, SIGNAL(signalWidgetResized()),
-		this, SLOT(slotWidgetResized()));
  connect(this, SIGNAL(signalWidgetShown(ufo::UWidgetEvent*)),
 		this, SLOT(slotWidgetShown()));
  connect(this, SIGNAL(signalWidgetHidden(ufo::UWidgetEvent*)),
@@ -841,12 +1009,9 @@ void BosonGameView::init()
 		this, SLOT(slotMouseEvent(QMouseEvent*)));
  connect(this, SIGNAL(signalMouseReleased(QMouseEvent*)),
 		this, SLOT(slotMouseEvent(QMouseEvent*)));
-
- setMouseEventsEnabled(true, true);
- setFocusEventsEnabled(true);
 }
 
-void BosonGameView::quitGame()
+void BosonQtGameView::quitGame()
 {
  boDebug() << k_funcinfo << endl;
  resetGameMode();
@@ -860,8 +1025,10 @@ void BosonGameView::quitGame()
  d->mSelectionRect->quitGame();
  d->mSelectionGroups->clearGroups();
  selection()->clear();
- d->mUfoCanvasWidget->quitGame();
+ d->mCanvasWidget->quitGame();
+#if !QT_PORT
  d->mToolTips->hideTip();
+#endif
 
  if (d->mGLMiniMap) {
 	d->mGLMiniMap->quitGame();
@@ -880,16 +1047,16 @@ void BosonGameView::quitGame()
  d->mLightWidget = 0;
 }
 
-bool BosonGameView::initializeItems()
+bool BosonQtGameView::initializeItems()
 {
- if (!d->mUfoCanvasWidget->initializeItems()) {
+ if (!d->mCanvasWidget->initializeItems()) {
 	boError() << k_funcinfo << "ufo canvas widget could not initialize items" << endl;
 	return false;
  }
  return true;
 }
 
-void BosonGameView::slotWidgetResized()
+void BosonQtGameView::resizeEvent(QResizeEvent* e)
 {
  int w = width();
  int h = height();
@@ -938,7 +1105,7 @@ void BosonGameView::slotWidgetResized()
  }
 }
 
-void BosonGameView::setViewport(int x, int y, GLsizei w, GLsizei h)
+void BosonQtGameView::setViewport(int x, int y, GLsizei w, GLsizei h)
 {
  glViewport(x, y, w, h);
  // AB: we could use glGetIntegerv(GL_VIEWPORT, d->mViewport); here. But our own
@@ -949,56 +1116,58 @@ void BosonGameView::setViewport(int x, int y, GLsizei w, GLsizei h)
  d->mViewport[3] = h;
 }
 
-const BoVector3Fixed& BosonGameView::cursorCanvasVector() const
+const BoVector3Fixed& BosonQtGameView::cursorCanvasVector() const
 {
  return d->mCursorPos.canvasVector();
 }
 
-const QPoint& BosonGameView::cursorWidgetPos() const
+const QPoint& BosonQtGameView::cursorWidgetPos() const
 {
  return d->mCursorPos.gameViewPos();
 }
 
-void BosonGameView::updateCursorCanvasVector(const QPoint& cursorGameViewPos)
+void BosonQtGameView::updateCursorCanvasVector(const QPoint& cursorGameViewPos)
 {
  GLfloat x = 0.0, y = 0.0, z = 0.0;
  mapCoordinatesToGround(cursorGameViewPos, &x, &y, &z);
  BoVector3Fixed canvas(x, -y, z); // AB: are these already real z coordinates?
+#if !QT_PORT
  QPoint rootPanePos = mapToRoot(cursorGameViewPos);
 
  d->mCursorPos.set(cursorGameViewPos, rootPanePos, canvas);
+#endif
 
  emit signalCursorCanvasVectorChanged(d->mCursorPos.canvasVector());
 }
 
-void BosonGameView::setGameFPSCounter(BosonGameFPSCounter* counter)
+void BosonQtGameView::setGameFPSCounter(BosonGameFPSCounter* counter)
 {
  d->mFPSCounter = counter;
  d->mUfoGameGUI->setGameFPSCounter(gameFPSCounter());
  d->mUfoFPSGraphWidget->setGameFPSCounter(gameFPSCounter());
 }
 
-BosonGameFPSCounter* BosonGameView::gameFPSCounter() const
+BosonGameFPSCounter* BosonQtGameView::gameFPSCounter() const
 {
  return d->mFPSCounter;
 }
 
-void BosonGameView::setCamera(const BoGameCamera& camera)
+void BosonQtGameView::setCamera(const BoGameCamera& camera)
 {
  d->mCamera = camera;
 }
 
-BoGameCamera* BosonGameView::camera() const
+BoGameCamera* BosonQtGameView::camera() const
 {
  return &d->mCamera;
 }
 
-BoAutoGameCamera* BosonGameView::autoCamera() const
+BoAutoGameCamera* BosonQtGameView::autoCamera() const
 {
  return camera()->autoGameCamera();
 }
 
-void BosonGameView::cameraChanged()
+void BosonQtGameView::cameraChanged()
 {
  camera()->applyCameraToScene();
 
@@ -1019,7 +1188,7 @@ void BosonGameView::cameraChanged()
 
  BoLightManager::manager()->cameraChanged();
 
- d->mUfoCanvasWidget->cameraChanged();
+ d->mCanvasWidget->cameraChanged();
 
  boWaterRenderer->modelviewMatrixChanged(d->mModelviewMatrix);
  boWaterRenderer->setCameraPos(camera()->cameraPos());
@@ -1028,27 +1197,27 @@ void BosonGameView::cameraChanged()
  updateCursorCanvasVector(cursorWidgetPos());
 }
 
-void BosonGameView::advanceCamera()
+void BosonQtGameView::advanceCamera()
 {
  autoCamera()->advance();
 }
 
-void BosonGameView::slotCenterHomeBase()
+void BosonQtGameView::slotCenterHomeBase()
 {
  BO_CHECK_NULL_RET(localPlayerIO());
  slotReCenterDisplay(localPlayerIO()->homeBase());
 }
 
-void BosonGameView::slotReCenterDisplay(const QPoint& pos)
+void BosonQtGameView::slotReCenterDisplay(const QPoint& pos)
 {
  BO_CHECK_NULL_RET(camera());
  camera()->setLookAt(BoVector3Float(((float)pos.x()), -((float)pos.y()), 0));
 }
 
-bool BosonGameView::mapCoordinatesToGround(const QPoint& widgetPos, GLfloat* posX, GLfloat* posY, GLfloat* posZ, bool useRealDepth) const
+bool BosonQtGameView::mapCoordinatesToGround(const QPoint& widgetPos, GLfloat* posX, GLfloat* posY, GLfloat* posZ, bool useRealDepth) const
 {
  BoVector3Float p;
- bool ret = d->mUfoCanvasWidget->emulatePickGroundPos(widgetPos, &p);
+ bool ret = d->mCanvasWidget->emulatePickGroundPos(widgetPos, &p);
  if (ret) {
 	*posX = p.x();
 	*posY = p.y();
@@ -1057,13 +1226,13 @@ bool BosonGameView::mapCoordinatesToGround(const QPoint& widgetPos, GLfloat* pos
  return ret;
 }
 
-bool BosonGameView::mapDistance(int windx, int windy, GLfloat* dx, GLfloat* dy) const
+bool BosonQtGameView::mapDistance(int windx, int windy, GLfloat* dx, GLfloat* dy) const
 {
  return Bo3dTools::mapDistance(d->mModelviewMatrix, d->mProjectionMatrix, d->mViewport,
 		windx, windy, dx, dy);
 }
 
-void BosonGameView::scrollBy(int dx, int dy)
+void BosonQtGameView::scrollBy(int dx, int dy)
 {
  BO_CHECK_NULL_RET(camera());
  GLfloat x, y;
@@ -1071,7 +1240,7 @@ void BosonGameView::scrollBy(int dx, int dy)
  camera()->changeLookAt(BoVector3Float(x, y, 0));
 }
 
-void BosonGameView::slotScroll(int dir)
+void BosonQtGameView::slotScroll(int dir)
 {
  switch ((ScrollDirection)dir) {
 	case ScrollUp:
@@ -1091,7 +1260,7 @@ void BosonGameView::slotScroll(int dir)
  }
 }
 
-void BosonGameView::slotCenterOnSelectionGroup(int n)
+void BosonQtGameView::slotCenterOnSelectionGroup(int n)
 {
  BO_CHECK_NULL_RET(selection());
  d->mSelectionGroups->slotSelectSelectionGroup(n);
@@ -1115,12 +1284,12 @@ void BosonGameView::slotCenterOnSelectionGroup(int n)
  slotReCenterDisplay(QPoint((int)leader->centerX(), (int)leader->centerY()));
 }
 
-void BosonGameView::rotate(float delta)
+void BosonQtGameView::rotate(float delta)
 {
  camera()->changeRotation(delta);
 }
 
-void BosonGameView::zoom(float delta)
+void BosonQtGameView::zoom(float delta)
 {
  BO_CHECK_NULL_RET(camera());
  BO_CHECK_NULL_RET(canvas());
@@ -1129,17 +1298,36 @@ void BosonGameView::zoom(float delta)
  camera()->changeDistance(delta);
 }
 
-void BosonGameView::slotResetViewProperties()
+void BosonQtGameView::slotResetViewProperties()
 {
  BO_CHECK_NULL_RET(canvas());
  d->mFovY = 60.0;
  d->mAspect = 1.0;
  setCamera(BoGameCamera(canvas()));
- slotWidgetResized();
+ QResizeEvent e(size(), size());
+ resizeEvent(&e);
 }
 
 
-void BosonGameView::initUfoGUI()
+void BosonQtGameView::initGUI()
+{
+ initUfoGUI();
+
+ d->mLayeredWidget = new BoLayeredWidget(this);
+ QVBoxLayout* layout = new QVBoxLayout(this);
+ layout->addWidget(d->mLayeredWidget);
+ d->mLayeredWidget->show();
+
+ d->mCanvasWidget = new BosonCanvasWidget(d->mLayeredWidget);
+ d->mCanvasWidget->setGameGLMatrices(d->mGameGLMatrices);
+ d->mCanvasWidget->setCamera(&d->mCamera);
+ d->mCanvasWidget->setCanvas(canvas());
+ d->mLeftButtonState->setCanvasWidget(d->mCanvasWidget);
+ d->mCanvasWidget->show();
+
+}
+
+void BosonQtGameView::initUfoGUI()
 {
  PROFILE_METHOD
  glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -1154,13 +1342,15 @@ void BosonGameView::initUfoGUI()
  d->mLayeredPane = new BoUfoLayeredPane();
  d->mLayeredPane->setName("GameViewLayeredPane");
  d->mLayeredPane->setOpaque(false);
+#if !QT_PORT
  addWidget(d->mLayeredPane);
+#endif
 
  d->mUfoCanvasWidget = new BosonUfoCanvasWidget();
  d->mUfoCanvasWidget->setGameGLMatrices(d->mGameGLMatrices);
  d->mUfoCanvasWidget->setCamera(&d->mCamera);
  d->mUfoCanvasWidget->setCanvas(canvas());
- d->mLeftButtonState->setUfoCanvasWidget(d->mUfoCanvasWidget);
+ d->mLeftButtonState->setCanvasWidget(d->mCanvasWidget);
 
  d->mUfoPlacementPreviewWidget = new BosonUfoPlacementPreviewWidget();
  d->mUfoPlacementPreviewWidget->setGameGLMatrices(d->mGameGLMatrices);
@@ -1184,10 +1374,12 @@ void BosonGameView::initUfoGUI()
 		d->mUfoGameGUI, SIGNAL(signalSelectionChanged(BoSelection*)));
  ufoGameGUIContainer->addWidget(d->mUfoGameGUI);
 
+#if !QT_PORT
  d->mToolTipLabel = new BoUfoLabel();
  d->mToolTipLabel->setName("ToolTipLabel");
  d->mToolTipLabel->setForegroundColor(Qt::white);
  d->mToolTips->setLabel(d->mToolTipLabel);
+#endif
 
  d->mUfoCursorWidget = new BosonUfoCursorWidget();
  d->mUfoCursorWidget->setGameGLMatrices(d->mGameGLMatrices);
@@ -1217,7 +1409,9 @@ void BosonGameView::initUfoGUI()
  d->mLayeredPane->addWidget(d->mUfoPlacementPreviewWidget);
  d->mLayeredPane->addWidget(d->mUfoLineVisualizationWidget);
  d->mLayeredPane->addWidget(ufoGameGUIContainer);
+#if !QT_PORT
  d->mLayeredPane->addWidget(d->mToolTipLabel);
+#endif
  d->mLayeredPane->addWidget(d->mUfoCursorWidget);
  d->mLayeredPane->addWidget(d->mUfoSelectionRectWidget);
  d->mLayeredPane->addWidget(d->mUfoFPSGraphWidget);
@@ -1236,7 +1430,7 @@ void BosonGameView::initUfoGUI()
  glPopAttrib();
 }
 
-void BosonGameView::setCanvas(BosonCanvas* canvas)
+void BosonQtGameView::setCanvas(BosonCanvas* canvas)
 {
  boDebug() << k_funcinfo << "current canvas: " << mCanvas << " new canvas: " << canvas << endl;
 
@@ -1253,7 +1447,7 @@ void BosonGameView::setCanvas(BosonCanvas* canvas)
  }
  d->mUfoLineVisualizationWidget->setCanvas(mCanvas);
  d->mUfoGameGUI->setCanvas(mCanvas);
- d->mUfoCanvasWidget->setCanvas(mCanvas);
+ d->mCanvasWidget->setCanvas(mCanvas);
  d->mUfoPlacementPreviewWidget->setCanvas(mCanvas);
  resetGameViewPlugin(); // setCanvas()
  if (!mCanvas) {
@@ -1263,7 +1457,7 @@ void BosonGameView::setCanvas(BosonCanvas* canvas)
  d->mEventListener->setCanvas(mCanvas);
 
  connect(d->mEventListener, SIGNAL(signalFacilityConstructed(Unit*)),
-		d->mUfoCanvasWidget, SLOT(slotFacilityConstructed(Unit*)));
+		d->mCanvasWidget, SLOT(slotFacilityConstructed(Unit*)));
 
  connect(mCanvas, SIGNAL(signalRemovedItem(BosonItem*)),
 		d->mSelectionGroups, SLOT(slotRemoveItem(BosonItem*)));
@@ -1308,7 +1502,7 @@ void BosonGameView::setCanvas(BosonCanvas* canvas)
 
 }
 
-void BosonGameView::bosonObjectCreated(Boson* boson)
+void BosonQtGameView::bosonObjectCreated(Boson* boson)
 {
  connect(boson, SIGNAL(signalAdvance(unsigned int, bool)),
 		this, SLOT(slotAdvance(unsigned int, bool)));
@@ -1322,13 +1516,13 @@ void BosonGameView::bosonObjectCreated(Boson* boson)
  d->mUfoGameGUI->bosonObjectCreated(boson);
 }
 
-void BosonGameView::bosonObjectAboutToBeDestroyed(Boson* boson)
+void BosonQtGameView::bosonObjectAboutToBeDestroyed(Boson* boson)
 {
  d->mUfoGameGUI->bosonObjectAboutToBeDestroyed(boson);
 }
 
 
-void BosonGameView::setLocalPlayerIO(PlayerIO* io)
+void BosonQtGameView::setLocalPlayerIO(PlayerIO* io)
 {
  boDebug() << k_funcinfo << endl;
  resetGameMode();
@@ -1345,7 +1539,9 @@ void BosonGameView::setLocalPlayerIO(PlayerIO* io)
  d->mLocalPlayerIO = io;
  boDebug() << k_funcinfo << "d->mLocalPlayerIO now: " << d->mLocalPlayerIO << endl;
 
+#if !QT_PORT
  d->mToolTips->setPlayerIO(localPlayerIO());
+#endif
  BoGroundRendererManager::manager()->setLocalPlayerIO(localPlayerIO());
 
  delete d->mMouseIO;
@@ -1395,8 +1591,9 @@ void BosonGameView::setLocalPlayerIO(PlayerIO* io)
 #endif
  }
 
+ boDebug() << "local player: " << localPlayerIO();
  d->mUfoGameGUI->setLocalPlayerIO(localPlayerIO());
- d->mUfoCanvasWidget->setLocalPlayerIO(localPlayerIO());
+ d->mCanvasWidget->setLocalPlayerIO(localPlayerIO());
  d->mUfoPlacementPreviewWidget->setLocalPlayerIO(localPlayerIO());
  resetGameViewPlugin(); // setLocalPlayerIO()
 
@@ -1427,24 +1624,24 @@ void BosonGameView::setLocalPlayerIO(PlayerIO* io)
  }
 }
 
-PlayerIO* BosonGameView::localPlayerIO() const
+PlayerIO* BosonQtGameView::localPlayerIO() const
 {
  return d->mLocalPlayerIO;
 }
 
-void BosonGameView::createActionCollection(BoUfoActionCollection* parent)
+void BosonQtGameView::createActionCollection(BoUfoActionCollection* parent)
 {
  BO_CHECK_NULL_RET(parent);
  delete d->mActionCollection;
  d->mActionCollection = new BoUfoActionCollection(parent, this, "gameview_actioncollection");
 }
 
-BoUfoActionCollection* BosonGameView::actionCollection() const
+BoUfoActionCollection* BosonQtGameView::actionCollection() const
 {
  return d->mActionCollection;
 }
 
-void BosonGameView::slotUnitChanged(Unit* unit)
+void BosonQtGameView::slotUnitChanged(Unit* unit)
 {
 // FIXME: we might want to place this code into BoSelection directly (cleaner)
  if (!unit) {
@@ -1458,7 +1655,7 @@ void BosonGameView::slotUnitChanged(Unit* unit)
  }
 }
 
-void BosonGameView::slotExplored(int x, int y)
+void BosonQtGameView::slotExplored(int x, int y)
 {
  BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
  if (r) {
@@ -1467,7 +1664,7 @@ void BosonGameView::slotExplored(int x, int y)
  boWaterRenderer->cellExploredChanged(x, y, x, y);
 }
 
-void BosonGameView::slotUnexplored(int x, int y)
+void BosonQtGameView::slotUnexplored(int x, int y)
 {
  BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
  if (r) {
@@ -1476,7 +1673,7 @@ void BosonGameView::slotUnexplored(int x, int y)
  boWaterRenderer->cellExploredChanged(x, y, x, y);
 }
 
-void BosonGameView::slotFog(int x, int y)
+void BosonQtGameView::slotFog(int x, int y)
 {
 	BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
 	if (r) {
@@ -1484,7 +1681,7 @@ void BosonGameView::slotFog(int x, int y)
 	}
 }
 
-void BosonGameView::slotUnfog(int x, int y)
+void BosonQtGameView::slotUnfog(int x, int y)
 {
 	BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
 	if (r) {
@@ -1492,7 +1689,7 @@ void BosonGameView::slotUnfog(int x, int y)
 	}
 }
 
-void BosonGameView::slotChangeTexMap(int x, int y)
+void BosonQtGameView::slotChangeTexMap(int x, int y)
 {
  BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
  if (r) {
@@ -1503,7 +1700,7 @@ void BosonGameView::slotChangeTexMap(int x, int y)
  }
 }
 
-void BosonGameView::slotChangeHeight(int x, int y)
+void BosonQtGameView::slotChangeHeight(int x, int y)
 {
  BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
  if (r) {
@@ -1511,25 +1708,31 @@ void BosonGameView::slotChangeHeight(int x, int y)
  }
 }
 
-void BosonGameView::slotRemovedItemFromCanvas(BosonItem* item)
+void BosonQtGameView::slotRemovedItemFromCanvas(BosonItem* item)
 {
  // be careful with the item pointer! this is usually called from the BosonItem
  // destructor, its functions might be destroyed already!
  BO_CHECK_NULL_RET(item);
+#if !QT_PORT
  d->mToolTips->unsetItem(item);
+#endif
 }
 
-void BosonGameView::setToolTipCreator(int type)
+void BosonQtGameView::setToolTipCreator(int type)
 {
+#if !QT_PORT
  d->mToolTips->setToolTipCreator(type);
+#endif
 }
 
-void BosonGameView::setToolTipUpdatePeriod(int ms)
+void BosonQtGameView::setToolTipUpdatePeriod(int ms)
 {
+#if !QT_PORT
  d->mToolTips->setUpdatePeriod(ms);
+#endif
 }
 
-void BosonGameView::slotInitMiniMapFogOfWar()
+void BosonQtGameView::slotInitMiniMapFogOfWar()
 {
  BO_CHECK_NULL_RET(d->mGLMiniMap);
  if (boGame->gameMode()) {
@@ -1539,7 +1742,7 @@ void BosonGameView::slotInitMiniMapFogOfWar()
  }
 }
 
-void BosonGameView::slotReloadGameViewPlugin()
+void BosonQtGameView::slotReloadGameViewPlugin()
 {
  if (d->mGameViewPluginWidget) {
 	d->mGameViewPluginWidgetContainer->removeWidget(d->mGameViewPluginWidget);
@@ -1566,12 +1769,12 @@ void BosonGameView::slotReloadGameViewPlugin()
  resetGameViewPlugin();
 }
 
-void BosonGameView::resetGameViewPlugin()
+void BosonQtGameView::resetGameViewPlugin()
 {
  resetGameViewPlugin(boGame ? boGame->gameMode() : true);
 }
 
-void BosonGameView::resetGameViewPlugin(bool gameMode)
+void BosonQtGameView::resetGameViewPlugin(bool gameMode)
 {
  d->mGameViewPlugin = (BosonGameViewPluginBase*)BosonGameViewPluginManager::manager()->currentPlugin();
  BO_CHECK_NULL_RET(d->mGameViewPlugin);
@@ -1591,33 +1794,33 @@ void BosonGameView::resetGameViewPlugin(bool gameMode)
  d->mGameViewPlugin->setGameMode(gameMode);
 }
 
-void BosonGameView::addChatMessage(const QString& message)
+void BosonQtGameView::addChatMessage(const QString& message)
 {
  d->mUfoGameGUI->addChatMessage(message);
 }
 
-void BosonGameView::slotEditorShowPlaceFacilities()
+void BosonQtGameView::slotEditorShowPlaceFacilities()
 {
  d->mUfoGameGUI->slotShowPlaceFacilities(localPlayerIO());
 }
 
-void BosonGameView::slotEditorShowPlaceMobiles()
+void BosonQtGameView::slotEditorShowPlaceMobiles()
 {
  d->mUfoGameGUI->slotShowPlaceMobiles(localPlayerIO());
 }
 
-void BosonGameView::slotEditorShowPlaceGround()
+void BosonQtGameView::slotEditorShowPlaceGround()
 {
  d->mUfoGameGUI->slotShowPlaceGround();
 }
 
-void BosonGameView::slotEditorDeleteSelectedUnits()
+void BosonQtGameView::slotEditorDeleteSelectedUnits()
 {
  BO_CHECK_NULL_RET(displayInput());
  displayInput()->deleteSelectedUnits();
 }
 
-void BosonGameView::slotEditorEditHeight(bool on)
+void BosonQtGameView::slotEditorEditHeight(bool on)
 {
  BO_CHECK_NULL_RET(displayInput());
  if (on) {
@@ -1629,31 +1832,31 @@ void BosonGameView::slotEditorEditHeight(bool on)
  }
 }
 
-void BosonGameView::slotEditorUndo()
+void BosonQtGameView::slotEditorUndo()
 {
  displayInput()->undo();
 }
 
-void BosonGameView::slotEditorRedo()
+void BosonQtGameView::slotEditorRedo()
 {
  displayInput()->redo();
 }
 
-void BosonGameView::slotWidgetShown()
+void BosonQtGameView::slotWidgetShown()
 {
  if (displayInput()) {
 	displayInput()->updateCursor();
  }
 }
 
-void BosonGameView::slotWidgetHidden()
+void BosonQtGameView::slotWidgetHidden()
 {
  if (displayInput()) {
 	displayInput()->makeCursorInvalid();
  }
 }
 
-void BosonGameView::slotChangeCursor(int mode, const QString& dir)
+void BosonQtGameView::slotChangeCursor(int mode, const QString& dir)
 {
  if (boGame && boGame->gameMode()) {
 	d->mUfoCursorWidget->slotChangeCursor(mode, dir);
@@ -1662,7 +1865,7 @@ void BosonGameView::slotChangeCursor(int mode, const QString& dir)
  }
 }
 
-void BosonGameView::resetGameMode()
+void BosonQtGameView::resetGameMode()
 {
  d->mGameMode = true;
  slotChangeCursor(boConfig->intValue("CursorMode"), boConfig->stringValue("CursorDir"));
@@ -1685,7 +1888,7 @@ void BosonGameView::resetGameMode()
 }
 
 
-void BosonGameView::setGameMode(bool mode)
+void BosonQtGameView::setGameMode(bool mode)
 {
  BO_CHECK_NULL_RET(actionCollection());
  resetGameMode();
@@ -1707,7 +1910,7 @@ void BosonGameView::setGameMode(bool mode)
  slotAddMenuInput();
 }
 
-void BosonGameView::slotAddMenuInput()
+void BosonQtGameView::slotAddMenuInput()
 {
  if (localPlayerIO()) {
 	KGameIO* oldIO = localPlayerIO()->findRttiIO(BosonMenuInput::RTTI);
@@ -1780,7 +1983,7 @@ void BosonGameView::slotAddMenuInput()
  }
 }
 
-void BosonGameView::slotPlugLocalPlayerInput()
+void BosonQtGameView::slotPlugLocalPlayerInput()
 {
  BO_CHECK_NULL_RET(localPlayerIO());
  BosonLocalPlayerInput* input = (BosonLocalPlayerInput*)localPlayerIO()->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
@@ -1798,7 +2001,7 @@ void BosonGameView::slotPlugLocalPlayerInput()
  }
 }
 
-void BosonGameView::setLocalPlayerScript(BosonScript* script)
+void BosonQtGameView::setLocalPlayerScript(BosonScript* script)
 {
  // AB: there is no need to save the pointer atm.
  // we just need to do these connects.
@@ -1807,29 +2010,29 @@ void BosonGameView::setLocalPlayerScript(BosonScript* script)
  }
 }
 
-BoLight* BosonGameView::light(int id) const
+BoLight* BosonQtGameView::light(int id) const
 {
  return BoLightManager::manager()->light(id);
 }
 
-BoLight* BosonGameView::newLight()
+BoLight* BosonQtGameView::newLight()
 {
  return BoLightManager::manager()->createLight();
 }
 
-void BosonGameView::removeLight(int id)
+void BosonQtGameView::removeLight(int id)
 {
  BoLightManager::manager()->deleteLight(id);
 }
 
-void BosonGameView::slotAdvance(unsigned int advanceCallsCount, bool advanceFlag)
+void BosonQtGameView::slotAdvance(unsigned int advanceCallsCount, bool advanceFlag)
 {
  // AB: note that in the big display no game logic must be done!
  // -> this slotAdvance() is here for certain optimizations on rendering, not
  //    for advancing the game itself
  advanceCamera();
 
- d->mUfoCanvasWidget->slotAdvance(advanceCallsCount, advanceFlag);
+ d->mCanvasWidget->slotAdvance(advanceCallsCount, advanceFlag);
  d->mUfoLineVisualizationWidget->slotAdvance(advanceCallsCount, advanceFlag);
 
 #warning FIXME: movie
@@ -1840,7 +2043,7 @@ void BosonGameView::slotAdvance(unsigned int advanceCallsCount, bool advanceFlag
 #endif
 }
 
-void BosonGameView::loadFromXML(const QDomElement& root)
+void BosonQtGameView::loadFromXML(const QDomElement& root)
 {
  // AB: note that a failure in this methods is an error, but it does not abort
  // loading.
@@ -1858,7 +2061,7 @@ void BosonGameView::loadFromXML(const QDomElement& root)
  if (effects.isNull()) {
 	boError(260) << k_funcinfo << "no Effects tag" << endl;
 	// do not return
- } else if (!d->mUfoCanvasWidget->loadEffectsFromXML(effects)) {
+ } else if (!d->mCanvasWidget->loadEffectsFromXML(effects)) {
 	boError(260) << k_funcinfo << "could not load effects" << endl;
 	// do not return
  }
@@ -1887,7 +2090,7 @@ void BosonGameView::loadFromXML(const QDomElement& root)
  }
 }
 
-void BosonGameView::saveAsXML(QDomElement& root)
+void BosonQtGameView::saveAsXML(QDomElement& root)
 {
  QDomDocument doc = root.ownerDocument();
 
@@ -1897,7 +2100,7 @@ void BosonGameView::saveAsXML(QDomElement& root)
  root.appendChild(unitGroups);
 
  QDomElement effects = doc.createElement(QString::fromLatin1("Effects"));
- d->mUfoCanvasWidget->saveEffectsAsXML(effects);
+ d->mCanvasWidget->saveEffectsAsXML(effects);
  root.appendChild(effects);
 
 
@@ -1918,11 +2121,11 @@ void BosonGameView::saveAsXML(QDomElement& root)
  display.appendChild(sel);
 }
 
-void BosonGameView::setFont(const BoFontInfo& font)
+void BosonQtGameView::setFont(const BoFontInfo& font)
 {
 }
 
-void BosonGameView::slotShowLight0Widget()
+void BosonQtGameView::slotShowLight0Widget()
 {
 #warning TODO use BoUfoLightCameraWidget
 #if 0
@@ -1933,7 +2136,7 @@ void BosonGameView::slotShowLight0Widget()
 #endif
 }
 
-void BosonGameView::moveSelectionRect(const QPoint& widgetPos)
+void BosonQtGameView::moveSelectionRect(const QPoint& widgetPos)
 {
  if (d->mSelectionRect->isVisible()) {
 	d->mSelectionRect->setEndWidgetPos(widgetPos);
@@ -1943,7 +2146,7 @@ void BosonGameView::moveSelectionRect(const QPoint& widgetPos)
  }
 }
 
-void BosonGameView::setDisplayInput(BosonGameViewInputBase* input)
+void BosonQtGameView::setDisplayInput(BosonGameViewInputBase* input)
 {
  if (d->mInput) {
 	boWarning() << k_funcinfo << "existing input non-NULL" << endl;
@@ -1988,22 +2191,22 @@ void BosonGameView::setDisplayInput(BosonGameViewInputBase* input)
 
 }
 
-BosonGameViewInputBase* BosonGameView::displayInput() const
+BosonGameViewInputBase* BosonQtGameView::displayInput() const
 {
  return d->mInput;
 }
 
-bool BosonGameView::isInputInitialized()
+bool BosonQtGameView::isInputInitialized()
 {
  return d->mInputInitialized;
 }
 
-void BosonGameView::setInputInitialized(bool initialized)
+void BosonQtGameView::setInputInitialized(bool initialized)
 {
  d->mInputInitialized = initialized;
 }
 
-void BosonGameView::slotAction(const BoSpecificAction& action)
+void BosonQtGameView::slotAction(const BoSpecificAction& action)
 {
  if (!displayInput()) {
 	return;
@@ -2011,13 +2214,13 @@ void BosonGameView::slotAction(const BoSpecificAction& action)
  displayInput()->action(action);
 }
 
-void BosonGameView::slotShowMiniMap(bool show)
+void BosonQtGameView::slotShowMiniMap(bool show)
 {
  d->mGLMiniMap->slotShowMiniMap(show);
 }
 
 
-void BosonGameView::slotMouseEvent(QMouseEvent* e)
+void BosonQtGameView::slotMouseEvent(QMouseEvent* e)
 {
  BO_CHECK_NULL_RET(displayInput());
  GLfloat posX = 0.0;
@@ -2044,7 +2247,7 @@ void BosonGameView::slotMouseEvent(QMouseEvent* e)
 	event.setShiftModifier(w->state() & Qt::ShiftButton);
 	event.setAltModifier(w->state() & Qt::AltButton);
  }
- event.setUnitAtEventPos(d->mUfoCanvasWidget->unitAtWidgetPos(event.gameViewWidgetPos()));
+ event.setUnitAtEventPos(d->mCanvasWidget->unitAtWidgetPos(event.gameViewWidgetPos()));
 
  switch (e->type()) {
 	case QEvent::Wheel:
@@ -2108,14 +2311,14 @@ void BosonGameView::slotMouseEvent(QMouseEvent* e)
  }
 }
 
-void BosonGameView::slotWheelEvent(QWheelEvent* e)
+void BosonQtGameView::slotWheelEvent(QWheelEvent* e)
 {
  // AB: very unclean. however it makes things easy :-)
  QEvent* ev = (QEvent*)e;
  slotMouseEvent((QMouseEvent*)ev);
 }
 
-void BosonGameView::mouseEventWheel(float delta, Qt::Orientation orientation, const BoMouseEvent& boEvent)
+void BosonQtGameView::mouseEventWheel(float delta, Qt::Orientation orientation, const BoMouseEvent& boEvent)
 {
  int action;
  if (boEvent.shiftButton()) {
@@ -2210,7 +2413,7 @@ void BosonGameView::mouseEventWheel(float delta, Qt::Orientation orientation, co
  }
 }
 
-void BosonGameView::mouseEventMove(int buttonState, const BoMouseEvent& event)
+void BosonQtGameView::mouseEventMove(int buttonState, const BoMouseEvent& event)
 {
  if (buttonState & Qt::LeftButton) {
 	d->mLeftButtonState->mouseMoved(event);
@@ -2234,7 +2437,7 @@ void BosonGameView::mouseEventMove(int buttonState, const BoMouseEvent& event)
  displayInput()->updateCursor();
 }
 
-void BosonGameView::mouseEventRelease(Qt::ButtonState button, const BoMouseEvent& event)
+void BosonQtGameView::mouseEventRelease(Qt::ButtonState button, const BoMouseEvent& event)
 {
  switch (button) {
 	case Qt::LeftButton:
@@ -2259,7 +2462,7 @@ void BosonGameView::mouseEventRelease(Qt::ButtonState button, const BoMouseEvent
  displayInput()->updateCursor();
 }
 
-void BosonGameView::mouseEventReleaseDouble(Qt::ButtonState button, const BoMouseEvent& event)
+void BosonQtGameView::mouseEventReleaseDouble(Qt::ButtonState button, const BoMouseEvent& event)
 {
  switch (button) {
 	case Qt::LeftButton:
@@ -2284,7 +2487,7 @@ void BosonGameView::mouseEventReleaseDouble(Qt::ButtonState button, const BoMous
  displayInput()->updateCursor();
 }
 
-void BosonGameView::paint()
+void BosonQtGameView::paint()
 {
  if (!isVisible()) {
 	return;
@@ -2328,9 +2531,15 @@ void BosonGameView::paint()
  // widget, as we would expect in OpenGL. the menubar is "cut off", we do not
  // have to take it into account here.
  glPushAttrib(GL_VIEWPORT_BIT);
+#if !QT_PORT
  QRect rect = widgetViewportRect();
  // TODO: It'd be sufficient to just set d->mViewport
  setViewport(rect.x(), rect.y(), rect.width(), rect.height());
+#else
+#warning TODO: viewport
+ boDebug() << "setting viewport: " << x() << y() << width() << height();
+ setViewport(x(), y(), width(), height());// AB: FIXME: x(), y() must be in GLOBAL coordinates!
+#endif
  glPopAttrib(); // normal ufo widgets dont need/like our viewport
 
  // apply the camera to the scene, if necessary. we do not need to keep the
@@ -2356,7 +2565,9 @@ void BosonGameView::paint()
 
  // the original implementation paints the children
  boProfiling->push("BoUfoCustomWidget::paint()");
+#if !QT_PORT
  BoUfoCustomWidget::paint();
+#endif
  boProfiling->pop(); // "BoUfoCustomWidget::paint()"
 
  glPopAttrib();
@@ -2366,14 +2577,103 @@ void BosonGameView::paint()
  }
 }
 
-void BosonGameView::paintWidget()
+void BosonQtGameView::paintEvent(QPaintEvent*)
+{
+ BO_CHECK_NULL_RET(camera());
+ BO_CHECK_NULL_RET(boTextureManager);
+ BO_CHECK_NULL_RET(boGame);
+ PROFILE_METHOD
+
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "OpenGL error at start of " << k_funcinfo << endl;
+ }
+
+#warning FIXME: frame skipping: skip child widgets, too!
+ if (boGame->delayedAdvanceMessageCount() >= 2) {
+	// if there are delayed advance messages, we only ensure that we render
+	// a frame once in a while, but most CPU power goes to advance
+	// procedures.
+
+	long long time = gameFPSCounter()->counter()->timeSinceLastFrame(true);
+	if (time > 0 && time < 500000) {
+		// now we need to let the counter know, that this frame is being skipped
+		gameFPSCounter()->skipFrame();
+		return;
+	}
+ }
+
+ glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+ // AB: note there seems to be hardly a difference between flat and smooth
+ // shading (in both quality and speed)
+ if (boConfig->boolValue("SmoothShading", true)) {
+	glShadeModel(GL_SMOOTH);
+ } else {
+	glShadeModel(GL_FLAT);
+ }
+
+ boTextureManager->invalidateCache();
+
+ // AB: we us a viewport to make life in our 3d widgets a _lot_ easier. with
+ // this viewport (0,0) is bottom-left and (width(), height) top-right of the
+ // widget, as we would expect in OpenGL. the menubar is "cut off", we do not
+ // have to take it into account here.
+ glPushAttrib(GL_VIEWPORT_BIT);
+#if !QT_PORT
+ QRect rect = widgetViewportRect();
+ // TODO: It'd be sufficient to just set d->mViewport
+ setViewport(rect.x(), rect.y(), rect.width(), rect.height());
+#else
+#warning TODO: viewport
+ boDebug() << "setting viewport: " << x() << y() << width() << height();
+ setViewport(x(), y(), width(), height());// AB: FIXME: x(), y() must be in GLOBAL coordinates!
+#endif
+ glPopAttrib(); // normal ufo widgets dont need/like our viewport
+
+ // apply the camera to the scene, if necessary. we do not need to keep the
+ // matrix, as it is saved into d->mModelviewMatrix.
+ glPushMatrix();
+ if (camera()->isCameraChanged()) {
+	cameraChanged();
+ }
+
+
+ glLoadMatrixf(d->mModelviewMatrix.data());
+ // AB: lights may depend on the modelview matrix, therefore we must
+ // update the lights at least once with a valid 3d modelview matrix.
+ BoLightManager::manager()->updateAllStates();
+
+
+ glPopMatrix();
+
+ d->mUfoGameGUI->updateUfoLabels();
+ if (d->mGameViewPlugin) {
+	d->mGameViewPlugin->updateBeforePaint();
+ }
+
+#if !QT_PORT
+ // the original implementation paints the children
+ boProfiling->push("BoUfoCustomWidget::paint()");
+ BoUfoCustomWidget::paint();
+ boProfiling->pop(); // "BoUfoCustomWidget::paint()"
+#endif
+
+#warning FIXME: glPopAttrib() for child widgets?
+ glPopAttrib();
+
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << "OpenGL error at end of " << k_funcinfo << endl;
+ }
+}
+
+void BosonQtGameView::paintWidget()
 {
  // nothing to do here, everything is done in child widgets.
  // all GL calls that should apply to child widgets as well should be made in
  // paint(), not here
 }
 
-void BosonGameView::slotGameOver()
+void BosonQtGameView::slotGameOver()
 {
  BO_CHECK_NULL_RET(localPlayerIO());
  BO_CHECK_NULL_RET(boGame);
@@ -2442,19 +2742,19 @@ void BosonGameView::slotGameOver()
  QTimer::singleShot(0, this, SIGNAL(signalEndGame()));
 }
 
-void BosonGameView::addEffect(unsigned int id, const BoVector3Fixed& pos, bofixed zrot)
+void BosonQtGameView::addEffect(unsigned int id, const BoVector3Fixed& pos, bofixed zrot)
 {
- d->mUfoCanvasWidget->createEffect(id, pos, zrot);
+ d->mCanvasWidget->createEffect(id, pos, zrot);
 }
 
-void BosonGameView::addEffectToUnit(int unitid, unsigned int effectid, BoVector3Fixed offset, bofixed zrot)
+void BosonQtGameView::addEffectToUnit(int unitid, unsigned int effectid, BoVector3Fixed offset, bofixed zrot)
 {
- d->mUfoCanvasWidget->createAttachedEffect(unitid, effectid, offset, zrot);
+ d->mCanvasWidget->createAttachedEffect(unitid, effectid, offset, zrot);
 }
 
-void BosonGameView::advanceEffects(int ticks)
+void BosonQtGameView::advanceEffects(int ticks)
 {
- d->mUfoCanvasWidget->advanceEffects(ticks * 0.05);
+ d->mCanvasWidget->advanceEffects(ticks * 0.05);
 }
 
 
@@ -2463,7 +2763,7 @@ void BosonGameView::advanceEffects(int ticks)
 
 
 
-BosonGameViewScriptConnectorBoUfo::BosonGameViewScriptConnectorBoUfo(BosonGameView* parent)
+BosonQtGameViewScriptConnector::BosonQtGameViewScriptConnector(BosonQtGameView* parent)
 	: QObject(parent, "script_to_display_connector")
 {
  mDisplay = parent;
@@ -2472,18 +2772,18 @@ BosonGameViewScriptConnectorBoUfo::BosonGameViewScriptConnectorBoUfo(BosonGameVi
  }
 }
 
-BosonGameViewScriptConnectorBoUfo::~BosonGameViewScriptConnectorBoUfo()
+BosonQtGameViewScriptConnector::~BosonQtGameViewScriptConnector()
 {
 }
 
-void BosonGameViewScriptConnectorBoUfo::reconnect(const QObject* sender, const char* signal, const QObject* receiver, const char* slot)
+void BosonQtGameViewScriptConnector::reconnect(const QObject* sender, const char* signal, const QObject* receiver, const char* slot)
 {
  // make sure noone else connects to that signal
  disconnect(sender, signal, 0, 0);
  connect(sender, signal, receiver, slot);
 }
 
-void BosonGameViewScriptConnectorBoUfo::connectToScript(BosonScript* script)
+void BosonQtGameViewScriptConnector::connectToScript(BosonScript* script)
 {
  BO_CHECK_NULL_RET(script);
  BosonScriptInterface* i = script->interface();
@@ -2574,7 +2874,7 @@ void BosonGameViewScriptConnectorBoUfo::connectToScript(BosonScript* script)
 		this, SLOT(slotGetWind(BoVector3Float*)));
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotAddLight(int* id)
+void BosonQtGameViewScriptConnector::slotAddLight(int* id)
 {
  BoLight* l = mDisplay->newLight();
  if (!l) {
@@ -2584,12 +2884,12 @@ void BosonGameViewScriptConnectorBoUfo::slotAddLight(int* id)
  }
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotRemoveLight(int id)
+void BosonQtGameViewScriptConnector::slotRemoveLight(int id)
 {
  mDisplay->removeLight(id);
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotGetLightPos(int id, BoVector4Float* v)
+void BosonQtGameViewScriptConnector::slotGetLightPos(int id, BoVector4Float* v)
 {
  BoLight* l = mDisplay->light(id);
  if (!l) {
@@ -2601,7 +2901,7 @@ void BosonGameViewScriptConnectorBoUfo::slotGetLightPos(int id, BoVector4Float* 
  }
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotGetLightAmbient(int id, BoVector4Float* v)
+void BosonQtGameViewScriptConnector::slotGetLightAmbient(int id, BoVector4Float* v)
 {
  BoLight* l = mDisplay->light(id);
  if (!l) {
@@ -2613,7 +2913,7 @@ void BosonGameViewScriptConnectorBoUfo::slotGetLightAmbient(int id, BoVector4Flo
  }
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotGetLightDiffuse(int id, BoVector4Float* v)
+void BosonQtGameViewScriptConnector::slotGetLightDiffuse(int id, BoVector4Float* v)
 {
  BoLight* l = mDisplay->light(id);
  if (!l) {
@@ -2625,7 +2925,7 @@ void BosonGameViewScriptConnectorBoUfo::slotGetLightDiffuse(int id, BoVector4Flo
  }
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotGetLightSpecular(int id, BoVector4Float* v)
+void BosonQtGameViewScriptConnector::slotGetLightSpecular(int id, BoVector4Float* v)
 {
  BoLight* l = mDisplay->light(id);
  if (!l) {
@@ -2637,7 +2937,7 @@ void BosonGameViewScriptConnectorBoUfo::slotGetLightSpecular(int id, BoVector4Fl
  }
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotGetLightAttenuation(int id, BoVector3Float* v)
+void BosonQtGameViewScriptConnector::slotGetLightAttenuation(int id, BoVector3Float* v)
 {
  BoLight* l = mDisplay->light(id);
  if (!l) {
@@ -2649,7 +2949,7 @@ void BosonGameViewScriptConnectorBoUfo::slotGetLightAttenuation(int id, BoVector
  }
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotGetLightEnabled(int id, bool* e)
+void BosonQtGameViewScriptConnector::slotGetLightEnabled(int id, bool* e)
 {
  BoLight* l = mDisplay->light(id);
  if (!l) {
@@ -2661,7 +2961,7 @@ void BosonGameViewScriptConnectorBoUfo::slotGetLightEnabled(int id, bool* e)
  }
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotSetLightPos(int id, const BoVector4Float& v)
+void BosonQtGameViewScriptConnector::slotSetLightPos(int id, const BoVector4Float& v)
 {
  BoLight* l = mDisplay->light(id);
  if (!l) {
@@ -2672,7 +2972,7 @@ void BosonGameViewScriptConnectorBoUfo::slotSetLightPos(int id, const BoVector4F
  }
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotSetLightAmbient(int id, const BoVector4Float& v)
+void BosonQtGameViewScriptConnector::slotSetLightAmbient(int id, const BoVector4Float& v)
 {
  BoLight* l = mDisplay->light(id);
  if (!l) {
@@ -2683,7 +2983,7 @@ void BosonGameViewScriptConnectorBoUfo::slotSetLightAmbient(int id, const BoVect
  }
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotSetLightDiffuse(int id, const BoVector4Float& v)
+void BosonQtGameViewScriptConnector::slotSetLightDiffuse(int id, const BoVector4Float& v)
 {
  BoLight* l = mDisplay->light(id);
  if (!l) {
@@ -2694,7 +2994,7 @@ void BosonGameViewScriptConnectorBoUfo::slotSetLightDiffuse(int id, const BoVect
  }
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotSetLightSpecular(int id, const BoVector4Float& v)
+void BosonQtGameViewScriptConnector::slotSetLightSpecular(int id, const BoVector4Float& v)
 {
  BoLight* l = mDisplay->light(id);
  if (!l) {
@@ -2705,7 +3005,7 @@ void BosonGameViewScriptConnectorBoUfo::slotSetLightSpecular(int id, const BoVec
  }
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotSetLightAttenuation(int id, const BoVector3Float& v)
+void BosonQtGameViewScriptConnector::slotSetLightAttenuation(int id, const BoVector3Float& v)
 {
  BoLight* l = mDisplay->light(id);
  if (!l) {
@@ -2716,7 +3016,7 @@ void BosonGameViewScriptConnectorBoUfo::slotSetLightAttenuation(int id, const Bo
  }
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotSetLightEnabled(int id, bool e)
+void BosonQtGameViewScriptConnector::slotSetLightEnabled(int id, bool e)
 {
  BoLight* l = mDisplay->light(id);
  if (!l) {
@@ -2727,154 +3027,154 @@ void BosonGameViewScriptConnectorBoUfo::slotSetLightEnabled(int id, bool e)
  }
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotGetCameraPos(BoVector3Float* v)
+void BosonQtGameViewScriptConnector::slotGetCameraPos(BoVector3Float* v)
 {
  BO_CHECK_NULL_RET(mDisplay->camera());
  *v = mDisplay->camera()->cameraPos();
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotGetCameraLookAt(BoVector3Float* v)
+void BosonQtGameViewScriptConnector::slotGetCameraLookAt(BoVector3Float* v)
 {
  BO_CHECK_NULL_RET(mDisplay->camera());
  *v = mDisplay->camera()->lookAt();
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotGetCameraUp(BoVector3Float* v)
+void BosonQtGameViewScriptConnector::slotGetCameraUp(BoVector3Float* v)
 {
  BO_CHECK_NULL_RET(mDisplay->camera());
  *v = mDisplay->camera()->up();
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotGetCameraRotation(float* v)
+void BosonQtGameViewScriptConnector::slotGetCameraRotation(float* v)
 {
  BO_CHECK_NULL_RET(mDisplay->camera());
  *v = mDisplay->camera()->rotation();
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotGetCameraXRotation(float* v)
+void BosonQtGameViewScriptConnector::slotGetCameraXRotation(float* v)
 {
  BO_CHECK_NULL_RET(mDisplay->camera());
  *v = mDisplay->camera()->xRotation();
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotGetCameraDistance(float* v)
+void BosonQtGameViewScriptConnector::slotGetCameraDistance(float* v)
 {
  BO_CHECK_NULL_RET(mDisplay->camera());
  *v = mDisplay->camera()->distance();
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotSetUseCameraLimits(bool u)
+void BosonQtGameViewScriptConnector::slotSetUseCameraLimits(bool u)
 {
  BO_CHECK_NULL_RET(mDisplay->camera());
  mDisplay->camera()->setUseLimits(u);
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotSetCameraFreeMovement(bool u)
+void BosonQtGameViewScriptConnector::slotSetCameraFreeMovement(bool u)
 {
  BO_CHECK_NULL_RET(mDisplay->camera());
  mDisplay->camera()->setFreeMovement(u);
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotSetCameraPos(const BoVector3Float& v)
+void BosonQtGameViewScriptConnector::slotSetCameraPos(const BoVector3Float& v)
 {
  BO_CHECK_NULL_RET(mDisplay->autoCamera());
  mDisplay->autoCamera()->setCameraPos(v);
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotSetCameraLookAt(const BoVector3Float& v)
+void BosonQtGameViewScriptConnector::slotSetCameraLookAt(const BoVector3Float& v)
 {
  BO_CHECK_NULL_RET(mDisplay->autoCamera());
  mDisplay->autoCamera()->setLookAt(v);
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotSetCameraUp(const BoVector3Float& v)
+void BosonQtGameViewScriptConnector::slotSetCameraUp(const BoVector3Float& v)
 {
  BO_CHECK_NULL_RET(mDisplay->autoCamera());
  mDisplay->autoCamera()->setUp(v);
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotAddCameraPosPoint(const BoVector3Float& v, float time)
+void BosonQtGameViewScriptConnector::slotAddCameraPosPoint(const BoVector3Float& v, float time)
 {
  BO_CHECK_NULL_RET(mDisplay->autoCamera());
  mDisplay->autoCamera()->addCameraPosPoint(v, time);
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotAddCameraLookAtPoint(const BoVector3Float& v, float time)
+void BosonQtGameViewScriptConnector::slotAddCameraLookAtPoint(const BoVector3Float& v, float time)
 {
  BO_CHECK_NULL_RET(mDisplay->autoCamera());
  mDisplay->autoCamera()->addLookAtPoint(v, time);
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotAddCameraUpPoint(const BoVector3Float& v, float time)
+void BosonQtGameViewScriptConnector::slotAddCameraUpPoint(const BoVector3Float& v, float time)
 {
  BO_CHECK_NULL_RET(mDisplay->autoCamera());
  mDisplay->autoCamera()->addUpPoint(v, time);
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotSetCameraRotation(float v)
+void BosonQtGameViewScriptConnector::slotSetCameraRotation(float v)
 {
  BO_CHECK_NULL_RET(mDisplay->autoCamera());
  mDisplay->autoCamera()->setRotation(v);
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotSetCameraXRotation(float v)
+void BosonQtGameViewScriptConnector::slotSetCameraXRotation(float v)
 {
  BO_CHECK_NULL_RET(mDisplay->autoCamera());
  mDisplay->autoCamera()->setXRotation(v);
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotSetCameraDistance(float v)
+void BosonQtGameViewScriptConnector::slotSetCameraDistance(float v)
 {
  BO_CHECK_NULL_RET(mDisplay->autoCamera());
  mDisplay->autoCamera()->setDistance(v);
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotSetCameraMoveMode(int v)
+void BosonQtGameViewScriptConnector::slotSetCameraMoveMode(int v)
 {
  BO_CHECK_NULL_RET(mDisplay->autoCamera());
  mDisplay->autoCamera()->setMoveMode((BoAutoCamera::MoveMode)v);
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotSetCameraInterpolationMode(int v)
+void BosonQtGameViewScriptConnector::slotSetCameraInterpolationMode(int v)
 {
  BO_CHECK_NULL_RET(mDisplay->autoCamera());
  mDisplay->autoCamera()->setInterpolationMode((BoAutoCamera::InterpolationMode)v);
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotCommitCameraChanges(int ticks)
+void BosonQtGameViewScriptConnector::slotCommitCameraChanges(int ticks)
 {
  BO_CHECK_NULL_RET(mDisplay->autoCamera());
  mDisplay->autoCamera()->commitChanges(ticks);
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotSetAcceptUserInput(bool accept)
+void BosonQtGameViewScriptConnector::slotSetAcceptUserInput(bool accept)
 {
  foreach (KGameIO* io, *mDisplay->localPlayerIO()->ioList()) {
 	io->blockSignals(!accept);
  }
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotAddEffect(unsigned int id, const BoVector3Fixed& pos, bofixed zrot)
+void BosonQtGameViewScriptConnector::slotAddEffect(unsigned int id, const BoVector3Fixed& pos, bofixed zrot)
 {
  mDisplay->addEffect(id, pos, zrot);
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotAddEffectToUnit(int unitid, unsigned int effectid, BoVector3Fixed offset, bofixed zrot)
+void BosonQtGameViewScriptConnector::slotAddEffectToUnit(int unitid, unsigned int effectid, BoVector3Fixed offset, bofixed zrot)
 {
  mDisplay->addEffectToUnit(unitid, effectid, offset, zrot);
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotAdvanceEffects(int ticks)
+void BosonQtGameViewScriptConnector::slotAdvanceEffects(int ticks)
 {
  mDisplay->advanceEffects(ticks);
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotSetWind(const BoVector3Float& wind)
+void BosonQtGameViewScriptConnector::slotSetWind(const BoVector3Float& wind)
 {
  BosonEffectPropertiesParticle::setWind(wind);
 }
 
-void BosonGameViewScriptConnectorBoUfo::slotGetWind(BoVector3Float* wind)
+void BosonQtGameViewScriptConnector::slotGetWind(BoVector3Float* wind)
 {
  *wind = BosonEffectPropertiesParticle::wind();
 }

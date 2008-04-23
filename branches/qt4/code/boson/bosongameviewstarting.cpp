@@ -51,7 +51,7 @@ QString BosonGameViewStarting::creatorName() const
  return i18n("GameView");
 }
 
-void BosonGameViewStarting::setGameView(BosonGameView* gameView)
+void BosonGameViewStarting::setGameView(BosonQtGameView* gameView)
 {
  mGameView = gameView;
 }
@@ -88,7 +88,7 @@ bool BosonGameViewStarting::createTasks(Q3PtrList<BosonStartingTask>* tasks)
 
 
 
-void BosonStartingStartGameView::setGameView(BosonGameView* gameView)
+void BosonStartingStartGameView::setGameView(BosonQtGameView* gameView)
 {
  mGameView = gameView;
 }

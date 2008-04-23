@@ -1,7 +1,7 @@
 /*
     This file is part of the Boson game
     Copyright (C) 1999-2000 Thomas Capricelli (capricel@email.enst.fr)
-    Copyright (C) 2001-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2008 Andreas Beckermann (b_mann@gmx.de)
     Copyright (C) 2001-2005 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
@@ -24,9 +24,7 @@
 #include "defines.h"
 #include "bo3dtools.h"
 
-#include "bosonufoglwidget.h"
-//Added by qt3to4:
-#include <Q3PtrList>
+#include <QWidget>
 
 class BosonCanvas;
 class BosonCursor;
@@ -54,8 +52,7 @@ class Boson;
 class KGameChat;
 class KGameIO;
 class QDomElement;
-template<class T> class Q3PtrList;
-template<class T> class Q3ValueVector;
+class QGraphicsView;
 class KCmdLineArgs;
 
 class BosonMainWidgetPrivate;
@@ -64,16 +61,17 @@ class BosonMainWidgetPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonMainWidget : public BosonUfoGLWidget
+class BosonMainWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	BosonMainWidget(QWidget* parent, bool wantDirect = true);
+	explicit BosonMainWidget(QWidget* parent);
 	virtual ~BosonMainWidget();
 
 	/**
 	 * Must be called exactly once right after the c'tor
 	 **/
+	void initGUI();
 	void initUfoGUI();
 
 	void setGameEngine(BosonGameEngine*);
@@ -125,8 +123,11 @@ public slots:
 
 
 protected:
+	virtual void paintEvent(QPaintEvent*);
 	virtual void initializeGL();
+public:
 	virtual void resizeGL(int w, int h);
+protected:
 	virtual void paintGL();
 
 	void renderUfo();
@@ -157,6 +158,7 @@ protected:
 	void saveConfig();
 
 	void raiseWidget(BoUfoWidget*);
+	void raiseQtWidget(QWidget*);
 
 protected slots:
 	void slotBosonObjectAboutToBeDestroyed(Boson*);

@@ -197,8 +197,10 @@ set(gameview_SRCS
 	gameview/bosonitemrenderer.cpp
 	gameview/bosonufogamegui.cpp
 	gameview/bosonufocanvaswidget.cpp
+	gameview/bosoncanvaswidget.cpp
 	gameview/bosonufogamewidgets.cpp
 	gameview/bosongameview.cpp
+	gameview/bosonqtgameview.cpp
 	gameview/bosongamevieweventlistener.cpp
 	gameview/bosoncanvasrenderer.cpp
 	gameview/bosongameviewinputbase.cpp
@@ -252,7 +254,9 @@ boson_target_link_libraries(modelrendering
 set(bosonmainlib_SRCS
 	bosonviewdata.cpp
 	botooltipcreator.cpp
+	bosonglview.cpp
 	bosonufoglwidget.cpp
+	bosonufowidget.cpp
 	bomousemovediff.cpp
 	bomatrixwidget.cpp
 	bocamerawidget.cpp
@@ -277,6 +281,8 @@ set(bosonmainlib_SRCS
 	bonuminput.cpp
 	sound/bosonaudiointerface.cpp
 	bosongldriverworkarounds.cpp
+	bosonfpscounter.cpp
+	bolayeredwidget.cpp
 )
 kde4_add_ui_files(bosonmainlib_SRCS
 	bosonprofilingdialoggui.ui
@@ -310,7 +316,6 @@ boson_target_link_libraries(bosonmainlib
 #     -> other binaries are not supposed to link against this. they may do so
 #        however, e.g. to provide a test application (-> commandframe tester)
 set(bosongamelib_SRCS
-	bosonfpscounter.cpp
 	bosonmainwidget.cpp
 	bosonmainwidgetmenuinput.cpp
 	boufoactionext.cpp
