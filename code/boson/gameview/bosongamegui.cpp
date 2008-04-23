@@ -49,6 +49,7 @@
 #include "../bosonfpscounter.h"
 #include "../info/boinfo.h"
 #include "../info/bocurrentinfo.h"
+#include "../bolayeredwidget.h"
 //#include <bodebuglog.h>
 #include "bodebug.h"
 
@@ -57,6 +58,8 @@
 #include <qdatetime.h>
 #include <QLabel>
 #include <QProgressBar>
+
+#define QT4_PORT 1
 
 /**
  * @return A string that displays @p plane. The plane consists of a normal
@@ -370,9 +373,25 @@ void BosonGameGUI::initWidgets()
  Ui::BosonGameGUIHelper* ui = new Ui::BosonGameGUIHelper();
  ui->setupUi(widget);
 
-#warning TODO: the GUIHelper is a stacked widget, we want a layered widget!!
+ BO_CHECK_NULL_RET(widget->layout());
+
+ BoLayeredWidget* layeredWidget = new BoLayeredWidget(widget);
+ widget->layout()->addWidget(layeredWidget);
+
  // AB: the GUIHelper widget MUST be a QStackedWidget, because we want the
- // "pages" in qt designer.
+ //     "pages" in qt designer.
+ //     however in the game, we need it to be a BoLayeredWidget, as all its
+ //     children must be visible at the same time.
+ foreach (QObject* child, ui->mStackedWidget->children()) {
+	if (!child->isWidgetType()) {
+		continue;
+	}
+	QWidget* w = static_cast<QWidget*>(child);
+	w->setParent(layeredWidget);
+ }
+ delete ui->mStackedWidget;
+ ui->mStackedWidget = 0;
+
 
  // just pointers (no need to add to another widget, as they already are added)
  d->mResourcesBox = ui->mResourcesBox;
@@ -466,12 +485,16 @@ BosonMiniMap* BosonGameGUI::miniMapWidget() const
 void BosonGameGUI::setSelection(BoSelection* s)
 {
  if (d->mSelection) {
+#if !QT4_PORT
 	disconnect(d->mSelection, 0, d->mUfoCommandFrame, 0);
+#endif
  }
  d->mSelection = s;
  if (d->mSelection) {
+#if !QT4_PORT
 	connect(d->mUfoCommandFrame, SIGNAL(signalSelectUnit(Unit*)),
 			selection(), SLOT(slotSelectSingleUnit(Unit*)));
+#endif
  }
 }
 
@@ -487,11 +510,15 @@ void BosonGameGUI::setLocalPlayerIO(PlayerIO* io)
  if (previousPlayerIO) {
 	BosonLocalPlayerInput* i = (BosonLocalPlayerInput*)previousPlayerIO->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
 	if (i) {
+#if !QT4_PORT
 		disconnect(i, 0, d->mUfoCommandFrame, 0);
 		disconnect(d->mUfoCommandFrame, 0, i, 0);
+#endif
 	}
  }
+#if !QT4_PORT
  d->mUfoCommandFrame->setLocalPlayerIO(localPlayerIO());
+#endif
  if (!localPlayerIO()) {
 	return;
  }
@@ -499,8 +526,10 @@ void BosonGameGUI::setLocalPlayerIO(PlayerIO* io)
 
  BosonLocalPlayerInput* i = (BosonLocalPlayerInput*)localPlayerIO()->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
  if (i) {
+#if !QT4_PORT
 	connect(d->mUfoCommandFrame, SIGNAL(signalAction(const BoSpecificAction&)),
 			i, SLOT(slotAction(const BoSpecificAction&)));
+#endif
  }
 }
 
@@ -511,7 +540,9 @@ PlayerIO* BosonGameGUI::localPlayerIO() const
 
 void BosonGameGUI::setGroundTheme(BosonGroundTheme* t)
 {
+#if !QT4_PORT
  d->mUfoCommandFrame->slotSetGroundTheme(t);
+#endif
 }
 
 void BosonGameGUI::setGameFPSCounter(BosonGameFPSCounter* counter)
@@ -888,7 +919,9 @@ void BosonGameGUI::setCursorWidgetPos(const QPoint* pos)
 
 void BosonGameGUI::setCursorRootPos(const QPoint* pos)
 {
+#if !QT4_PORT
  d->mUfoCommandFrame->setCursorRootPos(pos);
+#endif
 }
 
 const BoVector3Fixed& BosonGameGUI::cursorCanvasVector() const
@@ -928,7 +961,9 @@ bool BosonGameGUI::isChatVisible() const
 
 void BosonGameGUI::setGameMode(bool mode)
 {
+#if !QT4_PORT
  d->mUfoCommandFrame->setGameMode(mode);
+#endif
  d->mChat->setKGame(boGame);
 }
 
@@ -938,7 +973,9 @@ void BosonGameGUI::slotShowPlaceFacilities(PlayerIO* io)
 	boError() << k_funcinfo << "not in editor mode" << endl;
 	return;
  }
+#if !QT4_PORT
  d->mUfoCommandFrame->placeFacilities(io);
+#endif
 }
 
 void BosonGameGUI::slotShowPlaceMobiles(PlayerIO* io)
@@ -947,7 +984,9 @@ void BosonGameGUI::slotShowPlaceMobiles(PlayerIO* io)
 	boError() << k_funcinfo << "not in editor mode" << endl;
 	return;
  }
+#if !QT4_PORT
  d->mUfoCommandFrame->placeMobiles(io);
+#endif
 }
 
 void BosonGameGUI::slotShowPlaceGround()
@@ -956,7 +995,9 @@ void BosonGameGUI::slotShowPlaceGround()
 	boError() << k_funcinfo << "not in editor mode" << endl;
 	return;
  }
+#if !QT4_PORT
  d->mUfoCommandFrame->placeGround();
+#endif
 }
 
 void BosonGameGUI::addChatMessage(const QString& message)
