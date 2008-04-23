@@ -312,6 +312,7 @@ BoNewGameWidget::BoNewGameWidget(BosonStartupNetwork* interface, QWidget* parent
  BO_CHECK_NULL_RET(boGame);
  BO_CHECK_NULL_RET(interface);
  d = new BoNewGameWidgetPrivate;
+ setupUi(this);
  mNetworkInterface = interface;
 
  mSelectedPlayer = 0;
