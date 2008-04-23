@@ -1,7 +1,7 @@
 /*
     This file is part of the Boson game
     Copyright (C) 1999-2000 Thomas Capricelli (capricel@email.enst.fr)
-    Copyright (C) 2001-2005 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2008 Andreas Beckermann (b_mann@gmx.de)
     Copyright (C) 2001-2005 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
@@ -40,8 +40,10 @@
 #include "bosonguistarting.h"
 #include "bosongameviewstarting.h"
 #include "gameview/bosongameview.h"
+#include "gameview/bosonqtgameview.h"
 #include "gameview/bosonlocalplayerinput.h"
 #include "startupwidgets/boufostartupwidget.h"
+#include "startupwidgets/boqtstartupwidget.h"
 #include "startupwidgets/boufoloadsavegamewidget.h" // for BoUfoLoadSaveGameWidget::defaultDir()
 #include "gameengine/player.h"
 #include "gameengine/bosonmessageids.h"
@@ -63,6 +65,7 @@
 #include "bosondebugtextures.h"
 #include "bosondebugmodels.h"
 #include "boadvancecontrol.h"
+#include "bosonufowidget.h"
 
 #include <klocale.h>
 #include <kmessagebox.h>
@@ -81,10 +84,8 @@
 #include <qapplication.h>
 #include <qdesktopwidget.h>
 #include <QImageWriter>
-//Added by qt3to4:
-#include <Q3PtrList>
 #include <QPixmap>
-#include <Q3VBoxLayout>
+#include <QStackedWidget>
 
 
 #include <config.h>
@@ -98,15 +99,21 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#define FOO_0 0
+
 class BosonMainWidgetPrivate
 {
 public:
 	BosonMainWidgetPrivate()
 	{
+		mUfoWidget = 0;
 		mGameEngine = 0;
+		mQtWidgetStack = 0;
 		mWidgetStack = 0;
 		mStartup = 0;
+		mQtStartup = 0;
 		mGameView = 0;
+		mQtGameView = 0;
 		mMenuInput = 0;
 
 		mFPSCounter = 0;
@@ -116,10 +123,14 @@ public:
 		mStarting = 0;
 	}
 
+	BosonUfoWidget* mUfoWidget;
 	BosonGameEngine* mGameEngine;
+	QStackedWidget* mQtWidgetStack;
 	BoUfoWidgetStack* mWidgetStack;
 	BoUfoStartupWidget* mStartup;
+	BoQtStartupWidget* mQtStartup;
 	BosonGameView* mGameView;
+	BosonQtGameView* mQtGameView;
 	BosonMainWidgetMenuInput* mMenuInput;
 
 	BosonFPSCounter* mFPSCounter;
@@ -136,12 +147,14 @@ public:
 	bool mIsInUpdateGL;
 };
 
-BosonMainWidget::BosonMainWidget(QWidget* parent, bool wantDirect)
-		: BosonUfoGLWidget(parent, wantDirect)
+BosonMainWidget::BosonMainWidget(QWidget* parent)
+		: QWidget(parent)
 {
  boDebug() << k_funcinfo << endl;
  init();
- glInit();
+
+#warning FIXME: initializeGL should be called manually, not by the ctor! -> make sure the GL widget is already initialized!
+ initializeGL();
  boDebug() << k_funcinfo << "done" << endl;
 }
 
@@ -163,6 +176,7 @@ BosonMainWidget::~BosonMainWidget()
  endGame();
  delete d->mMenuInput;
 
+#if 0
  // AB: the following is a BoUfo vs valgrind issue.
  //     removeAllWidgets() will delete all ufo children.
  //     in every child, the BoUfoWidget obejct is deleted first, only then the
@@ -172,14 +186,16 @@ BosonMainWidget::~BosonMainWidget()
  //     I don't see a clean way around this yet, so we just prevent emitting
  //     such signals (which are noops in the destructor anyway)
  disconnect(d->mGameView, SIGNAL(signalSetWidgetCursor(BosonCursor*)), this, 0);
+#endif
 
- if (ufoManager()) {
+ if (d->mUfoWidget->ufoManager()) {
 	boDebug() << k_funcinfo << "removing ufo widgets" << endl;
-	ufoManager()->contentWidget()->removeAllWidgets();
+	d->mUfoWidget->ufoManager()->contentWidget()->removeAllWidgets();
 	boDebug() << k_funcinfo << "removed ufo widgets" << endl;
  }
  BosonData::bosonData()->clearData();
  BoTextureManager::deleteStatic();
+ delete d->mUfoWidget;
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
 }
@@ -199,15 +215,19 @@ void BosonMainWidget::init()
  setFocusPolicy(Qt::WheelFocus);
  setMouseTracking(true);
 
+#if 0
  if (!isValid()) {
 	boError() << k_funcinfo << "No OpenGL support present on this system??" << endl;
 	return;
  }
+#endif
 
  boAudio->setSound(boConfig->boolValue("Sound"));
  boAudio->setMusic(boConfig->boolValue("Music"));
 
+#if FOO_0
  connect(&d->mUpdateTimer, SIGNAL(timeout()), this, SLOT(updateGL()));
+#endif
  slotSetUpdateInterval(boConfig->uintValue("GLUpdateInterval"));
 
  qApp->setGlobalMouseTracking(true);
@@ -232,10 +252,12 @@ void BosonMainWidget::initializeGL()
  // generated, then this will get called as well!
  // (keep this in mind when allocating memory)
 
+#if 0
  if (!context()) {
 	boError() << k_funcinfo << "NULL context" << endl;
 	return;
  }
+#endif
  static bool recursive = false;
  if (recursive) {
 	// this can happen e.g. when a paint event occurs while we are in this
@@ -243,7 +265,6 @@ void BosonMainWidget::initializeGL()
 	return;
  }
  recursive = true;
- glClearColor(0.0, 0.0, 0.0, 0.0);
 
  glDisable(GL_DITHER); // we don't need this (and its enabled by default)
 
@@ -272,7 +293,9 @@ void BosonMainWidget::initializeGL()
  if (!context()->deviceIsPixmap()) {
 #endif
 	// start rendering (will also start the timer if necessary)
-	QTimer::singleShot(d->mUpdateInterval, this, SLOT(updateGL()));
+#if FOO_0
+	 QTimer::singleShot(d->mUpdateInterval, this, SLOT(updateGL()));
+#endif
 
 	// update system information (initializeGL() must have been called before
 	// this makes sense)
@@ -291,6 +314,61 @@ void BosonMainWidget::initializeGL()
  boDebug() << k_funcinfo << "done" << endl;
 }
 
+void BosonMainWidget::initGUI()
+{
+ initUfoGUI();
+
+ d->mQtWidgetStack = new QStackedWidget(this);
+
+ d->mQtStartup = new BoQtStartupWidget(this);
+ connect(d->mQtStartup, SIGNAL(signalAddLocalPlayer()),
+		this, SLOT(slotAddLocalPlayer()));
+ connect(d->mQtStartup, SIGNAL(signalResetGame()),
+		this, SLOT(slotResetGame()));
+ connect(d->mQtStartup, SIGNAL(signalGameOver()),
+		this, SLOT(slotGameOver()));
+ connect(d->mQtStartup, SIGNAL(signalQuit()), this, SLOT(close()));
+ connect(d->mQtStartup, SIGNAL(signalPreferences()), this, SLOT(slotPreferences()));
+ connect(d->mQtStartup, SIGNAL(signalCancelLoadSave()),
+		this, SLOT(slotCancelLoadSave()));
+ connect(d->mQtStartup, SIGNAL(signalPreferredSizeChanged()),
+		this, SLOT(slotStartupPreferredSizeChanged()));
+#if FOO_0
+ connect(d->mQtStartup, SIGNAL(signalUpdateGL()),
+		this, SLOT(updateGL()));
+#endif
+ d->mQtGameView = new BosonQtGameView(this);
+// d->mQtGameView->createActionCollection(d->mUfoWidget->ufoManager()->actionCollection());
+ connect(d->mQtGameView, SIGNAL(signalEditorChangeLocalPlayer(Player*)),
+		this, SLOT(slotChangeLocalPlayer(Player*)));
+ connect(d->mQtGameView, SIGNAL(signalEndGame()),
+		this, SLOT(slotEndGame()));
+ connect(d->mQtGameView, SIGNAL(signalQuit()),
+		this, SLOT(close()));
+ connect(d->mQtGameView, SIGNAL(signalSaveGame()),
+		this, SLOT(slotShowSaveGamePage()));
+ connect(d->mQtGameView, SIGNAL(signalLoadGame()),
+		this, SLOT(slotShowLoadGamePage()));
+ connect(d->mQtGameView, SIGNAL(signalQuicksaveGame()),
+		this, SLOT(slotQuicksaveGame()));
+ connect(d->mQtGameView, SIGNAL(signalQuickloadGame()),
+		this, SLOT(slotQuickloadGame()));
+ connect(d->mQtGameView, SIGNAL(signalSetWidgetCursor(BosonCursor*)),
+		this, SLOT(slotSetWidgetCursor(BosonCursor*)));
+ d->mQtGameView->setGameFPSCounter(new BosonGameFPSCounter(d->mFPSCounter));
+ d->mQtGameView->hide();
+
+ d->mQtWidgetStack->addWidget(d->mQtStartup);
+ d->mQtWidgetStack->addWidget(d->mQtGameView);
+
+ raiseQtWidget(d->mQtStartup);
+
+ QVBoxLayout* layout = new QVBoxLayout(this);
+ layout->addWidget(d->mQtWidgetStack);
+ QLabel* foo = new QLabel("foo", this);
+ layout->addWidget(foo);
+}
+
 void BosonMainWidget::initUfoGUI()
 {
  static bool initialized = false;
@@ -301,13 +379,16 @@ void BosonMainWidget::initUfoGUI()
  PROFILE_METHOD
  glPushAttrib(GL_ALL_ATTRIB_BITS);
 
+ d->mUfoWidget = new BosonUfoWidget(this);
+// addWidgetToScene(d->mUfoWidget, 0.0);
+
  boProfiling->push("initUfo()");
- initUfo();
+ d->mUfoWidget->initUfo();
  boProfiling->pop();
 
- BoUfoActionCollection::initActionCollection(ufoManager());
- ufoManager()->actionCollection()->setAccelWidget(this);
- d->mMenuInput = new BosonMainWidgetMenuInput(ufoManager()->actionCollection(), this);
+ BoUfoActionCollection::initActionCollection(d->mUfoWidget->ufoManager());
+ d->mUfoWidget->ufoManager()->actionCollection()->setAccelWidget(this);
+ d->mMenuInput = new BosonMainWidgetMenuInput(d->mUfoWidget->ufoManager()->actionCollection(), this);
  connect(d->mMenuInput, SIGNAL(signalDebugUfoWidgets()),
 		this, SLOT(slotDebugUfoWidgets()));
  connect(d->mMenuInput, SIGNAL(signalDebugTextures()),
@@ -317,7 +398,7 @@ void BosonMainWidget::initUfoGUI()
  connect(d->mMenuInput, SIGNAL(signalPreferences()),
 		this, SLOT(slotPreferences()));
 
- BoUfoWidget* contentWidget = ufoManager()->contentWidget();
+ BoUfoWidget* contentWidget = d->mUfoWidget->ufoManager()->contentWidget();
  contentWidget->setLayoutClass(BoUfoWidget::UFullLayout);
 
  d->mWidgetStack = (BoUfoWidgetStack*)BoUfoFactory::createWidget("BoUfoWidgetStack");
@@ -326,39 +407,9 @@ void BosonMainWidget::initUfoGUI()
 
  d->mStartup = new BoUfoStartupWidget();
  d->mStartup->show();
- connect(d->mStartup, SIGNAL(signalUpdateGL()),
-		this, SLOT(updateGL()));
- connect(d->mStartup, SIGNAL(signalAddLocalPlayer()),
-		this, SLOT(slotAddLocalPlayer()));
- connect(d->mStartup, SIGNAL(signalResetGame()),
-		this, SLOT(slotResetGame()));
- connect(d->mStartup, SIGNAL(signalGameOver()),
-		this, SLOT(slotGameOver()));
- connect(d->mStartup, SIGNAL(signalQuit()), this, SLOT(close()));
- connect(d->mStartup, SIGNAL(signalPreferences()), this, SLOT(slotPreferences()));
- connect(d->mStartup, SIGNAL(signalCancelLoadSave()),
-		this, SLOT(slotCancelLoadSave()));
- connect(d->mStartup, SIGNAL(signalPreferredSizeChanged()),
-		this, SLOT(slotStartupPreferredSizeChanged()));
 
  d->mGameView = new BosonGameView();
- d->mGameView->createActionCollection(ufoManager()->actionCollection());
- connect(d->mGameView, SIGNAL(signalEditorChangeLocalPlayer(Player*)),
-		this, SLOT(slotChangeLocalPlayer(Player*)));
- connect(d->mGameView, SIGNAL(signalEndGame()),
-		this, SLOT(slotEndGame()));
- connect(d->mGameView, SIGNAL(signalQuit()),
-		this, SLOT(close()));
- connect(d->mGameView, SIGNAL(signalSaveGame()),
-		this, SLOT(slotShowSaveGamePage()));
- connect(d->mGameView, SIGNAL(signalLoadGame()),
-		this, SLOT(slotShowLoadGamePage()));
- connect(d->mGameView, SIGNAL(signalQuicksaveGame()),
-		this, SLOT(slotQuicksaveGame()));
- connect(d->mGameView, SIGNAL(signalQuickloadGame()),
-		this, SLOT(slotQuickloadGame()));
- connect(d->mGameView, SIGNAL(signalSetWidgetCursor(BosonCursor*)),
-		this, SLOT(slotSetWidgetCursor(BosonCursor*)));
+ d->mGameView->createActionCollection(d->mUfoWidget->ufoManager()->actionCollection());
  d->mGameView->setGameFPSCounter(new BosonGameFPSCounter(d->mFPSCounter));
  d->mGameView->hide();
  boProfiling->push("adding startup widget to widget stack");
@@ -375,7 +426,7 @@ void BosonMainWidget::initUfoGUI()
  d->mGameView->setMouseEventsEnabled(true, true);
 
  boProfiling->push("createGUI()");
- ufoManager()->actionCollection()->createGUI();
+ d->mUfoWidget->ufoManager()->actionCollection()->createGUI();
  boProfiling->pop();
 
  glPopAttrib();
@@ -395,15 +446,22 @@ void BosonMainWidget::setGameEngine(BosonGameEngine* gameEngine)
 
 void BosonMainWidget::slotBosonObjectAboutToBeDestroyed(Boson* b)
 {
- if (d->mGameView) {
-	d->mGameView->bosonObjectAboutToBeDestroyed(b);
+ if (d->mQtGameView) {
+	d->mQtGameView->bosonObjectAboutToBeDestroyed(b);
  }
 }
 
 void BosonMainWidget::resizeGL(int w, int h)
 {
  boDebug() << k_funcinfo << w << " " << h << endl;
- BosonUfoGLWidget::resizeGL(w, h);
+ //BosonGLWidget::resizeGL(w, h);
+
+ if (Bo3dTools::checkError()) {
+	boError() << k_funcinfo << endl;
+ }
+
+ d->mUfoWidget->resize(w, h);
+ d->mUfoWidget->resizeGL(w, h);
 
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << endl;
@@ -438,7 +496,11 @@ void BosonMainWidget::updateGL()
  // on rendering, i.e. including swapBuffers(), which we have no control of in
  // paintGL().
  d->mFPSCounter->startFrame();
- BosonUfoGLWidget::updateGL();
+#if 0
+ BosonGLWidget::updateGL();
+#else
+ paintGL();
+#endif
  d->mFPSCounter->endFrame();
 
  boProfiling->pop();
@@ -446,6 +508,24 @@ void BosonMainWidget::updateGL()
 
  boProfiling->setPopTask(0);
  d->mIsInUpdateGL = false;
+}
+
+void BosonMainWidget::paintEvent(QPaintEvent*)
+{
+	return;
+ glMatrixMode(GL_PROJECTION);
+ glPushMatrix();
+ glLoadIdentity();
+ glMatrixMode(GL_MODELVIEW);
+ glPushMatrix();
+ glLoadIdentity();
+ glPushAttrib(GL_ALL_ATTRIB_BITS);
+ updateGL();
+ glPopAttrib();
+ glMatrixMode(GL_PROJECTION);
+ glPopMatrix();
+ glMatrixMode(GL_MODELVIEW);
+ glPopMatrix();
 }
 
 void BosonMainWidget::paintGL()
@@ -460,10 +540,12 @@ void BosonMainWidget::paintGL()
 	boError() << k_funcinfo << "OpenGL error at start of " << k_funcinfo << endl;
  }
 
- // buffer swapping might get disabled when a freme is skipped - reenable it
- setAutoBufferSwap(true);
+ // buffer swapping might get disabled when a frame is skipped - reenable it
+// setAutoBufferSwap(true);
 
+#if 0 // disabled for qt port: Qt does this already
  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+#endif
 
  boTextureManager->clearStatistics();
  glColor3ub(255, 255, 255);
@@ -495,17 +577,18 @@ void BosonMainWidget::paintGL()
 
 void BosonMainWidget::renderUfo()
 {
+	boDebug();
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "OpenGL error before method" << endl;
  }
- if (ufoManager()) {
+ if (d->mUfoWidget->ufoManager()) {
 	boTextureManager->invalidateCache();
 	glColor3ub(255, 255, 255);
 
 	boProfiling->push("dispatchEvents");
-	ufoManager()->dispatchEvents();
+	d->mUfoWidget->ufoManager()->dispatchEvents();
 	boProfiling->pop(); // "dispatchEvents"
-	ufoManager()->render(false);
+	d->mUfoWidget->ufoManager()->render(false);
  }
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "OpenGL error at end of method" << endl;
@@ -515,7 +598,9 @@ void BosonMainWidget::renderUfo()
 void BosonMainWidget::slotSetUpdateInterval(unsigned int ms)
 {
  d->mUpdateInterval = ms;
+#if FOO_0
  QTimer::singleShot(d->mUpdateInterval, this, SLOT(updateGL()));
+#endif
 }
 
 QByteArray BosonMainWidget::grabMovieFrame()
@@ -599,7 +684,9 @@ void BosonMainWidget::initBoson()
  if (!d->mStarting) {
 	BO_NULL_ERROR(d->mStarting);
  }
+#if FOO_0
  connect(boGame, SIGNAL(signalUpdateGL()), SLOT(updateGL()));
+#endif
 
  connect(boGame, SIGNAL(signalStartingCompletedReceived(const QByteArray&, quint32)),
 		d->mStarting, SLOT(slotStartingCompletedReceived(const QByteArray&, quint32)));
@@ -623,7 +710,7 @@ void BosonMainWidget::initBoson()
  connect(boGame, SIGNAL(signalEditorNewMap(const QByteArray&)),
 		this, SLOT(slotEditorNewMap(const QByteArray&)));
 
- d->mGameView->bosonObjectCreated(boGame);
+ d->mQtGameView->bosonObjectCreated(boGame);
 }
 
 void BosonMainWidget::deleteBoson()
@@ -631,8 +718,8 @@ void BosonMainWidget::deleteBoson()
  if (!Boson::boson()) {
 	return;
  }
- if (d->mGameView) {
-	d->mGameView->bosonObjectAboutToBeDestroyed(boGame);
+ if (d->mQtGameView) {
+	d->mQtGameView->bosonObjectAboutToBeDestroyed(boGame);
  }
  Boson::deleteBoson();
 }
@@ -642,8 +729,8 @@ void BosonMainWidget::endGame()
  boDebug() << k_funcinfo << endl;
  BO_CHECK_NULL_RET(d->mGameEngine);
  d->mFPSCounter->reset();
- if (d->mGameView) {
-	d->mGameView->quitGame();
+ if (d->mQtGameView) {
+	d->mQtGameView->quitGame();
  }
 
  d->mGameEngine->endGameAndDeleteBoson();
@@ -678,10 +765,10 @@ void BosonMainWidget::slotAddLocalPlayer()
  }
 
  boGame->bosonAddPlayer(p);
- if (d->mStartup) {
+ if (d->mQtStartup) {
 	// this must be done _now_, we cannot delay it!
 	// -> the newgame widget must know about the local player
-	d->mStartup->setLocalPlayer(p);
+	d->mQtStartup->setLocalPlayer(p);
  }
 }
 
@@ -706,13 +793,16 @@ void BosonMainWidget::slotEditorNewMap(const QByteArray& buffer)
 
 void BosonMainWidget::slotShowSaveGamePage()
 {
+#warning TODO (Qt4 port)
+#if 0
  // TODO: pause the game!
  if (!d->mStartup) {
 	boError() << k_funcinfo << "NULL startup widget" << endl;
 	return;
  }
  d->mStartup->slotSaveGame();
- raiseWidget(d->mStartup);
+ raiseQtWidget(d->mQtStartup);
+#endif
 }
 
 void BosonMainWidget::slotStartingFailed()
@@ -731,12 +821,12 @@ void BosonMainWidget::slotChangeLocalPlayer(Player* p)
 
 void BosonMainWidget::slotLoadExternalStuffFromXML(const QDomElement& root)
 {
- d->mGameView->loadFromXML(root);
+ d->mQtGameView->loadFromXML(root);
 }
 
 void BosonMainWidget::slotSaveExternalStuffAsXML(QDomElement& root)
 {
- d->mGameView->saveAsXML(root);
+ d->mQtGameView->saveAsXML(root);
 }
 
 void BosonMainWidget::slotAddChatSystemMessage(const QString& fromName, const QString& text, const Player* forPlayer)
@@ -744,7 +834,7 @@ void BosonMainWidget::slotAddChatSystemMessage(const QString& fromName, const QS
  if (forPlayer && forPlayer != d->mLocalPlayer) {
 	return;
  }
- d->mGameView->addChatMessage(i18n("--- %1: %2", fromName, text));
+ d->mQtGameView->addChatMessage(i18n("--- %1: %2", fromName, text));
 }
 
 void BosonMainWidget::saveConfig()
@@ -789,9 +879,9 @@ bool BosonMainWidget::changeLocalPlayer(Player* p)
  }
  d->mLocalPlayer = p;
  if (d->mLocalPlayer) {
-	d->mGameView->setLocalPlayerIO(d->mLocalPlayer->playerIO());
+	d->mQtGameView->setLocalPlayerIO(d->mLocalPlayer->playerIO());
  } else {
-	d->mGameView->setLocalPlayerIO(0);
+	d->mQtGameView->setLocalPlayerIO(0);
  }
 
  // AB: note: the startup widgets don't need to know the new local player
@@ -807,13 +897,13 @@ void BosonMainWidget::reinitGame()
  delete d->mStarting;
  d->mStarting = new BosonStarting(this);
  connect(d->mStarting, SIGNAL(signalLoadingMaxDuration(unsigned int)),
-		d->mStartup, SLOT(slotLoadingMaxDuration(unsigned int)));
+		d->mQtStartup, SLOT(slotLoadingMaxDuration(unsigned int)));
  connect(d->mStarting, SIGNAL(signalLoadingTaskCompleted(unsigned int)),
-		d->mStartup, SLOT(slotLoadingTaskCompleted(unsigned int)));
+		d->mQtStartup, SLOT(slotLoadingTaskCompleted(unsigned int)));
  connect(d->mStarting, SIGNAL(signalLoadingStartTask(const QString&)),
-		d->mStartup, SLOT(slotLoadingStartTask(const QString&)));
+		d->mQtStartup, SLOT(slotLoadingStartTask(const QString&)));
  connect(d->mStarting, SIGNAL(signalLoadingStartSubTask(const QString&)),
-		d->mStartup, SLOT(slotLoadingStartSubTask(const QString&)));
+		d->mQtStartup, SLOT(slotLoadingStartSubTask(const QString&)));
  connect(d->mStarting, SIGNAL(signalStartingFailed()),
 		this, SLOT(slotStartingFailed()));
 
@@ -822,7 +912,7 @@ void BosonMainWidget::reinitGame()
  BosonGUIStarting* guiStarting = new BosonGUIStarting(d->mStarting, d->mStarting);
  d->mStarting->addTaskCreator(guiStarting);
  BosonGameViewStarting* gameViewStarting = new BosonGameViewStarting(d->mStarting, d->mStarting);
- gameViewStarting->setGameView(d->mGameView);
+ gameViewStarting->setGameView(d->mQtGameView);
  d->mStarting->addTaskCreator(gameViewStarting);
 
  initBoson();
@@ -833,24 +923,26 @@ void BosonMainWidget::slotGameOver()
  boDebug() << k_funcinfo << endl;
  endGame();
 
- if (ufoManager() && ufoManager()->actionCollection()) {
-	ufoManager()->actionCollection()->createGUI();
+ if (d->mUfoWidget->ufoManager() && d->mUfoWidget->ufoManager()->actionCollection()) {
+	d->mUfoWidget->ufoManager()->actionCollection()->createGUI();
  }
 
  // this also resets the game!
  // if you replace this by something else you must call slotResetGame()
  // manually!
- d->mStartup->slotShowWelcomeWidget();
- raiseWidget(d->mStartup);
+ d->mQtStartup->slotShowWelcomeWidget();
+ raiseQtWidget(d->mQtStartup);
 }
 
 void BosonMainWidget::slotCancelLoadSave()
 {
+#warning TODO (Qt4 port)
+#if 0
  boDebug() << k_funcinfo << endl;
  if (boGame && boGame->gameStatus() != KGame::Init) {
 	// called from a running game - but the player doesn't want to load/save a
 	// game anymore
-	raiseWidget(d->mGameView);
+	raiseQtWidget(d->mQtGameView);
  } else {
 	if (!d->mStartup) {
 		boError() << k_funcinfo << "NULL startup widget??" << endl;
@@ -858,10 +950,13 @@ void BosonMainWidget::slotCancelLoadSave()
 	}
 	d->mStartup->slotShowWelcomeWidget();
  }
+#endif
 }
 
 void BosonMainWidget::slotQuicksaveGame()
 {
+#warning TODO (Qt4 port)
+#if 0
  BO_CHECK_NULL_RET(d->mLocalPlayer);
  BO_CHECK_NULL_RET(boGame);
  QString dir = BoUfoLoadSaveGameWidget::defaultDir();
@@ -874,10 +969,13 @@ void BosonMainWidget::slotQuicksaveGame()
  BO_CHECK_NULL_RET(d->mLocalPlayer);
  BO_CHECK_NULL_RET(boGame);
  boGame->slotAddChatSystemMessage(i18n("Quicksaving succeeded"), d->mLocalPlayer);
+#endif
 }
 
 void BosonMainWidget::slotQuickloadGame()
 {
+#warning TODO (Qt4 port)
+#if 0
  BO_CHECK_NULL_RET(d->mLocalPlayer);
  QString dir = BoUfoLoadSaveGameWidget::defaultDir();
  if (dir.isEmpty()) {
@@ -888,6 +986,7 @@ void BosonMainWidget::slotQuickloadGame()
 
  // AB: note that loading works asynchonously. after returning here, we haven't
  // started loading yet.
+#endif
 }
 
 void BosonMainWidget::slotStartNewGame()
@@ -898,7 +997,7 @@ void BosonMainWidget::slotStartNewGame()
 	boGame->unlock();
 	return;
  }
- if (!d->mStartup) {
+ if (!d->mQtStartup) {
 	boError() << k_funcinfo << "NULL startup widget" << endl;
 	boGame->unlock();
 	return;
@@ -911,7 +1010,7 @@ void BosonMainWidget::slotStartNewGame()
  // is NULL and gets applied at the end only.
  slotChangeLocalPlayer(0);
 
- d->mStartup->showLoadingWidget();
+ d->mQtStartup->showLoadingWidget();
 
  setFocusPolicy(Qt::StrongFocus);
 
@@ -998,24 +1097,24 @@ void BosonMainWidget::slotGameStarted()
 	return;
  }
 
- d->mGameView->setCanvas(boGame->canvasNonConst());
+ d->mQtGameView->setCanvas(boGame->canvasNonConst());
 
- raiseWidget(d->mGameView);
+ raiseQtWidget(d->mQtGameView);
 // setMinimumSize(BOSON_MINIMUM_WIDTH, BOSON_MINIMUM_HEIGHT);
  setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
 
  int progress = 0; // FIXME: wrong value!
 
  // we don't need these anymore. lets save the memory.
- d->mStartup->resetWidgets();
+ d->mQtStartup->resetWidgets();
 
  // Center home base if new game was started. If game is loaded, camera was
  //  already loaded as well
  // TODO: load the camera settings from XML if present. if not present, center
  // hombase.
- d->mGameView->slotCenterHomeBase();
+ d->mQtGameView->slotCenterHomeBase();
 
- d->mGameView->setFocus();
+ d->mQtGameView->setFocus();
 
  if (boGame->gameMode()) {
 	if (boGame->isAdmin()) {
@@ -1055,26 +1154,31 @@ bool BosonMainWidget::queryClose()
 
 void BosonMainWidget::slotShowLoadGamePage(KCmdLineArgs* args)
 {
+#warning TODO (Qt4 port)
+#if 0
  // TODO: pause the game!
  if (!d->mStartup) {
 	boError() << k_funcinfo << "NULL startup widget" << endl;
 	return;
  }
  d->mStartup->slotLoadGame();
- raiseWidget(d->mStartup);
+ raiseQtWidget(d->mQtStartup);
+#endif
 }
 
 void BosonMainWidget::slotShowNewGamePage(KCmdLineArgs* args)
 {
- if (!d->mStartup) {
+ if (!d->mQtStartup) {
 	boError() << k_funcinfo << "NULL startup widget" << endl;
 	return;
  }
- d->mStartup->slotNewSinglePlayerGame(args);
+ d->mQtStartup->slotNewSinglePlayerGame(args);
 }
 
 void BosonMainWidget::slotLoadFromLog(const QString& logFile)
 {
+#warning TODO (Qt4 port)
+#if 0
  if (!d->mStartup) {
 	boError() << k_funcinfo << "NULL startup widget" << endl;
 	return;
@@ -1088,27 +1192,28 @@ void BosonMainWidget::slotLoadFromLog(const QString& logFile)
  // -> the messages are actually loaded already at this point
  BO_CHECK_NULL_RET(d->mStarting);
  d->mStarting->setLoadFromLogFile(logFile);
+#endif
 }
 
 void BosonMainWidget::slotShowStartEditorPage(KCmdLineArgs* args)
 {
  BO_CHECK_NULL_RET(boGame);
- if (!d->mStartup) {
+ if (!d->mQtStartup) {
 	boError() << k_funcinfo << "NULL startup widget" << endl;
 	return;
  }
- d->mStartup->slotStartEditor(args);
+ d->mQtStartup->slotStartEditor(args);
 }
 
 void BosonMainWidget::slotSkipFrame()
 {
- setAutoBufferSwap(false);
+// setAutoBufferSwap(false);
 }
 
 void BosonMainWidget::slotSetWidgetCursor(BosonCursor* c)
 {
  BO_CHECK_NULL_RET(c);
- if (d->mWidgetStack->visibleWidget() != d->mGameView) {
+ if (d->mQtWidgetStack->currentWidget() != d->mQtGameView) {
 	return;
  }
  c->setWidgetCursor(this);
@@ -1135,6 +1240,28 @@ void BosonMainWidget::raiseWidget(BoUfoWidget* w)
  }
 }
 
+void BosonMainWidget::raiseQtWidget(QWidget* w)
+{
+ w->show();
+ d->mQtWidgetStack->setCurrentWidget(w);
+ if (w != d->mQtGameView) {
+	unsetCursor();
+ } else {
+	// gameview widget is maximized by default
+	boDebug() << k_funcinfo << "maximized" << endl;
+#if 1
+	// AB: by some reason the showMaximized() call is ignored, if we dont do
+	// this
+	// (at least with the current toolbar that want about 2100 pixels in
+	// width)
+	QDesktopWidget* desktop = QApplication::desktop();
+	QRect r = desktop->availableGeometry(this);
+	resize(r.width(), r.height());
+#endif
+	showMaximized();
+ }
+}
+
 void BosonMainWidget::slotPreferences()
 {
  OptionsDialog* dlg = new OptionsDialog(0);
@@ -1144,7 +1271,7 @@ void BosonMainWidget::slotPreferences()
  connect(dlg, SIGNAL(finished()), dlg, SLOT(deleteLater()));
 
  connect(dlg, SIGNAL(signalCursorChanged(int, const QString&)),
-		d->mGameView, SLOT(slotChangeCursor(int, const QString&)));
+		d->mQtGameView, SLOT(slotChangeCursor(int, const QString&)));
  connect(dlg, SIGNAL(signalApply()),
 		this, SLOT(slotPreferencesApply()));
 // connect(dlg, SIGNAL(signalFontChanged(const BoFontInfo&)),
@@ -1159,8 +1286,8 @@ void BosonMainWidget::slotPreferencesApply()
  // options that are stored in boConfig only don't need to be touched.
  // AB: cursor is still a special case and not handled here.
  boDebug() << k_funcinfo << endl;
- d->mGameView->setToolTipCreator(boConfig->intValue("ToolTipCreator"));
- d->mGameView->setToolTipUpdatePeriod(boConfig->intValue("ToolTipUpdatePeriod"));
+ d->mQtGameView->setToolTipCreator(boConfig->intValue("ToolTipCreator"));
+ d->mQtGameView->setToolTipUpdatePeriod(boConfig->intValue("ToolTipUpdatePeriod"));
  slotSetUpdateInterval(boConfig->uintValue("GLUpdateInterval"));
  if (boGame) {
 	if (boGame->gameSpeed() != boConfig->intValue("GameSpeed")) {
@@ -1182,7 +1309,7 @@ void BosonMainWidget::slotDebugUfoWidgets()
 // Q3VBoxLayout* l = new Q3VBoxLayout(dialog->plainPage());
 // l->addWidget(debug);
 
- debug->setBoUfoManager(ufoManager());
+ debug->setBoUfoManager(d->mUfoWidget->ufoManager());
 
  dialog->show();
 #else
@@ -1206,14 +1333,14 @@ void BosonMainWidget::slotDebugModels()
 
 void BosonMainWidget::slotStartupPreferredSizeChanged()
 {
- BO_CHECK_NULL_RET(ufoManager());
- BO_CHECK_NULL_RET(ufoManager()->rootPaneWidget());
+ BO_CHECK_NULL_RET(d->mUfoWidget->ufoManager());
+ BO_CHECK_NULL_RET(d->mUfoWidget->ufoManager()->rootPaneWidget());
  BO_CHECK_NULL_RET(d->mWidgetStack);
- if (d->mWidgetStack->visibleWidget() == d->mGameView) {
+ if (d->mQtWidgetStack->currentWidget() == d->mQtGameView) {
 	return;
  }
- int w = ufoManager()->rootPaneWidget()->preferredWidth();
- int h = ufoManager()->rootPaneWidget()->preferredHeight();
+ int w = d->mUfoWidget->ufoManager()->rootPaneWidget()->preferredWidth();
+ int h = d->mUfoWidget->ufoManager()->rootPaneWidget()->preferredHeight();
 
  // make sure we don't exceed the maximum desktop size
  QDesktopWidget* desktop = QApplication::desktop();
@@ -1229,5 +1356,6 @@ void BosonMainWidget::slotStartupPreferredSizeChanged()
  w = qMin(w, r.width());
  h = qMin(h, r.height());
  resize(w, h);
+ resizeGL(w, h);
 }
 

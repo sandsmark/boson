@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2006 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2001-2008 Andreas Beckermann (b_mann@gmx.de)
     Copyright (C) 2001-2006 Rivo Laks (rivolaks@hot.ee)
 
     This program is free software; you can redistribute it and/or modify
@@ -17,16 +17,14 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
-#ifndef BOSONUFOCANVASWIDGET_H
-#define BOSONUFOCANVASWIDGET_H
+#ifndef BOSONCANVASWIDGET_H
+#define BOSONCANVASWIDGET_H
 
 #include "../boufo/boufo.h"
 #include "../bo3dtools.h"
-//Added by qt3to4:
 #include <Q3ValueList>
 #include <Q3PtrList>
-
-#include "bosoncanvaswidget.h"
+#include <QWidget>
 
 class BosonCanvas;
 class PlayerIO;
@@ -42,16 +40,41 @@ class BosonItemRenderer;
 class BosonItemContainer;
 template<class T> class Q3PtrList;
 
-class BosonUfoCanvasWidgetPrivate;
+class BosonItemEffects
+{
+public:
+	BosonItemEffects(BosonItem* item);
+	~BosonItemEffects();
+
+	const BosonItem* item() const
+	{
+		return mItem;
+	}
+	void setEffects(const Q3PtrList<BosonEffect>& effects, Q3PtrList<BosonEffect>* takeOwnership);
+	void addEffect(BosonEffect* e, Q3PtrList<BosonEffect>* takeOwnership);
+	void clearEffects();
+	void removeEffect(BosonEffect* e);
+	const Q3PtrList<BosonEffect>& effects() const;
+
+	void updateEffectsPosition();
+	void updateEffectsRotation();
+
+private:
+	Q3PtrList<BosonEffect>* mEffects;
+	BosonItem* mItem;
+};
+
+
+class BosonCanvasWidgetPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonUfoCanvasWidget : public BoUfoCustomWidget
+class BosonCanvasWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	BosonUfoCanvasWidget();
-	virtual ~BosonUfoCanvasWidget();
+	BosonCanvasWidget(QWidget* parent = 0);
+	virtual ~BosonCanvasWidget();
 
 	/**
 	 * Called once after game starting to initialize the items that are
@@ -64,7 +87,7 @@ public:
 	void setLocalPlayerIO(PlayerIO* io);
 	void setCanvas(const BosonCanvas* canvas);
 
-	virtual void paintWidget();
+	virtual void paintEvent(QPaintEvent* e);
 
 	Q3ValueList<BosonItem*> itemsAtWidgetRect(const QRect& widgetRect) const;
 
@@ -132,7 +155,7 @@ protected:
 	BosonItemRenderer* createItemRendererFor(const BosonItemContainer* c);
 
 private:
-	BosonUfoCanvasWidgetPrivate* d;
+	BosonCanvasWidgetPrivate* d;
 };
 
 

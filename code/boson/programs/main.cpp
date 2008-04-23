@@ -28,6 +28,7 @@
 #include "bo3dtools.h"
 #include "bosongameengine.h"
 #include "bosongldriverworkarounds.h"
+#include "bosonglview.h"
 #include <config.h>
 #include <bogl.h>
 
@@ -35,8 +36,10 @@
 #include <kcmdlineargs.h>
 #include <klocale.h>
 #include <kmessagebox.h>
-//Added by qt3to4:
+#include <QGraphicsView>
+#include <QTimer>
 #include <Q3CString>
+#include <QGLFormat>
 
 // sound is enabled by default atm
 #define HARDCODE_NOSOUND 0
@@ -133,9 +136,17 @@ int main(int argc, char **argv)
  BosonGameEngine* gameEngine = new BosonGameEngine(0);
 
  bool forceWantDirect = boConfig->boolValue("ForceWantDirect");
- BosonMainWidget* top = new BosonMainWidget(0, forceWantDirect);
+ BosonGLView* glView = new BosonGLView(0, forceWantDirect);
+ if (!glView->initializeGL()) {
+	boError() << "Could not initialize the GL view";
+	KMessageBox::sorry(0, i18n("Could not initialize the GL view. Maybe OpenGL problems in this system?"), i18n("Initialization failed"));
+	return 1;
+ }
+ glView->show();
+ BosonMainWidget* top = new BosonMainWidget(0);
+ glView->addWidgetToScene(top, 0.0);
 
- bool directRendering = top->format().directRendering();
+ bool directRendering = glView->format().directRendering();
  if (!directRendering) {
 	boWarning() << "using INDIRECT (software) rendering" << endl;
  }
@@ -162,8 +173,9 @@ int main(int argc, char **argv)
 	boConfig->setBoolValue("EnableMesaVertexArraysWorkarounds", true);
  }
 
- top->initUfoGUI();
+ top->initGUI();
 
+ glView->show();
  top->show();
 
  top->setGameEngine(gameEngine);
@@ -232,6 +244,16 @@ int main(int argc, char **argv)
  if (boConfig->boolValue("ForceDisableModelLoading")) {
 	boWarning() << "model loading disabled - you will not see any units!" << endl;
  }
+
+
+#if 1
+ QTimer timer;
+ timer.start(100);
+ QObject::connect(&timer, SIGNAL(timeout()), glView, SLOT(slotRenderFrame()));
+ glView->resize(800, 600);
+ top->resize(700, 500);
+ top->resizeGL(700, 500);
+#endif
  int ret = app.exec();
 
  delete top;
