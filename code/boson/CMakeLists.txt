@@ -153,8 +153,10 @@ set(startupwidgets_SRCS
 	startupwidgets/boufocolorchooser.cpp
 	startupwidgets/bosonstartupnetwork.cpp
 	startupwidgets/boufonewgamewidget.cpp
+	startupwidgets/bonewgamewidget.cpp
 	startupwidgets/boufostartupwidget.cpp
 	startupwidgets/boufoloadingwidget.cpp
+	startupwidgets/boloadingwidget.cpp
 	startupwidgets/boufonetworkoptionswidget.cpp
 	startupwidgets/boufostarteditorwidget.cpp
 	startupwidgets/boufoloadsavegamewidget.cpp
@@ -162,6 +164,9 @@ set(startupwidgets_SRCS
 	startupwidgets/bosonloadsavegamehandler.cpp
 	startupwidgets/boufoloadfromlogwidget.cpp
 	startupwidgets/boufomappreview.cpp
+	startupwidgets/bomappreview.cpp
+	startupwidgets/boqtstartupwidget.cpp
+	startupwidgets/bowelcomewidget.cpp
 )
 boson_add_boui_files(startupwidgets_SRCS
 	startupwidgets/welcomewidget.boui
@@ -170,6 +175,11 @@ boson_add_boui_files(startupwidgets_SRCS
 	startupwidgets/boufostarteditorwidgetbase.boui
 	startupwidgets/boufoloadfromlogwidgetbase.boui
 	startupwidgets/boufoloadingwidgetbase.boui
+)
+kde4_add_ui_files(startupwidgets_SRCS
+	startupwidgets/welcomewidget.ui
+	startupwidgets/newgamewidget.ui
+	startupwidgets/loadingwidget.ui
 )
 
 set(commandframe_SRCS
