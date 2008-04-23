@@ -267,7 +267,7 @@ void BosonPlacementPreviewWidget::quitGame()
  d->mPlacementPreview.clear();
 }
 
-void BosonPlacementPreviewWidget::paintWidget()
+void BosonPlacementPreviewWidget::paintEvent(QPaintEvent*)
 {
  PROFILE_METHOD;
  if (Bo3dTools::checkError()) {
@@ -528,7 +528,7 @@ const BosonCanvas* BosonLineVisualizationWidget::canvas() const
  return d->mCanvas;
 }
 
-void BosonLineVisualizationWidget::paintWidget()
+void BosonLineVisualizationWidget::paintEvent(QPaintEvent*)
 {
  PROFILE_METHOD;
  if (Bo3dTools::checkError()) {
@@ -662,7 +662,7 @@ BosonCursor* BosonCursorWidget::cursor() const
  return d->mCursorCollection->cursor();
 }
 
-void BosonCursorWidget::paintWidget()
+void BosonCursorWidget::paintEvent(QPaintEvent*)
 {
  PROFILE_METHOD;
  BO_CHECK_NULL_RET(d->mCursorWidgetPos);
@@ -765,7 +765,7 @@ void BosonSelectionRectWidget::slotSelectionRectChanged(const QRect& r)
  d->mSelectionRect = r;
 }
 
-void BosonSelectionRectWidget::paintWidget()
+void BosonSelectionRectWidget::paintEvent(QPaintEvent*)
 {
  PROFILE_METHOD;
  BO_CHECK_NULL_RET(d->mGameGLMatrices);
@@ -907,7 +907,7 @@ void BosonFPSGraphWidget::setGameFPSCounter(const BosonGameFPSCounter* c)
  d->mGameFPSCounter = c;
 }
 
-void BosonFPSGraphWidget::paintWidget()
+void BosonFPSGraphWidget::paintEvent(QPaintEvent*)
 {
  PROFILE_METHOD;
  BO_CHECK_NULL_RET(d->mGameGLMatrices);
@@ -1167,7 +1167,7 @@ void BosonProfilingGraphWidget::setGameGLMatrices(const BoGLMatrices* m)
  d->mGameGLMatrices = m;
 }
 
-void BosonProfilingGraphWidget::paintWidget()
+void BosonProfilingGraphWidget::paintEvent(QPaintEvent*)
 {
  PROFILE_METHOD;
  BO_CHECK_NULL_RET(d->mGameGLMatrices);

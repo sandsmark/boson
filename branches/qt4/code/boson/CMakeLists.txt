@@ -196,6 +196,7 @@ set(commandframe_SRCS
 set(gameview_SRCS
 	gameview/bosonitemrenderer.cpp
 	gameview/bosonufogamegui.cpp
+	gameview/bosongamegui.cpp
 	gameview/bosonufocanvaswidget.cpp
 	gameview/bosoncanvaswidget.cpp
 	gameview/bosonufogamewidgets.cpp
@@ -221,9 +222,14 @@ set(gameview_SRCS
 	gameview/minimap/bosonglminimapview.cpp
 	gameview/minimap/bosonufominimap.cpp
 	gameview/minimap/bosonufominimapdisplay.cpp
+	gameview/minimap/bosonminimap.cpp
+	gameview/minimap/bosonminimapdisplay.cpp
 )
 boson_add_boui_files(gameview_SRCS
 	gameview/bosonufogameguihelper.boui
+)
+kde4_add_ui_files(startupwidgets_SRCS
+	gameview/bosongameguihelper.ui
 )
 
 
@@ -263,6 +269,7 @@ set(bosonmainlib_SRCS
 	bocamerawidget.cpp
 	boorbiterwidget.cpp
 	bosonufochat.cpp
+	bosonchat.cpp
 	bosonprofilingdialog.cpp
 	bpfdescriptiondialog.cpp
 	boglstatewidget.cpp

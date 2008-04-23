@@ -70,6 +70,7 @@
 #include "bosonmenuinput.h"
 #include "../boshader.h"
 #include "bosonufogamewidgets.h"
+#include "bosongamewidgets.h"
 #include "bosonufocanvaswidget.h"
 #include "../gameengine/script/bosonscript.h"
 #include "../gameengine/script/bosonscriptinterface.h"
@@ -89,7 +90,7 @@
 #include <kmessagebox.h>
 #include <kapplication.h>
 
-#include <qtimer.h>
+#include <QTimer>
 #include <qcursor.h>
 #include <qbuffer.h>
 #include <qimage.h>
@@ -724,23 +725,6 @@ void BoCursorEdgeScrolling::slotCursorEdgeTimeout()
  }
 }
 
-/**
- * This class is a simple container class for the @ref BoUfoGameGUI class. It
- * exists only so that we can easily profile the time that is spent in @ref
- * paint.
- **/
-class BoUfoGameGUIContainer : public BoUfoCustomWidget
-{
-public:
-	virtual void paint()
-	{
-		PROFILE_METHOD
-		BoUfoCustomWidget::paint();
-	}
-};
-
-
-
 
 
 class BosonQtGameViewPrivate
@@ -751,7 +735,6 @@ public:
 		mViewData = 0;
 		mLayeredPane = 0;
 		mLayeredWidget = 0;
-		mUfoCanvasWidget = 0;
 		mCanvasWidget = 0;
 		mUfoGameGUI = 0;
 		mToolTipLabel = 0;
@@ -791,10 +774,9 @@ public:
 	BosonViewData* mViewData;
 	BoUfoLayeredPane* mLayeredPane;
 	BoLayeredWidget* mLayeredWidget;
-	BosonUfoCanvasWidget* mUfoCanvasWidget;
 	BosonCanvasWidget* mCanvasWidget;
-	BosonUfoPlacementPreviewWidget* mUfoPlacementPreviewWidget;
-	BosonUfoLineVisualizationWidget* mUfoLineVisualizationWidget;
+	BosonPlacementPreviewWidget* mPlacementPreviewWidget;
+	BosonLineVisualizationWidget* mLineVisualizationWidget;
 	BosonUfoGameGUI* mUfoGameGUI;
 	BoUfoLabel* mToolTipLabel;
 	BosonUfoCursorWidget* mUfoCursorWidget;
@@ -869,7 +851,7 @@ BosonQtGameView::~BosonQtGameView()
  delete d->mSelectionGroups;
  delete mSelection;
  delete d->mGameGLMatrices;
-#if !QTimer
+#if !QT_PORT
  delete d->mToolTips;
 #endif
  d->mGameViewPlugin = 0;
@@ -1325,6 +1307,14 @@ void BosonQtGameView::initGUI()
  d->mLeftButtonState->setCanvasWidget(d->mCanvasWidget);
  d->mCanvasWidget->show();
 
+ d->mPlacementPreviewWidget = new BosonPlacementPreviewWidget(d->mLayeredWidget);
+ d->mPlacementPreviewWidget->setGameGLMatrices(d->mGameGLMatrices);
+ d->mPlacementPreviewWidget->setCursorCanvasVectorPointer(d->mCursorPos.canvasVectorPointer());
+
+ d->mLineVisualizationWidget = new BosonLineVisualizationWidget(d->mLayeredWidget);
+ d->mLineVisualizationWidget->setGameGLMatrices(d->mGameGLMatrices);
+ d->mLineVisualizationWidget->setCanvas(canvas());
+
 }
 
 void BosonQtGameView::initUfoGUI()
@@ -1346,6 +1336,7 @@ void BosonQtGameView::initUfoGUI()
  addWidget(d->mLayeredPane);
 #endif
 
+#if 0
  d->mUfoCanvasWidget = new BosonUfoCanvasWidget();
  d->mUfoCanvasWidget->setGameGLMatrices(d->mGameGLMatrices);
  d->mUfoCanvasWidget->setCamera(&d->mCamera);
@@ -1359,9 +1350,8 @@ void BosonQtGameView::initUfoGUI()
  d->mUfoLineVisualizationWidget = new BosonUfoLineVisualizationWidget();
  d->mUfoLineVisualizationWidget->setGameGLMatrices(d->mGameGLMatrices);
  d->mUfoLineVisualizationWidget->setCanvas(canvas());
+#endif
 
- BoUfoGameGUIContainer* ufoGameGUIContainer = new BoUfoGameGUIContainer();
- ufoGameGUIContainer->setName("ufoGameGUIContainer");
  d->mUfoGameGUI = new BosonUfoGameGUI(d->mModelviewMatrix, d->mProjectionMatrix, d->mViewFrustum, d->mViewport);
  d->mUfoGameGUI->setCursorWidgetPos(d->mCursorPos.gameViewPosPointer());
  d->mUfoGameGUI->setCursorCanvasVector(d->mCursorPos.canvasVectorPointer());
@@ -1372,7 +1362,6 @@ void BosonQtGameView::initUfoGUI()
  d->mGLMiniMap = d->mUfoGameGUI->miniMapWidget();
  connect(this, SIGNAL(signalSelectionChanged(BoSelection*)),
 		d->mUfoGameGUI, SIGNAL(signalSelectionChanged(BoSelection*)));
- ufoGameGUIContainer->addWidget(d->mUfoGameGUI);
 
 #if !QT_PORT
  d->mToolTipLabel = new BoUfoLabel();
@@ -1405,10 +1394,12 @@ void BosonQtGameView::initUfoGUI()
  d->mGameViewPluginWidgetContainer = new BoUfoWidget();
  d->mGameViewPluginWidgetContainer->setName("GameViewPluginWidgetContainer");
 
+#if 0
  d->mLayeredPane->addWidget(d->mUfoCanvasWidget);
  d->mLayeredPane->addWidget(d->mUfoPlacementPreviewWidget);
  d->mLayeredPane->addWidget(d->mUfoLineVisualizationWidget);
- d->mLayeredPane->addWidget(ufoGameGUIContainer);
+#endif
+ d->mLayeredPane->addWidget(d->mUfoGameGUI);
 #if !QT_PORT
  d->mLayeredPane->addWidget(d->mToolTipLabel);
 #endif
@@ -1445,10 +1436,10 @@ void BosonQtGameView::setCanvas(BosonCanvas* canvas)
  if (d->mInput) {
 	d->mInput->setCanvas(mCanvas);
  }
- d->mUfoLineVisualizationWidget->setCanvas(mCanvas);
+ d->mLineVisualizationWidget->setCanvas(mCanvas);
  d->mUfoGameGUI->setCanvas(mCanvas);
  d->mCanvasWidget->setCanvas(mCanvas);
- d->mUfoPlacementPreviewWidget->setCanvas(mCanvas);
+ d->mPlacementPreviewWidget->setCanvas(mCanvas);
  resetGameViewPlugin(); // setCanvas()
  if (!mCanvas) {
 	return;
@@ -1594,7 +1585,7 @@ void BosonQtGameView::setLocalPlayerIO(PlayerIO* io)
  boDebug() << "local player: " << localPlayerIO();
  d->mUfoGameGUI->setLocalPlayerIO(localPlayerIO());
  d->mCanvasWidget->setLocalPlayerIO(localPlayerIO());
- d->mUfoPlacementPreviewWidget->setLocalPlayerIO(localPlayerIO());
+ d->mPlacementPreviewWidget->setLocalPlayerIO(localPlayerIO());
  resetGameViewPlugin(); // setLocalPlayerIO()
 
  if (d->mInput) {
@@ -2033,7 +2024,7 @@ void BosonQtGameView::slotAdvance(unsigned int advanceCallsCount, bool advanceFl
  advanceCamera();
 
  d->mCanvasWidget->slotAdvance(advanceCallsCount, advanceFlag);
- d->mUfoLineVisualizationWidget->slotAdvance(advanceCallsCount, advanceFlag);
+ d->mLineVisualizationWidget->slotAdvance(advanceCallsCount, advanceFlag);
 
 #warning FIXME: movie
  // TODO: probably emit a signalGrabMovieFrameAndSave() and implement it in the
@@ -2171,11 +2162,11 @@ void BosonQtGameView::setDisplayInput(BosonGameViewInputBase* input)
 		input, SLOT(slotPlaceUnit(unsigned int, Player*)));
 
  connect(input, SIGNAL(signalSetPlacementPreviewData(const UnitProperties*, bool, bool, bool)),
-		d->mUfoPlacementPreviewWidget, SLOT(slotSetPlacementPreviewData(const UnitProperties*, bool, bool, bool)));
+		d->mPlacementPreviewWidget, SLOT(slotSetPlacementPreviewData(const UnitProperties*, bool, bool, bool)));
  connect(input, SIGNAL(signalSetPlacementCellPreviewData(unsigned int, unsigned char*, bool)),
-		d->mUfoPlacementPreviewWidget, SLOT(slotSetPlacementCellPreviewData(unsigned int, unsigned char*, bool)));
+		d->mPlacementPreviewWidget, SLOT(slotSetPlacementCellPreviewData(unsigned int, unsigned char*, bool)));
  connect(input, SIGNAL(signalLockAction(bool, int)),
-		d->mUfoPlacementPreviewWidget, SLOT(slotLockAction(bool, int)));
+		d->mPlacementPreviewWidget, SLOT(slotLockAction(bool, int)));
 
  connect(d->mUfoCursorWidget, SIGNAL(signalSetCursor(BosonCursor*)),
 		input, SLOT(slotSetCursor(BosonCursor*)));
@@ -2664,13 +2655,6 @@ void BosonQtGameView::paintEvent(QPaintEvent*)
  if (Bo3dTools::checkError()) {
 	boError() << k_funcinfo << "OpenGL error at end of " << k_funcinfo << endl;
  }
-}
-
-void BosonQtGameView::paintWidget()
-{
- // nothing to do here, everything is done in child widgets.
- // all GL calls that should apply to child widgets as well should be made in
- // paint(), not here
 }
 
 void BosonQtGameView::slotGameOver()

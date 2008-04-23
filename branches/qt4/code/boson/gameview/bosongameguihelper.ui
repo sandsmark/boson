@@ -1,0 +1,505 @@
+<ui version="4.0" >
+ <class>BosonGameGUIHelper</class>
+ <widget class="QWidget" name="BosonGameGUIHelper" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>624</width>
+    <height>898</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string/>
+  </property>
+  <layout class="QVBoxLayout" >
+   <item>
+    <widget class="QStackedWidget" name="stackedWidget" >
+     <property name="currentIndex" >
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="NorthPage" >
+      <layout class="QHBoxLayout" >
+       <item>
+        <widget class="QWidget" native="1" name="mNorthWest" >
+         <layout class="QVBoxLayout" >
+          <item>
+           <layout class="QHBoxLayout" >
+            <item>
+             <widget class="QWidget" native="1" name="mMiniMapContainer" >
+              <property name="minimumSize" >
+               <size>
+                <width>30</width>
+                <height>30</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer>
+              <property name="orientation" >
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" >
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QWidget" native="1" name="mCommandFrameContainer" >
+            <property name="minimumSize" >
+             <size>
+              <width>30</width>
+              <height>30</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" native="1" name="mNorthWestDebugContainer" >
+            <property name="minimumSize" >
+             <size>
+              <width>30</width>
+              <height>30</height>
+             </size>
+            </property>
+            <layout class="QVBoxLayout" >
+             <item>
+              <widget class="QWidget" native="1" name="mMatricesDebug" >
+               <layout class="QVBoxLayout" >
+                <item>
+                 <layout class="QVBoxLayout" >
+                  <item>
+                   <widget class="QLabel" name="label_4" >
+                    <property name="text" >
+                     <string>(Projection * Modelview)^(-1)</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QWidget" native="1" name="mMatricesDebugProjModInvContainer" >
+                    <property name="minimumSize" >
+                     <size>
+                      <width>5</width>
+                      <height>5</height>
+                     </size>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QVBoxLayout" >
+                  <item>
+                   <widget class="QLabel" name="label" >
+                    <property name="minimumSize" >
+                     <size>
+                      <width>5</width>
+                      <height>5</height>
+                     </size>
+                    </property>
+                    <property name="text" >
+                     <string>Projection Matrix</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QWidget" native="1" name="mMatricesDebugProjectionContainer" >
+                    <property name="minimumSize" >
+                     <size>
+                      <width>5</width>
+                      <height>5</height>
+                     </size>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QVBoxLayout" >
+                  <item>
+                   <widget class="QLabel" name="label_3" >
+                    <property name="text" >
+                     <string>Projection * Modelview</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QWidget" native="1" name="mMatricesDebugProjModContainer" >
+                    <property name="minimumSize" >
+                     <size>
+                      <width>5</width>
+                      <height>5</height>
+                     </size>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QVBoxLayout" >
+                  <item>
+                   <widget class="QLabel" name="label_2" >
+                    <property name="text" >
+                     <string>Modelview Matrix</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QWidget" native="1" name="mMatricesDebugModelviewContainer" >
+                    <property name="minimumSize" >
+                     <size>
+                      <width>5</width>
+                      <height>5</height>
+                     </size>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <widget class="QLabel" name="mMatricesDebugText" >
+                  <property name="text" >
+                   <string>TextLabel</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" >
+               <item>
+                <widget class="QLabel" name="mItemWorkStatistics" >
+                 <property name="text" >
+                  <string>(item work statistics)</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="mOpenGLCamera" >
+                 <property name="text" >
+                  <string>(OpenGL camera)</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="mRenderCounts" >
+                 <property name="text" >
+                  <string>(render counts)</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="mAdvanceCalls" >
+                 <property name="text" >
+                  <string>(advance calls)</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="mTextureMemory" >
+                 <property name="text" >
+                  <string>(texture memory)</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <spacer>
+            <property name="orientation" >
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" >
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QWidget" native="1" name="mNorthEast" >
+         <layout class="QVBoxLayout" >
+          <item>
+           <widget class="QWidget" native="1" name="mResourcesBox" >
+            <layout class="QGridLayout" >
+             <property name="leftMargin" >
+              <number>0</number>
+             </property>
+             <property name="topMargin" >
+              <number>10</number>
+             </property>
+             <property name="rightMargin" >
+              <number>0</number>
+             </property>
+             <property name="bottomMargin" >
+              <number>0</number>
+             </property>
+             <item row="0" column="0" >
+              <widget class="QLabel" name="label_5" >
+               <property name="text" >
+                <string>Minerals:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1" >
+              <widget class="QLabel" name="mMineralsLabel" >
+               <property name="text" >
+                <string>(minerals)</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0" >
+              <widget class="QLabel" name="label_6" >
+               <property name="text" >
+                <string>Oil:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1" >
+              <widget class="QLabel" name="mOilLabel" >
+               <property name="text" >
+                <string>(oil)</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0" >
+              <widget class="QLabel" name="label_13" >
+               <property name="text" >
+                <string>Generic Ammo:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1" >
+              <widget class="QLabel" name="mGenericAmmoLabel" >
+               <property name="text" >
+                <string>(generic ammo)</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0" >
+              <widget class="QLabel" name="label_7" >
+               <property name="text" >
+                <string>Power generated:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1" >
+              <widget class="QLabel" name="mPowerGeneratedLabel" >
+               <property name="text" >
+                <string>(power generated)</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0" >
+              <widget class="QLabel" name="label_8" >
+               <property name="text" >
+                <string>Power consumed:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1" >
+              <widget class="QLabel" name="mPowerConsumedLabel" >
+               <property name="text" >
+                <string>(power consumed)</string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="0" colspan="2" >
+              <widget class="QProgressBar" name="mPower" >
+               <property name="value" >
+                <number>24</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" native="1" name="mNorthEastDebugContainer" >
+            <layout class="QVBoxLayout" >
+             <item>
+              <widget class="QLabel" name="mFPSLabel" >
+               <property name="text" >
+                <string>FPS:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="mGroundRendererDebug" >
+               <property name="text" >
+                <string>(ground renderer debug)</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QWidget" native="1" name="mMapCoordinates" >
+               <layout class="QVBoxLayout" >
+                <item>
+                 <widget class="QLabel" name="mMapCoordinatesWorldLabel" >
+                  <property name="text" >
+                   <string>(mapcoordinates world)</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="mMapCoordinatesCanvasLabel" >
+                  <property name="text" >
+                   <string>(mapcoordinates canvas)</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="mMapCoordinatesWindowLabel" >
+                  <property name="text" >
+                   <string>(mapcoordinates window)</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="mPathFinderDebug" >
+               <property name="text" >
+                <string>(pathfinder debug)</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <spacer>
+            <property name="orientation" >
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" >
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType" >
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>5</width>
+           <height>5</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="CenterPage" >
+      <layout class="QVBoxLayout" >
+       <item>
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="mGamePaused" >
+         <property name="text" >
+          <string>The game is paused</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="SouthPage" >
+      <layout class="QVBoxLayout" >
+       <item>
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QWidget" native="1" name="mChatContainer" >
+         <property name="minimumSize" >
+          <size>
+           <width>0</width>
+           <height>10</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
