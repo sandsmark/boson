@@ -85,13 +85,12 @@ protected slots: // implementations for the .ui slots
 	// his widget. nearly all must be transferred over network before the
 	// actual action is performed!
 	virtual void slotPlayerNameChanged();
-	virtual void slotPlayFieldSelected(int, int);
-	virtual void slotCampaignSelected(int, int);
+	virtual void slotPlayFieldSelected(int);
+	virtual void slotCampaignSelected(int);
 	virtual void slotPlayerSpeciesChanged(int);
 	virtual void slotPlayerSideChanged(int);
 	virtual void slotAddComputerPlayer();
 	virtual void slotRemovePlayer();
-	virtual void slotPlayerSelected(int, int);
 	virtual void slotPlayerSelected(int index);
 
 private slots:
