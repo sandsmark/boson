@@ -33,6 +33,9 @@
 #include <QHBoxLayout>
 #include <QLabel>
 
+// used to find points in code where the BoUfo->Qt port has not been done
+#define QT_PORT 1
+
 class BoColorDrawable : public BoUfoDrawable
 {
 public:
@@ -118,7 +121,7 @@ public:
 	{
 	}
 
-	Q3PtrList<BoUfoWidget> mButtons;
+	QList<QLabel*> mButtons;
 	Q3PtrList<BoColorDrawable> mButtonDrawable;
 	Q3ValueVector<QColor> mColors;
 	Q3ValueVector<bool> mTaken;
@@ -137,10 +140,13 @@ BoColorChooser::BoColorChooser(QWidget* parent)
  for (int i = 0; i < count; i++) {
 	QLabel* button = new QLabel(this);
 	layout->addWidget(button);
+#if !QT_PORT
 	button->setOpaque(true);
+#endif
 	d->mButtons.append(button);
 	d->mTaken[i] = false;
 
+#if !QT_PORT
 	BoColorDrawable* drawable = new BoColorDrawable();
 	d->mButtonDrawable.append(drawable);
 	button->setBackground(drawable);
@@ -153,6 +159,7 @@ BoColorChooser::BoColorChooser(QWidget* parent)
 	button->setMouseEventsEnabled(true, false);
 	connect(button, SIGNAL(signalMouseReleased(QMouseEvent*)),
 			this, SLOT(slotMouseButtonReleased(QMouseEvent*)));
+#endif
  }
 
  Q3ValueVector<QColor> colors(count);
@@ -173,12 +180,14 @@ BoColorChooser::BoColorChooser(QWidget* parent)
 
 BoColorChooser::~BoColorChooser()
 {
- for (unsigned int i = 0; i < d->mButtons.count(); i++) {
-	BoUfoWidget* w = d->mButtons.at(i);
+ for (int i = 0; i < d->mButtons.count(); i++) {
+	QLabel* w = d->mButtons.at(i);
+#if !QT_PORT
 	BoColorDrawable* drawable = d->mButtonDrawable.at(i);
 	w->setBackground((BoUfoDrawable*)0);
 
 	delete drawable;
+#endif
  }
  d->mButtons.clear();
  d->mButtonDrawable.clear();
@@ -247,7 +256,7 @@ bool BoColorChooser::isTaken(int i) const
 
 void BoColorChooser::setAllTaken(bool taken)
 {
- for (unsigned int i = 0; i < d->mButtons.count(); i++) {
+ for (int i = 0; i < d->mButtons.count(); i++) {
 	setTaken(i, taken);
  }
 }
@@ -289,7 +298,7 @@ void BoColorChooser::setColors(const Q3ValueVector<QColor>& colors)
 void BoColorChooser::setColors(const Q3ValueList<QColor>& colors)
 {
  Q3ValueVector<QColor> v(colors.count());
- for (unsigned int i = 0; i < colors.count(); i++) {
+ for (int i = 0; i < colors.count(); i++) {
 	v[i] = colors[i];
  }
  setColors(v);
@@ -297,9 +306,10 @@ void BoColorChooser::setColors(const Q3ValueList<QColor>& colors)
 
 void BoColorChooser::applyColors()
 {
- for (unsigned int i = 0; i < d->mButtons.count(); i++) {
-	BoUfoWidget* b = d->mButtons.at(i);
+ for (int i = 0; i < d->mButtons.count(); i++) {
+	QLabel* b = d->mButtons.at(i);
 	QColor c = d->mColors[i];
+#if !QT_PORT
 	BoColorDrawable* drawable = d->mButtonDrawable.at(i);
 
 	b->setOpaque(true);
@@ -307,6 +317,7 @@ void BoColorChooser::applyColors()
 //	b->setBackgroundColor(c);
 
 	drawable->setTaken(isTaken(i));
+#endif
  }
 }
 
@@ -328,10 +339,12 @@ void BoColorChooser::highlightColor(int i)
 	unhighlightColor(j);
  }
 
- BoUfoWidget* b = d->mButtons.at(i);
+ QLabel* b = d->mButtons.at(i);
+#if !QT_PORT
  b->setBorderType(BoUfoWidget::LoweredBevelBorder);
  BoColorDrawable* drawable = d->mButtonDrawable.at(i);
  drawable->setHighlight(true);
+#endif
 }
 
 void BoColorChooser::highlightColor(const QColor& c)
@@ -355,10 +368,12 @@ void BoColorChooser::unhighlightColor(int i)
 	return;
  }
 
- BoUfoWidget* b = d->mButtons.at(i);
+ QLabel* b = d->mButtons.at(i);
+#if !QT_PORT
  b->setBorderType(BoUfoWidget::NoBorder);
  BoColorDrawable* drawable = d->mButtonDrawable.at(i);
  drawable->setHighlight(false);
+#endif
 }
 
 void BoColorChooser::unhighlightColor(const QColor& c)
@@ -373,7 +388,7 @@ void BoColorChooser::unhighlightColor(const QColor& c)
 
 void BoColorChooser::slotButtonClicked(int i)
 {
- if (i < 0 || (unsigned int)i >= d->mButtons.count()) {
+ if (i < 0 || i >= d->mButtons.count()) {
 	boError() << k_funcinfo << "invalid index " << i << endl;
 	return;
  }
