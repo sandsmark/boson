@@ -157,7 +157,9 @@ public:
     // slot that changes the listbox selection for the campaign!
 
     mIndex2PlayFieldIdentifier.clear();
+    mSelectPlayField->blockSignals(true);
     mSelectPlayField->clear();
+    mSelectPlayField->blockSignals(false);
     QStringList list = campaign->playFields();
     QStringList items;
     for (int i = 0; i < list.count(); i++) {
