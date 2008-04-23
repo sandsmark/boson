@@ -24,6 +24,12 @@
 BoWelcomeWidget::BoWelcomeWidget(QWidget* parent)
 	: QWidget(parent)
 {
+ connect(mOptions, SIGNAL(clicked()), this, SIGNAL(signalPreferences()));
+ connect(mLoadGame, SIGNAL(clicked()), this, SIGNAL(signalLoadGame()));
+ connect(mStartSPGame, SIGNAL(clicked()), this, SIGNAL(signalNewSPGame()));
+ connect(mStartMPGame, SIGNAL(clicked()), this, SIGNAL(signalNewMPGame()));
+ connect(mStartEditor, SIGNAL(clicked()), this, SIGNAL(signalStartEditor()));
+ connect(mQuit, SIGNAL(clicked()), this, SIGNAL(signalQuit()));
 }
 
 BoWelcomeWidget::~BoWelcomeWidget()
