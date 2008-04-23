@@ -151,6 +151,7 @@ boson_target_link_libraries(gameengine
 
 set(startupwidgets_SRCS
 	startupwidgets/boufocolorchooser.cpp
+	startupwidgets/bocolorchooser.cpp
 	startupwidgets/bosonstartupnetwork.cpp
 	startupwidgets/boufonewgamewidget.cpp
 	startupwidgets/bonewgamewidget.cpp
