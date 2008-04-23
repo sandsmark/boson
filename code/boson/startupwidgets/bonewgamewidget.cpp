@@ -139,7 +139,7 @@ public:
           mSelectCampaign->clearSelection();
           QListWidgetItem* item = mSelectCampaign->item(index);
           if (item) {
-            item->setSelected(true);
+            mSelectCampaign->setCurrentItem(item);
           }
           mSelectCampaign->blockSignals(false);
           mSelectCampaign->setSelectionMode(QListWidget::NoSelection);
@@ -147,7 +147,7 @@ public:
           mSelectCampaign->blockSignals(true);
           QListWidgetItem* item = mSelectCampaign->item(index);
           if (item) {
-            item->setSelected(true);
+            mSelectCampaign->setCurrentItem(item);
           }
           mSelectCampaign->blockSignals(false);
       }
@@ -206,7 +206,7 @@ public:
           mSelectPlayField->clearSelection();
           QListWidgetItem* item = mSelectPlayField->item(index);
           if (item) {
-            item->setSelected(true);
+            mSelectPlayField->setCurrentItem(item);
           }
           mSelectPlayField->blockSignals(false);
           mSelectPlayField->setSelectionMode(QListWidget::NoSelection);
@@ -214,7 +214,7 @@ public:
           mSelectPlayField->blockSignals(true);
           QListWidgetItem* item = mSelectPlayField->item(index);
           if (item) {
-            item->setSelected(true);
+            mSelectPlayField->setCurrentItem(item);
           }
           mSelectPlayField->blockSignals(false);
       }
@@ -319,7 +319,7 @@ BoNewGameWidget::BoNewGameWidget(BosonStartupNetwork* interface, QWidget* parent
  connect(mAddAIPlayer, SIGNAL(clicked()), this, SLOT(slotAddComputerPlayer()));
  connect(mSelectCampaign, SIGNAL(currentRowChanged(int)), this, SLOT(slotCampaignSelected(int)));
  connect(mCancel, SIGNAL(clicked()), this, SLOT(slotCancel()));
- connect(mPlayerName, SIGNAL(clicked()), this, SLOT(slotPlayerNameChanged()));
+ connect(mPlayerName, SIGNAL(textChanged(const QString&)), this, SLOT(slotPlayerNameChanged()));
  connect(mConnectedPlayersList, SIGNAL(currentRowChanged(int)), this, SLOT(slotPlayerSelected(int)));
  connect(mPlayerSpecies, SIGNAL(activated(int)), this, SLOT(slotPlayerSpeciesChanged(int)));
  connect(mSelectMap, SIGNAL(currentRowChanged(int)), this, SLOT(slotPlayFieldSelected(int)));
@@ -462,7 +462,6 @@ void BoNewGameWidget::initPlayFields()
     }
     d->mPlayFieldSelection->addCampaign(campaign);
  }
- boDebug() << "foo3";
 }
 
 void BoNewGameWidget::initSpecies()
@@ -644,7 +643,7 @@ void BoNewGameWidget::slotNetPlayerJoinedGame(KPlayer* p)
     // Localplayer joined the game. No chat message, but select it
     QListWidgetItem* item = mConnectedPlayersList->item(indexOfNewPlayerInList);
     if (item) {
-      item->setSelected(true);
+      mConnectedPlayersList->setCurrentItem(item);
     }
     mInited = true;
  } else if (mInited) {
@@ -1190,7 +1189,7 @@ void BoNewGameWidget::slotConnectedToServer()
     if ((*it) == (KPlayer*)localPlayer()) {
         QListWidgetItem* item = mConnectedPlayersList->item(it.key());
         if (item) {
-          item->setSelected(true);
+          mConnectedPlayersList->setCurrentItem(item);
         }
         break;
     }
@@ -1225,12 +1224,12 @@ void BoNewGameWidget::removePlayer(KPlayer* p)
                 // Last item in list
                 QListWidgetItem* item = mConnectedPlayersList->item(index - 1);
                 if (item) {
-                  item->setSelected(true);
+                  mConnectedPlayersList->setCurrentItem(item);
                 }
             } else {
                 QListWidgetItem* item = mConnectedPlayersList->item(index + 1);
                 if (item) {
-                  item->setSelected(true);
+                  mConnectedPlayersList->setCurrentItem(item);
                 }
             }
         }
