@@ -208,16 +208,35 @@ void BoDebugObject::finalizeMessage()
   switch (outputMode)
   {
     case OutputShell:
-      fprintf(stderr, "%s(%d)%s%s %s %s\n",
+    {
+      QByteArray prefix;
+      switch (mType)
+      {
+        case QtDebugMsg:
+          break;
+        case QtWarningMsg:
+          prefix = "WARNING: ";
+          break;
+        default:
+        case QtCriticalMsg:
+          prefix = "ERROR: ";
+          break;
+        case QtFatalMsg:
+          prefix = "FATAL ERROR: ";
+          break;
+      }
+      fprintf(stderr, "%s(%d)%s%s %s%s %s\n",
           programName.constData(),
           getpid(),
           haveAreaName ? "/" : "",
           haveAreaName ? areaName.constData() : "",
+          prefix.constData(),
           funcinfo.constData(),
           mMessage.toLocal8Bit().constData()
       );
       fflush(stderr);
       break;
+    }
     case OutputMessageBox:
     {
       QString caption;
