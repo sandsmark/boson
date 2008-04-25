@@ -21,6 +21,7 @@
 
 #include "../bomemory/bodummymemory.h"
 #include "boglobal.h"
+#include "bodebugareas.h"
 #include "imageio/boimageio.h"
 
 #include <config.h>
@@ -91,6 +92,7 @@ BoApplication::BoApplication(const Q3CString& argv0, bool enableGUI)
 
  BoGlobal::initStatic();
  BoGlobal::boGlobal()->initGlobalObjects();
+ BoDebugAreas::initAreas();
 // BoImageIO::init();
 }
 

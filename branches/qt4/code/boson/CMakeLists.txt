@@ -49,6 +49,7 @@ boson_add_library(imageio STATIC ${imageio_SRCS})
 set(common_SRCS
 	boapplication.cpp
 	boglobal.cpp
+	bodebugareas.cpp
 	bosonconfig.cpp
 	bosonconfigentries.cpp
 	bosondata.cpp
