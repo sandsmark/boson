@@ -105,6 +105,7 @@
 #include <QEvent>
 #include <Q3PtrList>
 #include <QVBoxLayout>
+#include <QLabel>
 
 // helps to grep for places where qt port is incomplete
 #define QT_PORT 1
@@ -738,10 +739,10 @@ public:
 		mCanvasWidget = 0;
 		mGameGUI = 0;
 		mToolTipLabel = 0;
-		mUfoCursorWidget = 0;
-		mUfoSelectionRectWidget = 0;
-		mUfoFPSGraphWidget = 0;
-		mUfoProfilingGraphWidget = 0;
+		mCursorWidget = 0;
+		mSelectionRectWidget = 0;
+		mFPSGraphWidget = 0;
+		mProfilingGraphWidget = 0;
 
 		mFPSCounter = 0;
 		mActionCollection = 0;
@@ -779,10 +780,10 @@ public:
 	BosonLineVisualizationWidget* mLineVisualizationWidget;
 	BosonGameGUI* mGameGUI;
 	BoUfoLabel* mToolTipLabel;
-	BosonUfoCursorWidget* mUfoCursorWidget;
-	BosonUfoSelectionRectWidget* mUfoSelectionRectWidget;
-	BosonUfoFPSGraphWidget* mUfoFPSGraphWidget;
-	BosonUfoProfilingGraphWidget* mUfoProfilingGraphWidget;
+	BosonCursorWidget* mCursorWidget;
+	BosonSelectionRectWidget* mSelectionRectWidget;
+	BosonFPSGraphWidget* mFPSGraphWidget;
+	BosonProfilingGraphWidget* mProfilingGraphWidget;
 
 	BosonGameFPSCounter* mFPSCounter;
 	BoUfoActionCollection* mActionCollection;
@@ -811,8 +812,8 @@ public:
 	BoLightCameraWidget1* mLightWidget;
 
 	BosonGameViewPluginBase* mGameViewPlugin;
-	BoUfoWidget* mGameViewPluginWidget;
-	BoUfoWidget* mGameViewPluginWidgetContainer;
+	QWidget* mGameViewPluginWidget;
+	QWidget* mGameViewPluginWidgetContainer;
 
 	BosonGameViewEventListener* mEventListener;
 
@@ -998,7 +999,9 @@ void BosonQtGameView::quitGame()
  boDebug() << k_funcinfo << endl;
  resetGameMode();
 
- d->mGameViewPlugin->quitGame();
+ if (d->mGameViewPlugin) {
+	d->mGameViewPlugin->quitGame();
+ }
  d->mCursorEdgeScrolling->quitGame();
  delete d->mMouseIO;
  d->mMouseIO = 0;
@@ -1126,7 +1129,7 @@ void BosonQtGameView::setGameFPSCounter(BosonGameFPSCounter* counter)
 {
  d->mFPSCounter = counter;
  d->mGameGUI->setGameFPSCounter(gameFPSCounter());
- d->mUfoFPSGraphWidget->setGameFPSCounter(gameFPSCounter());
+ d->mFPSGraphWidget->setGameFPSCounter(gameFPSCounter());
 }
 
 BosonGameFPSCounter* BosonQtGameView::gameFPSCounter() const
@@ -1326,6 +1329,30 @@ void BosonQtGameView::initGUI()
  connect(this, SIGNAL(signalSelectionChanged(BoSelection*)),
 		d->mGameGUI, SIGNAL(signalSelectionChanged(BoSelection*)));
 
+ d->mCursorWidget = new BosonCursorWidget(d->mLayeredWidget);
+ d->mCursorWidget->setGameGLMatrices(d->mGameGLMatrices);
+ d->mCursorWidget->setCursorWidgetPos(d->mCursorPos.gameViewPosPointer());
+ connect(d->mCursorWidget, SIGNAL(signalSetWidgetCursor(BosonCursor*)),
+		this, SIGNAL(signalSetWidgetCursor(BosonCursor*)));
+
+ d->mSelectionRectWidget = new BosonSelectionRectWidget(d->mLayeredWidget);
+ d->mSelectionRectWidget->setGameGLMatrices(d->mGameGLMatrices);
+
+ d->mFPSGraphWidget = new BosonFPSGraphWidget(d->mLayeredWidget);
+ d->mFPSGraphWidget->setGameGLMatrices(d->mGameGLMatrices);
+ d->mFPSGraphWidget->setGameFPSCounter(gameFPSCounter());
+
+ d->mProfilingGraphWidget = new BosonProfilingGraphWidget(d->mLayeredWidget);
+ d->mProfilingGraphWidget->setGameGLMatrices(d->mGameGLMatrices);
+
+ connect(d->mSelectionRect, SIGNAL(signalVisible(bool)),
+		d->mSelectionRectWidget, SLOT(slotSelectionRectVisible(bool)));
+ connect(d->mSelectionRect, SIGNAL(signalChanged(const QRect&)),
+		d->mSelectionRectWidget, SLOT(slotSelectionRectChanged(const QRect&)));
+
+ d->mGameViewPluginWidgetContainer = new QWidget(d->mLayeredWidget);
+ d->mGameViewPluginWidgetContainer->setObjectName("GameViewPluginWidgetContainer");
+
 }
 
 void BosonQtGameView::initUfoGUI()
@@ -1381,6 +1408,7 @@ void BosonQtGameView::initUfoGUI()
  d->mToolTips->setLabel(d->mToolTipLabel);
 #endif
 
+#if 0
  d->mUfoCursorWidget = new BosonUfoCursorWidget();
  d->mUfoCursorWidget->setGameGLMatrices(d->mGameGLMatrices);
  d->mUfoCursorWidget->setCursorWidgetPos(d->mCursorPos.gameViewPosPointer());
@@ -1404,6 +1432,7 @@ void BosonQtGameView::initUfoGUI()
 
  d->mGameViewPluginWidgetContainer = new BoUfoWidget();
  d->mGameViewPluginWidgetContainer->setName("GameViewPluginWidgetContainer");
+#endif
 
 #if 0
  d->mLayeredPane->addWidget(d->mUfoCanvasWidget);
@@ -1414,11 +1443,13 @@ void BosonQtGameView::initUfoGUI()
 #if !QT_PORT
  d->mLayeredPane->addWidget(d->mToolTipLabel);
 #endif
+#if 0
  d->mLayeredPane->addWidget(d->mUfoCursorWidget);
  d->mLayeredPane->addWidget(d->mUfoSelectionRectWidget);
  d->mLayeredPane->addWidget(d->mUfoFPSGraphWidget);
  d->mLayeredPane->addWidget(d->mUfoProfilingGraphWidget);
  d->mLayeredPane->addWidget(d->mGameViewPluginWidgetContainer);
+#endif
 
 #if 0
  d->mLayeredPane->setMouseEventsEnabled(true, true);
@@ -1746,6 +1777,9 @@ void BosonQtGameView::slotInitMiniMapFogOfWar()
 
 void BosonQtGameView::slotReloadGameViewPlugin()
 {
+ kWarning() << "TODO";
+#warning TODO (plugins are obsolete)
+#if 0
  if (d->mGameViewPluginWidget) {
 	d->mGameViewPluginWidgetContainer->removeWidget(d->mGameViewPluginWidget);
 	d->mGameViewPluginWidget = 0;
@@ -1769,6 +1803,7 @@ void BosonQtGameView::slotReloadGameViewPlugin()
 	}
  }
  resetGameViewPlugin();
+#endif
 }
 
 void BosonQtGameView::resetGameViewPlugin()
@@ -1778,6 +1813,9 @@ void BosonQtGameView::resetGameViewPlugin()
 
 void BosonQtGameView::resetGameViewPlugin(bool gameMode)
 {
+ kWarning() << "TODO";
+#warning TODO (plugins are obsolete)
+#if 0
  d->mGameViewPlugin = (BosonGameViewPluginBase*)BosonGameViewPluginManager::manager()->currentPlugin();
  BO_CHECK_NULL_RET(d->mGameViewPlugin);
 
@@ -1794,6 +1832,7 @@ void BosonQtGameView::resetGameViewPlugin(bool gameMode)
  d->mGameViewPlugin->setCanvas(mCanvas);
  d->mGameViewPlugin->setLocalPlayerIO(localPlayerIO());
  d->mGameViewPlugin->setGameMode(gameMode);
+#endif
 }
 
 void BosonQtGameView::addChatMessage(const QString& message)
@@ -1861,9 +1900,9 @@ void BosonQtGameView::slotWidgetHidden()
 void BosonQtGameView::slotChangeCursor(int mode, const QString& dir)
 {
  if (boGame && boGame->gameMode()) {
-	d->mUfoCursorWidget->slotChangeCursor(mode, dir);
+	d->mCursorWidget->slotChangeCursor(mode, dir);
  } else {
-	d->mUfoCursorWidget->slotChangeCursor(CursorKDE, boConfig->stringValue("CursorDir"));
+	d->mCursorWidget->slotChangeCursor(CursorKDE, boConfig->stringValue("CursorDir"));
  }
 }
 
@@ -2161,7 +2200,7 @@ void BosonQtGameView::setDisplayInput(BosonGameViewInputBase* input)
  }
  d->mInput->setSelection(selection());
 
- d->mInput->slotSetCursor(d->mUfoCursorWidget->cursor());
+ d->mInput->slotSetCursor(d->mCursorWidget->cursor());
 
  d->mInput->setCanvas(canvas());
  d->mInput->setLocalPlayerIO(localPlayerIO());
@@ -2179,7 +2218,7 @@ void BosonQtGameView::setDisplayInput(BosonGameViewInputBase* input)
  connect(input, SIGNAL(signalLockAction(bool, int)),
 		d->mPlacementPreviewWidget, SLOT(slotLockAction(bool, int)));
 
- connect(d->mUfoCursorWidget, SIGNAL(signalSetCursor(BosonCursor*)),
+ connect(d->mCursorWidget, SIGNAL(signalSetCursor(BosonCursor*)),
 		input, SLOT(slotSetCursor(BosonCursor*)));
  if (d->mGLMiniMap) {
 	connect(d->mGLMiniMap, SIGNAL(signalMoveSelection(int, int)),
