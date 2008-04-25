@@ -38,6 +38,8 @@ public:
 	BoLayeredWidget(QWidget* parent = 0);
 	~BoLayeredWidget();
 
+	virtual QSize sizeHint() const;
+
 protected:
 	virtual void resizeEvent(QResizeEvent* e);
 	virtual void childEvent(QChildEvent* e);

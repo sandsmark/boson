@@ -56,3 +56,17 @@ void BoLayeredWidget::childEvent(QChildEvent* e)
  w->resize(size());
 }
 
+QSize BoLayeredWidget::sizeHint() const
+{
+ // TODO: caching?
+ QSize size;
+ foreach (QObject* o, children()) {
+	if (!o->isWidgetType()) {
+		continue;
+	}
+	QWidget* w = static_cast<QWidget*>(o);
+	size = size.expandedTo(w->sizeHint());
+ }
+ return size;
+}
+
