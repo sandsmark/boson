@@ -22,16 +22,20 @@
 
 #include "bodebug.h"
 
-#include <k3staticdeleter.h>
-#include <Q3PtrList>
+#include <QCoreApplication> // qAddPostRoutine()
+
 
 static const int maxLevels = 4; // see QtMsgType
 
-static K3StaticDeleter<BoDebugLog> sd;
 BoDebugLog* BoDebugLog::mDebugLog = 0;
 
 BoDebugLog::BoDebugLog()
 {
+ if (mDebugLog) {
+	kFatal() << "debug log already created. can create only one instance of BoDebugLog!";
+	return;
+ }
+ BoDebugLog::mDebugLog = this;
  mLists = maxLevels;
  mMessages = new QList<BoDebugMessage*>[mLists];
  mMaxCount = new unsigned int[mLists];
@@ -80,22 +84,22 @@ BoDebugLog::~BoDebugLog()
 
  // set static pointer back to NULL. this is safe, as there is only at most one
  // object of this class
- mDebugLog = 0;
+ BoDebugLog::mDebugLog = 0;
 }
 
-void BoDebugLog::initStatic()
+BoDebugLog* BoDebugLog::debugLog()
 {
- static bool initialized = false;
- if (initialized) {
-	// AB: note that even if mDebugLog == 0, initialized may still be false.
-	// this can happen on destruction, if some debug message is emitted
-	// after the log has been deleted already. we don't want to re-create
-	// it, and so we use that initialized variable.
-	return;
+ if (!mDebugLog) {
+	mDebugLog = new BoDebugLog();
+	qAddPostRoutine(deleteStatic);
  }
- initialized = true;
- mDebugLog = new BoDebugLog;
- sd.setObject(mDebugLog);
+ return mDebugLog;
+}
+
+void BoDebugLog::deleteStatic()
+{
+ delete mDebugLog;
+ mDebugLog = 0;
 }
 
 void BoDebugLog::addEntry(const QString& string, int area, const QString& areaName, QtMsgType level_)
