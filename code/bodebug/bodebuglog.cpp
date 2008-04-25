@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2004-2008 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,10 +23,9 @@
 #include "bodebug.h"
 
 #include <k3staticdeleter.h>
-//Added by qt3to4:
 #include <Q3PtrList>
 
-static const int maxLevels = 4; // see BoDebug::DebugLevels
+static const int maxLevels = 4; // see QtMsgType
 
 static K3StaticDeleter<BoDebugLog> sd;
 BoDebugLog* BoDebugLog::mDebugLog = 0;
@@ -34,13 +33,11 @@ BoDebugLog* BoDebugLog::mDebugLog = 0;
 BoDebugLog::BoDebugLog()
 {
  mLists = maxLevels;
- mAllMessages.setAutoDelete(true);
- mMessages = new Q3PtrList<BoDebugMessage>[mLists];
+ mMessages = new QList<BoDebugMessage*>[mLists];
  mMaxCount = new unsigned int[mLists];
  mPopAtFront = new bool[mLists];
  mEmitSignal = new bool[mLists];
  for (int i = 0; i < mLists; i++) {
-	mMessages[i].setAutoDelete(true);
 	mPopAtFront[i] = false;
 	mMaxCount[i] = 1000;
 	mEmitSignal[i] = false;
@@ -49,32 +46,36 @@ BoDebugLog::BoDebugLog()
  mAllPopAtFront = false;
  mAllEmitSignal = false;
 
- // note: for ERROR and WARN, we will never reach these limits.
- // if ERROR ever goes beyound 10000 entries, we have a lot of more grave
+ // note: for QtCriticalMsg and QtWarningMsg , we will never reach these limits.
+ // if QtCriticalMsg ever goes beyound 10000 entries, we have a lot of more grave
  // problems anyway.
  // but INFO can easily reach _huge_ numbers
- setMaxCount(BoDebug::KDEBUG_ERROR, 1000);
- setMaxCount(BoDebug::KDEBUG_WARN, 500);
- setMaxCount(BoDebug::KDEBUG_INFO, 2000);
+ setMaxCount(QtCriticalMsg, 1000);
+ setMaxCount(QtWarningMsg, 500);
+ setMaxCount(QtDebugMsg, 2000);
 
  // the most recent errors are the important ones
- setPopAtFront(BoDebug::KDEBUG_INFO, true);
+ setPopAtFront(QtDebugMsg, true);
 
 
  // the separate list that is independant of the level
- setMaxCount(-1, 5000);
- setPopAtFront(-1, true);
+ setMaxCountOfFullLog(5000);
+ setPopFullLogAtFront(true);
 }
 
 BoDebugLog::~BoDebugLog()
 {
  for (int i = 0; i < mLists; i++) {
+	qDeleteAll(mMessages[i]);
 	mMessages[i].clear();
  }
  delete[] mMessages;
  delete[] mMaxCount;
  delete[] mPopAtFront;
  delete[] mEmitSignal;
+
+ qDeleteAll(mAllMessages);
+ mAllMessages.clear();
 
 
  // set static pointer back to NULL. this is safe, as there is only at most one
@@ -97,57 +98,60 @@ void BoDebugLog::initStatic()
  sd.setObject(mDebugLog);
 }
 
-void BoDebugLog::addEntry(const QString& string, int area, const QString& areaName, int level)
+void BoDebugLog::addEntry(const QString& string, int area, const QString& areaName, QtMsgType level_)
 {
- if (level < 0 || level >= mLists) {
+ int levelIndex = msgType2Index(level_);
+ if (levelIndex >= mLists) {
 	return;
  }
  bool addToLevel = true;
  bool addToAll = true;
- unsigned int countLevel = mMessages[level].count();
- unsigned int countAll = mAllMessages.count();
+ int countLevel = mMessages[levelIndex].count();
+ int countAll = mAllMessages.count();
  QString backtrace;
- if (countLevel >= mMaxCount[level]) {
-	if (mPopAtFront[level]) {
-		mMessages[level].removeFirst();
+ if ((unsigned int)countLevel >= mMaxCount[levelIndex]) {
+	if (mPopAtFront[levelIndex]) {
+		BoDebugMessage* first = mMessages[levelIndex].takeFirst();
+		delete first;
 	} else {
 		// pop from the end - aka don't add anything
 		addToLevel = false;
 	}
  }
- if (countAll >= mAllMaxCount) {
+ if ((unsigned int)countAll >= mAllMaxCount) {
 	if (mAllPopAtFront) {
-		mAllMessages.removeFirst();
+		BoDebugMessage* first = mAllMessages.takeFirst();
+		delete first;
 	} else {
 		// pop from the end - aka don't add anything
 		addToAll = false;
 	}
  }
- if (level != BoDebug::KDEBUG_INFO) {
+ if (level_ != QtDebugMsg) {
 	backtrace = boBacktrace(-1);
  }
  if (addToLevel) {
-	BoDebugMessage* m = new BoDebugMessage(string, area, areaName, level, backtrace);
-	mMessages[level].append(m);
+	BoDebugMessage* m = new BoDebugMessage(string, area, areaName, level_, backtrace);
+	mMessages[levelIndex].append(m);
  }
  if (addToAll) {
-	BoDebugMessage* m = new BoDebugMessage(string, area, areaName, level, backtrace);
+	BoDebugMessage* m = new BoDebugMessage(string, area, areaName, level_, backtrace);
 	mAllMessages.append(m);
  }
- if (mEmitSignal[level] || mAllEmitSignal) {
-	BoDebugMessage m(string, area, areaName, level, backtrace);
+ if (mEmitSignal[levelIndex] || mAllEmitSignal) {
+	BoDebugMessage m(string, area, areaName, level_, backtrace);
 	emit signalMessage(m);
-	switch (level) {
-		case BoDebug::KDEBUG_INFO:
+	switch (level_) {
+		case QtDebugMsg:
 			emit signalDebug(m);
 			break;
-		case BoDebug::KDEBUG_WARN:
+		case QtWarningMsg:
 			emit signalWarn(m);
 			break;
-		case BoDebug::KDEBUG_ERROR:
+		case QtCriticalMsg:
 			emit signalError(m);
 			break;
-		case BoDebug::KDEBUG_FATAL:
+		case QtFatalMsg:
 			emit signalFatal(m);
 			break;
 		default:
@@ -156,50 +160,71 @@ void BoDebugLog::addEntry(const QString& string, int area, const QString& areaNa
  }
 }
 
-void BoDebugLog::setMaxCount(int level, unsigned int count)
+void BoDebugLog::setMaxCount(QtMsgType level, unsigned int count)
 {
- if (level >= mLists) {
+ if (msgType2Index(level) >= mLists) {
 	return;
  }
- if (level < 0) {
-	mAllMaxCount = count;
- } else {
-	mMaxCount[level] = count;
- }
+ mMaxCount[msgType2Index(level)] = count;
 }
 
-void BoDebugLog::setPopAtFront(int level, bool front)
+void BoDebugLog::setMaxCountOfFullLog(unsigned int count)
 {
- if (level >= mLists) {
+ mAllMaxCount = count;
+}
+
+void BoDebugLog::setPopAtFront(QtMsgType level, bool front)
+{
+ if (msgType2Index(level) >= mLists) {
 	return;
  }
- if (level < 0) {
-	mAllPopAtFront = front;
- } else {
-	mPopAtFront[level] = front;
- }
+ mPopAtFront[msgType2Index(level)] = front;
 }
 
-void BoDebugLog::setEmitSignal(int level, bool e)
+void BoDebugLog::setPopFullLogAtFront(bool front)
 {
- if (level >= mLists) {
+ mAllPopAtFront = front;
+}
+
+void BoDebugLog::setEmitSignal(QtMsgType level, bool e)
+{
+ if (msgType2Index(level) >= mLists) {
 	return;
  }
- if (level < 0) {
-	mAllEmitSignal = e;
- } else {
-	mEmitSignal[level] = e;
- }
+ mEmitSignal[msgType2Index(level)] = e;
 }
 
-const Q3PtrList<BoDebugMessage>* BoDebugLog::messageLogLevel(int level) const
+void BoDebugLog::setEmitSignalFullLog(bool e)
 {
- if (level >= mLists) {
-	return 0;
- }
- if (level < 0) {
-	return &mAllMessages;
- }
- return &mMessages[level];
+ mAllEmitSignal = e;
 }
 
+QList<BoDebugMessage*> BoDebugLog::messageLogLevel(QtMsgType level) const
+{
+ if (msgType2Index(level) >= mLists) {
+	return QList<BoDebugMessage*>();
+ }
+ return mMessages[msgType2Index(level)];
+}
+
+QList<BoDebugMessage*> BoDebugLog::messageLogFull() const
+{
+ return mAllMessages;
+}
+
+int BoDebugLog::msgType2Index(QtMsgType type) const
+{
+ switch (type) {
+	case QtDebugMsg:
+		return 0;
+	case QtWarningMsg:
+		return 1;
+	case QtCriticalMsg:
+		return 2;
+	case QtFatalMsg:
+		return 3;
+	default:
+		return 0;
+ }
+ return 0;
+}
