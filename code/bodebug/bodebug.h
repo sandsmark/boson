@@ -24,6 +24,8 @@
 
 #include <KDebug>
 
+class AreaData;
+
 /**
  * Output a NULL pointer error for @p p (including the variable name).
  * Won't check whether p is actually NULL.
@@ -94,6 +96,7 @@ namespace BoDebug
 {
   void registerAreaName(int area, QString name);
   QByteArray findAreaName(int area);
+  AreaData* findAreaData(int area);
 };
 
 
