@@ -157,13 +157,8 @@ public:
 	QList<BoDebugMessage*> messageLogLevel(QtMsgType level) const;
 	QList<BoDebugMessage*> messageLogFull() const;
 
-	static BoDebugLog* debugLog()
-	{
-		if (!mDebugLog) {
-			initStatic();
-		}
-		return mDebugLog;
-	}
+	static BoDebugLog* debugLog();
+	static void deleteStatic();
 
 signals:
 	/**
@@ -208,8 +203,6 @@ signals:
 
 private:
 	BoDebugLog();
-
-	static void initStatic();
 
 	int msgType2Index(QtMsgType type) const;
 
