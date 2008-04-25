@@ -102,6 +102,7 @@ void BoDebugLog::deleteStatic()
  mDebugLog = 0;
 }
 
+#warning TODO: add line, file, funcinfo parameters. storing and displaying them separately from the message string may be very useful!
 void BoDebugLog::addEntry(const QString& string, int area, const QString& areaName, QtMsgType level_)
 {
  int levelIndex = msgType2Index(level_);

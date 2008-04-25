@@ -30,7 +30,7 @@
  *
  * Usually you will use BO_CHECK_NULL* instead.
  **/
-#define BO_NULL_ERROR(p) boError() << k_funcinfo << "NULL pointer: " << #p;
+#define BO_NULL_ERROR(p) boError() << "NULL pointer: " << #p;
 
 /**
  * Ensure that the pointer p is non-NULL. If it is NULL output an error. will
@@ -51,12 +51,50 @@
 #define BO_CHECK_NULL_RET0(p) if (!p) { BO_NULL_ERROR(p) return 0; }
 
 // make boDebug behave like kDebug
-#define boDebug KDebug(QtDebugMsg, __FILE__, __LINE__, Q_FUNC_INFO)
-#define boWarning KDebug(QtWarningMsg, __FILE__, __LINE__, Q_FUNC_INFO)
-#define boError KDebug(QtCriticalMsg, __FILE__, __LINE__, Q_FUNC_INFO)
+#define boDebug BoDebugObject(QtDebugMsg, __FILE__, __LINE__, Q_FUNC_INFO)
+#define boWarning BoDebugObject(QtWarningMsg, __FILE__, __LINE__, Q_FUNC_INFO)
+#define boError BoDebugObject(QtCriticalMsg, __FILE__, __LINE__, Q_FUNC_INFO)
 #define boBacktrace kBacktrace
 
 //#warning TODO: BoDebugLog support
+
+
+class BoDebugObject
+{
+public:
+  inline BoDebugObject(QtMsgType t, const char* file, int line, const char* funcinfo)
+    : mType(t), mFile(file), mLine(line), mFuncinfo(funcinfo), mArea(0)
+  {
+  }
+
+  inline QDebug operator()(int area = 0)
+  {
+    mArea = area;
+    return QDebug(&mMessage);
+  }
+  inline ~BoDebugObject()
+  {
+    finalizeMessage();
+  }
+
+protected:
+  void finalizeMessage();
+  QByteArray stripFuncinfoDown(const char* funcinfo) const;
+
+private:
+  QString mMessage;
+  QtMsgType mType;
+  const char* mFile;
+  int mLine;
+  const char* mFuncinfo;
+  int mArea;
+};
+
+namespace BoDebug
+{
+  void registerAreaName(int area, QString name);
+  QByteArray findAreaName(int area);
+};
 
 
 #if 0
