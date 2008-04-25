@@ -125,7 +125,7 @@ public:
 		}
 		return mMaxCount[msgType2Index(level)];
 	}
-	unsigned int maxCountFullLog(QtMsgType level) const
+	unsigned int maxCountFullLog() const
 	{
 		return mAllMaxCount;
 	}
