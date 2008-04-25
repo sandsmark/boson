@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2004-2008 Andreas Beckermann (b_mann@gmx.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
 #define BODEBUGLOG_H
 
 #include <qstring.h>
-#include <q3ptrlist.h>
 #include <qobject.h>
 
 /**
@@ -30,7 +29,7 @@
 class BoDebugMessage
 {
 public:
-	BoDebugMessage(const QString& m, int area, const QString& areaName, int level, const QString& backtrace)
+	BoDebugMessage(const QString& m, int area, const QString& areaName, QtMsgType level, const QString& backtrace)
 		: mMessage(m), mArea(area), mAreaName(areaName), mLevel(level), mBacktrace(backtrace)
 	{
 	}
@@ -38,14 +37,14 @@ public:
 	const QString& message() const { return mMessage; }
 	int area() const { return mArea; }
 	const QString& areaName() const { return mAreaName; }
-	int level() const { return mLevel; }
+	QtMsgType level() const { return mLevel; }
 	const QString& backtrace() const { return mBacktrace; }
 
 private:
 	QString mMessage;
 	int mArea;
 	QString mAreaName;
-	int mLevel;
+	QtMsgType mLevel;
 	QString mBacktrace;
 
 };
@@ -84,24 +83,30 @@ public:
 	 * @internal
 	 * Used internally to add the message.
 	 **/
-	void addEntry(const QString& string, int area, const QString& areaName, int level);
+	void addEntry(const QString& string, int area, const QString& areaName, QtMsgType level);
 
 	/**
-	 * @param level See @ref BoDebug::DebugLevels for possible values.
-	 * Additionally you can use -1 to influence the separately maintained
-	 * list that contains messages of all levels.
 	 * @param count How many items are stored before removing items.
 	 **/
-	void setMaxCount(int level, unsigned int count);
+	void setMaxCount(QtMsgType level, unsigned int count);
 
 	/**
-	 * @param level See @ref BoDebug::DebugLevels for possible values.
-	 * Additionally you can use -1 to influence the separately maintained
-	 * list that contains messages of all levels.
+	 * Like @ref setMaxCount, but influences the list that contains all
+	 * message types/levels.
+	 **/
+	void setMaxCountOfFullLog(unsigned int count);
+
+	/**
 	 * @param front TRUE to pop from the beginning (old messages), otherwise
 	 * the new/incoming message is not added.
 	 **/
-	void setPopAtFront(int level, bool front);
+	void setPopAtFront(QtMsgType level, bool front);
+
+	/**
+	 * Like @ref setPopAtFront but influences the "full log" that contains
+	 * all message types.
+	 **/
+	void setPopFullLogAtFront(bool front);
 
 	/**
 	 * @param level See @ref BoDebug::DebugLevels for possible values.
@@ -110,46 +115,47 @@ public:
 	 * @param e If TRUE, a signal is emitted whenever a message with level
 	 * @p level comes in
 	 **/
-	void setEmitSignal(int level, bool e);
+	void setEmitSignal(QtMsgType level, bool e);
+	void setEmitSignalFullLog(bool e);
 
-	unsigned int maxCount(int level) const
+	unsigned int maxCount(QtMsgType level) const
 	{
-		if (level >= mLists) {
+		if (msgType2Index(level) >= mLists) {
 			return 0;
 		}
-		if (level < 0) {
-			return mAllMaxCount;
-		}
-		return mMaxCount[level];
+		return mMaxCount[msgType2Index(level)];
 	}
-	bool popAtFront(int level) const
+	unsigned int maxCountFullLog(QtMsgType level) const
 	{
-		if (level >= mLists) {
+		return mAllMaxCount;
+	}
+	bool popAtFront(QtMsgType level) const
+	{
+		if (msgType2Index(level) >= mLists) {
 			return false;
 		}
-		if (level < 0) {
-			return mAllPopAtFront;
-		}
-		return mPopAtFront[level];
+		return mPopAtFront[msgType2Index(level)];
+	}
+	bool popFullLogAtFront() const
+	{
+		return mAllPopAtFront;
 	}
 
-	bool emitSignal(int level) const
+	bool emitSignal(QtMsgType level) const
 	{
-		if (level < 0 || level >= mLists) {
+		if (msgType2Index(level) >= mLists) {
 			return false;
 		}
-		return mEmitSignal[level];
+		return mEmitSignal[msgType2Index(level)];
 	}
 
 	/**
 	 * @return @ref maxCount messages with @p level. Whether these are the
 	 * most recent or the oldest @ref maxCount messages depends on @ref
 	 * popAtFront.
-	 *
-	 * @param level Which type (debug/warn/error) of messages you want. Use
-	 * -1 to ignore the level (uses a separate list)
 	 **/
-	const Q3PtrList<BoDebugMessage>* messageLogLevel(int level) const;
+	QList<BoDebugMessage*> messageLogLevel(QtMsgType level) const;
+	QList<BoDebugMessage*> messageLogFull() const;
 
 	static BoDebugLog* debugLog()
 	{
@@ -205,15 +211,17 @@ private:
 
 	static void initStatic();
 
+	int msgType2Index(QtMsgType type) const;
+
 private:
 	int mLists;
 
-	Q3PtrList<BoDebugMessage>* mMessages;
+	QList<BoDebugMessage*>* mMessages;
 	unsigned int* mMaxCount;
 	bool* mPopAtFront;
 	bool* mEmitSignal;
 
-	Q3PtrList<BoDebugMessage> mAllMessages;
+	QList<BoDebugMessage*> mAllMessages;
 	unsigned int mAllMaxCount;
 	bool mAllPopAtFront;
 	bool mAllEmitSignal;
