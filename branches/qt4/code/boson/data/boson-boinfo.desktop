@@ -1,10 +1,9 @@
 [Desktop Entry]
-Encoding=UTF-8
+Version=1.0
 Name=Boson Info
 GenericName=Boson System Information
 Exec=boinfo
 Icon=boson
-Path=
 X-DocPath=boson/index.html
 Type=Application
 Terminal=false

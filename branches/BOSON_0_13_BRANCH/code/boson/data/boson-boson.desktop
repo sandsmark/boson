@@ -1,5 +1,5 @@
 [Desktop Entry]
-Encoding=UTF-8
+Version=1.0
 Name=Boson
 Name[de]=Boson
 Name[fr]=Boson
@@ -12,6 +12,5 @@ Icon=boson
 X-DocPath=boson/index.html
 Terminal=false
 Type=Application
-Path=
 Categories=Qt;KDE;Game;StrategyGame;
 
