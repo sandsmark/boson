@@ -34,6 +34,9 @@
 #include "udimension.hpp"
 #include "uinsets.hpp"
 
+#include <cstdlib>
+#include <memory>
+
 namespace ufo {
 
 /** @short An abstraction of a rectangle (x, y, width and height).

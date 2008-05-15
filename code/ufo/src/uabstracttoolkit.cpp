@@ -62,6 +62,9 @@
 
 #include "ufo/uvideodriver.hpp"
 
+#include <climits>
+#include <cstring>
+
 namespace ufo {
 bool operator<(const UPluginInfo & p1, const UPluginInfo & p2) {
 	return ((p1.category < p2.category) || (p1.feature < p2.feature));

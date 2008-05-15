@@ -30,6 +30,8 @@
 #include "ufo/events/ukeyevent.hpp"
 #include "ufo/util/ustring.hpp"
 
+#include <algorithm>
+
 
 using namespace ufo;
 
