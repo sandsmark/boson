@@ -132,7 +132,7 @@ extern "C" {
 	typedef GLvoid (*_glShaderSource)(GLuint, GLsizei, const GLchar**, const GLint*);
 	typedef GLvoid (*_glCompileShader)(GLuint);
 	typedef GLvoid (*_glDeleteShader)(GLuint);
-	typedef GLuint (*_glCreateProgram)();
+	typedef GLuint (*_glCreateProgram)(void);
 	typedef GLvoid (*_glAttachShader)(GLuint, GLuint);
 	typedef GLvoid (*_glDetachShader)(GLuint, GLuint);
 	typedef GLvoid (*_glLinkProgram)(GLuint);
