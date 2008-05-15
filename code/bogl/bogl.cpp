@@ -45,8 +45,7 @@ BoGL* BoGL::mBoGL = 0;
 
 QStringList boglGetOpenGLExtensions()
 {
- QString extensions = (const char*)glGetString(GL_EXTENSIONS);
- return QStringList::split(" ", extensions);
+ return BoGL::bogl()->OpenGLExtensions();
 }
 
 QStringList boglGetGLUExtensions()
