@@ -27,6 +27,7 @@
 
 #include "ufo/ufo_global.hpp"
 
+#include <cstdlib>
 #include <cstring>
 #include <cstdarg>
 #include <cstdio> // for vsnprintf

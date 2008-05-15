@@ -38,6 +38,8 @@
 #include "ufo/widgets/upopupmenu.hpp"
 #include "ufo/widgets/urootpane.hpp"
 
+#include <algorithm>
+
 using namespace ufo;
 
 UFO_IMPLEMENT_DYNAMIC_CLASS(UMenuManager, UObject)

@@ -31,6 +31,8 @@
 // special case for radio buttons
 #include "ufo/widgets/uradiobutton.hpp"
 
+#include <algorithm>
+
 using namespace ufo;
 
 UFO_IMPLEMENT_DYNAMIC_CLASS(UButtonGroup, UObject)

@@ -45,6 +45,7 @@
 #include "ufo/uvolatiledata.hpp"
 
 #include <bitset>
+#include <algorithm>
 
 namespace ufo {
 
