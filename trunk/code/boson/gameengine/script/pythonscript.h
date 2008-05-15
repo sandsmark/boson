@@ -29,6 +29,11 @@ typedef struct _object PyObject;
 struct PyMethodDef;
 typedef struct _ts PyThreadState;
 
+#include <patchlevel.h>
+/* Python < 2.5 compat */
+#if PY_VERSION_HEX < 0x02050000
+typedef int Py_ssize_t;
+#endif
 
 class PythonScript : public BosonScript
 {
