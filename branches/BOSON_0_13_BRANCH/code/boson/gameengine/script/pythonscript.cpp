@@ -14,7 +14,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
 #include "pythonscript.h"
@@ -688,7 +688,7 @@ PyObject* PythonScript::saveModule(PyObject* module) const
   //  variables or submodules dict if possible.
   PyObject* key;
   PyObject* value;
-  int pos = 0;
+  Py_ssize_t pos = 0;
   while(PyDict_Next(moduledict, &pos, &key, &value))
   {
     // Check if value is any of the known types
@@ -774,7 +774,7 @@ void PythonScript::loadModule(PyObject* module, PyObject* data)
   boDebug(700) << k_funcinfo << "Loading and merging " << PyDict_Size(submodules) << " submodules" << endl;
   PyObject* key;
   PyObject* value;
-  int pos = 0;
+  Py_ssize_t pos = 0;
   while(PyDict_Next(submodules, &pos, &key, &value))
   {
     // Check if current module already has module with this name
