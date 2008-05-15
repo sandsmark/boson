@@ -14,7 +14,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
 #include "boinfo.h"
@@ -72,7 +72,11 @@ void BoInfo::updateOSInfo()
 	insert(OSVersionString, kernelVersion);
  }
 
+#ifdef UTS_RELEASE
  kernelVersion = UTS_RELEASE;
+#else
+ kernelVersion = "(Unknown)";
+#endif
  insert(BoInfo::OSVersionString + BoInfo::CompileOffset, kernelVersion);
 
  QString kernelModules = readFile("/proc/modules");
