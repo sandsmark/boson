@@ -1,11 +1,11 @@
 [Desktop Entry]
-Encoding=UTF-8
+Version=1.0
 GenericName=Unit Editor for Boson
+Comment=Edit Units for Boson
 Name=BoUnit
 Exec=bounit
 Icon=boson
-Path=
 X-DocPath=boson/index.html
 Type=Application
 Terminal=false
-
+Categories=Game;StrategyGame;
