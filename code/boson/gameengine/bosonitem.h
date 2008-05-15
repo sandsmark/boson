@@ -580,12 +580,12 @@ private:
 	/**
 	 * Called right before changing the position of this item.
 	 **/
-	void itemAboutToMove(bofixed dx, bofixed dy, bofixed dy);
+	void itemAboutToMove(bofixed dx, bofixed dy, bofixed dz);
 
 	/**
 	 * Called right after changing the position of this item.
 	 **/
-	void itemHasMoved(bofixed dx, bofixed dy, bofixed dy);
+	void itemHasMoved(bofixed dx, bofixed dy, bofixed dz);
 
 	/**
 	 * Add the item to the cells on the canvas. This should get called
