@@ -699,7 +699,7 @@ PyObject* PythonScript::saveModule(PyObject* module) const
   //  variables or submodules dict if possible.
   PyObject* key;
   PyObject* value;
-  int pos = 0;
+  Py_ssize_t pos = 0;
   while(PyDict_Next(moduledict, &pos, &key, &value))
   {
     // Check if value is any of the known types
@@ -785,7 +785,7 @@ void PythonScript::loadModule(PyObject* module, PyObject* data)
   boDebug(700) << k_funcinfo << "Loading and merging " << PyDict_Size(submodules) << " submodules" << endl;
   PyObject* key;
   PyObject* value;
-  int pos = 0;
+  Py_ssize_t pos = 0;
   while(PyDict_Next(submodules, &pos, &key, &value))
   {
     // Check if current module already has module with this name
