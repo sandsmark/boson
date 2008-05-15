@@ -57,7 +57,7 @@ static KCmdLineOptions options[] =
 
 static bool parseArgs(MainNoGUIStartOptions* options, KCmdLineArgs* args);
 static bool parseAddComputerArgs(MainNoGUIStartOptions* options, KCmdLineArgs* args);
-static bool parsePlayFieldArgs(MainNoGUIStartOptions* args, KCmdLineArgs* args);
+static bool parsePlayFieldArgs(MainNoGUIStartOptions* options, KCmdLineArgs* args);
 
 static void postBosonConfigInit();
 

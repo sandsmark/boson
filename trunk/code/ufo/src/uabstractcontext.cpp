@@ -50,6 +50,7 @@
 #include "ufo/ukeystroke.hpp"
 #include "ufo/events/uactionevent.hpp"
 
+#include <cstdlib>
 
 using namespace ufo;
 
