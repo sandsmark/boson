@@ -30,6 +30,8 @@
 #include "ufo/signals/ufo_signals.hpp"
 #include "ufo/ufo_types.hpp"
 
+#include <algorithm>
+
 using namespace ufo;
 
 #ifdef UFO_RTTI
