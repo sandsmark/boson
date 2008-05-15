@@ -31,6 +31,8 @@
 #include "ufo/utoolkit.hpp"
 #include "ufo/uvolatiledata.hpp"
 
+#include <algorithm>
+
 using namespace ufo;
 
 UFO_IMPLEMENT_DYNAMIC_CLASS(UContextGroup, UObject)

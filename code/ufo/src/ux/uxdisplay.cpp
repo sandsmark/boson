@@ -43,6 +43,8 @@
 
 #include "ufo/gl/ugl_driver.hpp"
 
+#include <algorithm>
+
 using namespace ufo;
 
 UFO_IMPLEMENT_DYNAMIC_CLASS(UXDisplay, UAbstractDisplay)

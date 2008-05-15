@@ -35,6 +35,8 @@
 #define UFO_GL_LIB "libGL.so.1"
 #endif
 
+#include <cstdlib>
+
 ufo::UGL_Driver * ufo::ugl_driver = NULL;//new ufo::UGL_Driver("");
 
 ufo::UGL_Driver::UGL_Driver(const char * glPath) {
