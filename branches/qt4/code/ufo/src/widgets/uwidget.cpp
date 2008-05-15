@@ -69,6 +69,8 @@
 
 #include "ufo/umodel.hpp"
 
+#include <algorithm>
+
 using namespace ufo;
 
 class PaintNotifier
