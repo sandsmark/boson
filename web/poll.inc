@@ -42,8 +42,7 @@ function poll_show($id = -1)
 
   if($poll_disable)
   {
-    echo "Local developer mode.<br>
-    No database configured.";
+    echo "Currently no poll.";
     return;
   }
   
