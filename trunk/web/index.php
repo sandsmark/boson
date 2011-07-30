@@ -39,7 +39,7 @@ sidebar_begin();
   sidebar_download_box();
     sidebar_box_begin("Poll");
       $id = poll_last_id();
-      if($HTTP_COOKIE_VARS["voted-$id"] == "yes")
+      if($_COOKIE["voted-$id"] == "yes")
       {
         // User has already voted, show small version of results
         poll_results_small($id);
@@ -63,12 +63,14 @@ echo "<tr><td>Boson is an OpenGL real-time strategy game.
 draw_bigbox_end();
 
 // About
+/*
 draw_bigbox_begin("Help wanted!!!");
 echo "<tr><td>We are in need of additional team members, especially 3d designers.<br>
   If you think you can help, please
   <a href=\"mailto:boson-devel@__NO_SPAM__lists.sourceforge.net\">contact us</a>.<br>
   You can find a list of jobs <a href=\"/wiki/Main/Jobs\">in our wiki</a>.</td></tr>";
 draw_bigbox_end();
+ */
 
 /*// We need you!
 draw_bigbox_begin("We need you!");

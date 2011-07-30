@@ -4,5 +4,5 @@
     allow from localhost
 </Files>
 
-Redirect /wiki http://boson.freehackers.org/wiki/
+Redirect /wiki http://boson.freehackers.org/wiki
 

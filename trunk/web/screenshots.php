@@ -132,14 +132,14 @@ function add_screenshot($description, $date, $thumbfile, $bigfile)
 /*****  Functions  *****/
 
 // show
-if(array_key_exists("show", $HTTP_GET_VARS))
+if(array_key_exists("show", $_GET))
 {
-  $show_ss=$HTTP_GET_VARS["show"];
+  $show_ss=$_GET["show"];
 }
 // page
-if(array_key_exists("page", $HTTP_GET_VARS))
+if(array_key_exists("page", $_GET))
 {
-  $page=$HTTP_GET_VARS["page"];
+  $page=$_GET["page"];
 }
 
 /** Add screenshots here!

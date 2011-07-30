@@ -21,7 +21,7 @@
 
 
 $poll_inited = false;
-$poll_disable = false;
+$poll_disable = true;
 
 include_once("common.inc");
 
@@ -38,7 +38,7 @@ else
 function poll_show($id = -1)
 {
   global $poll_disable;
-  global $HTTP_COOKIE_VARS;
+  global $_COOKIE;
 
   if($poll_disable)
   {
