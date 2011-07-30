@@ -288,6 +288,8 @@ function counter2($page)
   }
 
   // Log unknown user agents to a file so we can improve browser/os detection code
+  // AB: currently not functional, so we disable this.
+  /*
   if($browser == "Unknown")
   {
     $file = fopen($basedir . "unknown_browser", "a");
@@ -300,6 +302,7 @@ function counter2($page)
     fputs($file, date("Y/m/d H:i:s")." : $REMOTE_ADDR : $_SERVER['HTTP_USER_AGENT']\n");
     fclose($file);
   }
+  */
 
   // Print some (all) stats
   /*echo "
