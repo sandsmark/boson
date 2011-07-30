@@ -49,7 +49,7 @@ You have been on this page <font class=\"countervalue\">$visitcount</font> times
 // New counter
 
 $counter2_inited = false;
-$counter2_disable = false;
+$counter2_disable = true;
 
 if(file_exists("${basedir}database.inc"))
 {
@@ -69,7 +69,7 @@ else
  **/
 function counter2($page)
 {
-  global $HTTP_USER_AGENT, $REMOTE_ADDR;
+  global $_SERVER, $REMOTE_ADDR;
   global $basedir;
 
   global $counter2_disable;
@@ -245,7 +245,7 @@ function counter2($page)
 
 
   // counter_browser
-  $browser = counter2_get_browser($HTTP_USER_AGENT);
+  $browser = counter2_get_browser($_SERVER['HTTP_USER_AGENT']);
   $browsercount = 0;
   $query = "SELECT * FROM counter_browser WHERE id = '$browser'";
   $result = mysql_query($query);
@@ -267,7 +267,7 @@ function counter2($page)
 
 
   // counter_os
-  $os = counter2_get_os($HTTP_USER_AGENT);
+  $os = counter2_get_os($_SERVER['HTTP_USER_AGENT']);
   $oscount = 0;
   $query = "SELECT * FROM counter_os WHERE id = '$os'";
   $result = mysql_query($query);
@@ -291,13 +291,13 @@ function counter2($page)
   if($browser == "Unknown")
   {
     $file = fopen($basedir . "unknown_browser", "a");
-    fputs($file, date("Y/m/d H:i:s")." : $REMOTE_ADDR : $HTTP_USER_AGENT\n");
+    fputs($file, date("Y/m/d H:i:s")." : $REMOTE_ADDR : $_SERVER['HTTP_USER_AGENT']\n");
     fclose($file);
   }
   if($os == "Unknown")
   {
     $file = fopen($basedir . "unknown_os", "a");
-    fputs($file, date("Y/m/d H:i:s")." : $REMOTE_ADDR : $HTTP_USER_AGENT\n");
+    fputs($file, date("Y/m/d H:i:s")." : $REMOTE_ADDR : $_SERVER['HTTP_USER_AGENT']\n");
     fclose($file);
   }
 

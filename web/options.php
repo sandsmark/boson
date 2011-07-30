@@ -43,10 +43,10 @@ echo "
 
 
 //$style;
-if($HTTP_GET_VARS["style"] != "")
+if($_GET["style"] != "")
 {
-  $change_style=$HTTP_GET_VARS["style"];
-  $HTTP_COOKIE_VARS["Style"] = $change_style;
+  $change_style=$_GET["style"];
+  $_COOKIE["Style"] = $change_style;
   setcookie("Style", $change_style, time() + 3600 * 24 * 365 * 25); // Expires after 25 years
 }
 

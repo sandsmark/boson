@@ -31,7 +31,7 @@ include_once("poll.inc");
 if($action == "vote" && $answer != "")
 {
   // Vote. This cannot be done later as it uses cookies
-  if($HTTP_COOKIE_VARS["voted-$id"] == "yes")
+  if($_COOKIE["voted-$id"] == "yes")
   {
     // User has already voted
     $votetext = "\nYou have already voted!<br>
@@ -109,7 +109,7 @@ main_area_begin();
   else
   {
     // show poll
-    if($HTTP_COOKIE_VARS["voted-$id"] == "yes")
+    if($_COOKIE["voted-$id"] == "yes")
     {
       // User has already voted, show results
       poll_results($id);
