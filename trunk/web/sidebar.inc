@@ -81,7 +81,6 @@ draw_link("Screenshots", "screenshots.php");
 draw_link("Download", "download.php");
 draw_link("Install", "install.php");
 draw_link("More information", "info.php");
-draw_link("Wiki", "wiki/");
 draw_extended_link("FAQ", "http://boson.halux2001.de/handbook/en/faq.html", "target=\"_blank\"");
 echo "<br>";
 draw_link("Announcements", "announcements.php");

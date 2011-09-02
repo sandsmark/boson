@@ -43,9 +43,8 @@ main_area_begin();
 // Contacts
 draw_bigbox_begin("Status");
 draw_bigbox_text("
-You can find the current status, that is changes in recent SVN as well as
-changelogs from previous versions, in our <a
-href=\"http://boson.sf.net/wiki/Main/ChangeLog\">wiki</a>");
+Inactive, project is no longer maintained.
+");
 
 draw_bigbox_end();
 main_area_end();
