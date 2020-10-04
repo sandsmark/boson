@@ -14,4 +14,5 @@ set(math_SRCS
 )
 
 boson_add_library(bomath STATIC ${math_SRCS})
+target_link_libraries(bomath Qt5::Core)
 

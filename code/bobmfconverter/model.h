@@ -25,7 +25,7 @@
 
 #include <qstring.h>
 #include <qvaluevector.h>
-#include <qdict.h>
+#include <QHash>
 
 class LOD;
 class Material;
@@ -93,8 +93,8 @@ class Model
      **/
     Texture* getTexture(const QString& filename);
     void addTexture(Texture* t);
-    QDict<Texture>* texturesDict()  { return &mTextures; }
-    void setTextures(const QDict<Texture>& textures);
+    QHash<QString, Texture>* texturesDict()  { return &mTextures; }
+    void setTextures(const QHash<QString, Texture>& textures);
     bool loadTextures();
 
 
@@ -139,7 +139,7 @@ class Model
   private:
     QValueVector<LOD*> mLODs;
     QValueVector<Material*> mMaterials;
-    QDict<Texture> mTextures;
+    QHash<QString, Texture> mTextures;
 
     QString mName;
     QString mComment;

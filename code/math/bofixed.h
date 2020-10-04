@@ -27,6 +27,17 @@
 #include <math.h>
 
 #include <qglobal.h> // Q_INT32, ...
+typedef qint64 Q_INT64;
+typedef qint32 Q_INT32;
+typedef quint32 Q_UINT32;
+typedef qint16 Q_INT16;
+typedef quint16 Q_UINT16;
+typedef qint8 Q_INT8;
+typedef quint8 Q_UINT8;
+typedef long Q_LONG;
+typedef ulong Q_ULONG;
+
+#define QMAX qMax<double>
 
 // Define this when you want bofixed to use normal floats (so that essentially
 //  bofixed = float)

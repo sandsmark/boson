@@ -27,7 +27,7 @@
 #include <bogl.h>
 
 #include <qptrlist.h>
-#include <qdict.h>
+#include <QMap>
 
 #include <kconfig.h>
 #include <kapplication.h>
@@ -608,12 +608,11 @@ class BosonConfig::BosonConfigPrivate
 {
 public:
 	BosonConfigPrivate()
-		: mDynamicEntries(QDict<BoConfigEntry>(101))
 	{
 	}
 
 	QPtrList<BoConfigEntry> mConfigEntries;
-	QDict<BoConfigEntry> mDynamicEntries; // added dynamically.
+	QMap<BoConfigEntry> mDynamicEntries; // added dynamically.
 	QPtrList<BosonConfigScript> mConfigScripts;
 };
 

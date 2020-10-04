@@ -40,16 +40,17 @@
 #include <qvaluelist.h>
 #include <qpair.h>
 #include <qregexp.h>
+#include <QSettings>
 
-#include <kinstance.h>
-#include <ksimpleconfig.h>
+//#include <kinstance.h>
+//#include <ksimpleconfig.h>
 
 
 bool processCommandLine(int argc, char** argv);
 bool checkConfig();
 bool loadConfigFile(Model* m);
 bool doModelProcessing(Model* m);
-bool executeProcessors(Model* model, const QPtrList<Processor>& list);
+bool executeProcessors(Model* model, const QVector<Processor*>& list);
 
 // Global variables - used for configuration
 QString g_inFileName;
@@ -103,8 +104,8 @@ int main(int argc, char** argv)
 {
   initdbgtime();
 
-  boDebug() << "Creating KInstance object..." << endl;
-  KInstance instance("bobmfconverter");
+//  boDebug() << "Creating KInstance object..." << endl;
+//  KInstance instance("bobmfconverter");
 
   // Parse cmdline
   boDebug() << "Processing cmdline..." << endl;
@@ -186,7 +187,7 @@ int main(int argc, char** argv)
     i++; \
     if(i >= argc) \
     { \
-      boError() << k_funcinfo << "No value found for argument " << arg << endl; \
+      boError() << k_funcinfo << "No value found for argument " << arg.toStdString() << endl; \
       return false; \
     } \
     arg = argv[i];
@@ -196,7 +197,7 @@ bool processCommandLine(int argc, char** argv)
   for(int i = 1; i < argc; i++)
   {
     QString arg = QString(argv[i]);
-    QString larg = arg.lower();
+    QString larg = arg.toLower();
 
     if(larg == "-h" || larg == "-help" || larg == "--help")
     {
@@ -230,7 +231,7 @@ bool processCommandLine(int argc, char** argv)
       usage += "  -dontmergemeshes   Will not try to merge model's meshes\n";
       usage += "  -resetmaterials    Resets all model's materials to a default one\n";
       //usage += "  \n";
-      cout << usage;
+      cout << usage.toStdString();
       return false;
     }
     else if(larg == "--version" || larg == "-v")
@@ -368,7 +369,7 @@ bool processCommandLine(int argc, char** argv)
     {
       if(arg[0] == '-')
       {
-        boError() << "Unrecognized argument " << arg << endl;
+        boError() << "Unrecognized argument " << arg.toStdString() << endl;
         return false;
       }
 
@@ -390,12 +391,12 @@ bool checkConfig()
   QFileInfo inFileinfo(g_inFileName);
   if(!inFileinfo.exists())
   {
-    boError() << "Input file '" << g_inFileName << "' doesn't exist!" << endl;
+    boError() << "Input file '" << g_inFileName.toStdString() << "' doesn't exist!" << endl;
     return false;
   }
   else if(!inFileinfo.isReadable())
   {
-    boError() << "Input file '" << g_inFileName << "' isn't readable!" << endl;
+    boError() << "Input file '" << g_inFileName.toStdString() << "' isn't readable!" << endl;
     return false;
   }
 
@@ -403,7 +404,7 @@ bool checkConfig()
   if(g_outFileName.isEmpty())
   {
     // Create output filename by replacing input file's extension with '.bmf'
-    int i = g_inFileName.findRev('.');
+    int i = g_inFileName.lastIndexOf('.');
     if(i == -1)
     {
       // Filename didn't have '.' in it. Just append '.bmf'
@@ -420,7 +421,7 @@ bool checkConfig()
   {
     // Create output texture filename by replacing input file's extension with
     //  '.jpg'
-    int i = g_inFileName.findRev('.');
+    int i = g_inFileName.lastIndexOf('.');
     if(i == -1)
     {
       // Filename didn't have '.' in it. Just append '.jpg'
@@ -438,15 +439,15 @@ bool checkConfig()
     QFileInfo configFileInfo(g_configFileName);
     if(!configFileInfo.exists())
     {
-      boError() << "Config file '" << g_configFileName << "' doesn't exist!" << endl;
+      boError() << "Config file '" << g_configFileName.toStdString() << "' doesn't exist!" << endl;
       return false;
     }
     else if(!configFileInfo.isReadable())
     {
-      boError() << "Config file '" << g_configFileName << "' isn't readable!" << endl;
+      boError() << "Config file '" << g_configFileName.toStdString() << "' isn't readable!" << endl;
       return false;
     }
-    g_configFileName = configFileInfo.absFilePath();
+    g_configFileName = configFileInfo.absoluteFilePath();
   }
 
   return true;
@@ -459,37 +460,40 @@ bool loadConfigFile(Model* m)
     return true;
   }
 
-  KSimpleConfig cfg(g_configFileName, true);
+  //KSimpleConfig cfg(g_configFileName, true);
 
   // Load model size
-  cfg.setGroup("Boson Unit");
-  g_modelSize = (float)cfg.readDoubleNumEntry("UnitWidth", g_modelSize);
+  QSettings cfg(g_configFileName);
+  cfg.beginGroup("Boson Unit");
+  g_modelSize = (float)cfg.value("UnitWidth", g_modelSize).toFloat();
+  cfg.endGroup();
 
   // Load entries from "Model" config group.
   // Note that size entry here takes preference over the one in "Boson Unit"
   //  group.
-  cfg.setGroup("Model");
-  g_modelSize = (float)cfg.readDoubleNumEntry("Size", g_modelSize);
-  g_meshes_merge = cfg.readBoolEntry("MergeMeshes", g_meshes_merge);
-  g_usenormalcalculator = cfg.readBoolEntry("UseNormalCalculator", g_usenormalcalculator);
-  g_normalcalculator_threshold = (float)cfg.readDoubleNumEntry("NormalCalculatorThreshold", g_normalcalculator_threshold);
-  g_frames_keepCount = cfg.readNumEntry("KeepFramesCount", g_frames_keepCount);
-  g_numLods = cfg.readNumEntry("LODs", g_numLods);
+  cfg.beginGroup("Model");
+  g_modelSize = (float)cfg.value("Size", g_modelSize).toFloat();
+  g_meshes_merge = cfg.value("MergeMeshes", g_meshes_merge).toBool();
+  g_usenormalcalculator = cfg.value("UseNormalCalculator", g_usenormalcalculator).toBool();
+  g_normalcalculator_threshold = (float)cfg.value("NormalCalculatorThreshold", g_normalcalculator_threshold).toFloat();
+  g_frames_keepCount = cfg.value("KeepFramesCount", g_frames_keepCount).toInt();
+  g_numLods = cfg.value("LODs", g_numLods).toInt();
 
   if(g_frames_keepCount == -1)
   {
     g_frames_keepCount = 1;
-    QMap<QString, QString> entries = cfg.entryMap("Model");
+    QMap<QString, QString> entries = cfg.value("Model").value<QMap<QString, QString> >();
     QRegExp animationend("Animation-[A-Za-z]+-End");
     for(QMap<QString, QString>::Iterator it = entries.begin(); it != entries.end(); ++it)
     {
       if(animationend.exactMatch(it.key()))
       {
-        g_frames_keepCount = QMAX(g_frames_keepCount, cfg.readNumEntry(it.key(), 0)+1);
+        g_frames_keepCount = qMax(g_frames_keepCount, cfg.value(it.key(), 0).toInt()+1);
       }
     }
     boDebug() << k_funcinfo << "Automatically set number of kept frames to " << g_frames_keepCount << endl;
   }
+  cfg.endGroup();
 
   return true;
 }
@@ -502,7 +506,7 @@ void saveLod(Model* m, unsigned int i)
 {
   LOD* l = m->lod(i);
 
-  ofstream out(QString("%1-%2.obj").arg(g_outFileName).arg(i));
+  ofstream out(QString("%1-%2.obj").arg(g_outFileName).arg(i).toStdString());
 
   QString vertexStr;
   QString faceStr;
@@ -525,8 +529,8 @@ void saveLod(Model* m, unsigned int i)
     vertexOffset += mesh->vertexCount();
   }
 
-  out << vertexStr.latin1();
-  out << faceStr.latin1();
+  out << vertexStr.toStdString();
+  out << faceStr.toStdString();
 
   out.close();
 }
@@ -536,7 +540,7 @@ void saveLodFrame(Model* m, unsigned int lodi, unsigned int framei)
   LOD* l = m->lod(lodi);
   Frame* f = l->frame(framei);
 
-  ofstream out(QString("%1-%2-%3.obj").arg(g_outFileName).arg(lodi).arg(framei));
+  ofstream out(QString("%1-%2-%3.obj").arg(g_outFileName).arg(lodi).arg(framei).toStdString());
 
   QString vertexStr;
   QString faceStr;
@@ -563,8 +567,8 @@ void saveLodFrame(Model* m, unsigned int lodi, unsigned int framei)
     vertexOffset += mesh->vertexCount();
   }
 
-  out << vertexStr.latin1();
-  out << faceStr.latin1();
+  out << vertexStr.toStdString();
+  out << faceStr.toStdString();
 
   out.close();
 }
@@ -583,7 +587,7 @@ void saveLodFrameAC(Model* m, unsigned int lodi, unsigned int framei)
   for(unsigned int i = 0; i < m->materialCount(); i++)
   {
     Material* mat = m->material(i);
-    out << "MATERIAL \"" << mat->name().latin1() << "\"  ";
+    out << "MATERIAL \"" << mat->name().toLatin1() << "\"  ";
     out << "rgb " << mat->diffuse().x() << " " << mat->diffuse().y() << " " << mat->diffuse().z() << "  ";
     out << "amb " << mat->ambient().x() << " " << mat->ambient().y() << " " << mat->ambient().z() << "  ";
     out << "emis " << mat->emissive().x() << " " << mat->emissive().y() << " " << mat->emissive().z() << "  ";
@@ -602,10 +606,10 @@ void saveLodFrameAC(Model* m, unsigned int lodi, unsigned int framei)
 
     // Object header
     out << "OBJECT poly" << endl;
-    out << "name \"" << mesh->name().latin1() << "\"" << endl;
+    out << "name \"" << mesh->name().toLatin1() << "\"" << endl;
     if(mesh->material() && mesh->material()->texture())
     {
-      out << "texture \"" << mesh->material()->texture()->filename().latin1() << "\"" << endl;
+      out << "texture \"" << mesh->material()->texture()->filename().toLatin1() << "\"" << endl;
     }
 
     // Save _tranformed_ vertices
@@ -655,10 +659,10 @@ bool doModelProcessing(Model* m)
   if(g_tex_convertToLowerCase)
   {
     // Convert texture names to lowercase
-    QDictIterator<Texture> it(*m->texturesDict());
+    QHashIterator<QString, Texture> it(*m->texturesDict());
     while(it.current())
     {
-      it.current()->setFilename(it.current()->filename().lower());
+      it.current()->setFilename(it.current()->filename().toLower());
       ++it;
     }
   }
@@ -672,8 +676,7 @@ bool doModelProcessing(Model* m)
     return false;
   }
 
-  QPtrList<Processor> processorList;
-  processorList.setAutoDelete(true);
+  QVector<Processor*> processorList;
 
   processorList.append(new DefaultMaterials);
   processorList.append(new UnusedDataRemover);
@@ -720,7 +723,7 @@ bool doModelProcessing(Model* m)
   {
     return false;
   }
-  processorList.setAutoDelete(true);
+  qDeleteAll(processorList);
   processorList.clear();
 
 
@@ -770,7 +773,7 @@ bool doModelProcessing(Model* m)
 }
 
 
-bool executeProcessors(Model* model, const QPtrList<Processor>& list)
+bool executeProcessors(Model* model, const QList<Processor*>& list)
 {
   if(!model)
   {

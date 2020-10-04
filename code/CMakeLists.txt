@@ -8,6 +8,7 @@ if(insource)
   MESSAGE(FATAL_ERROR "boson requires an out of source build. Please create a separate build directory and run 'cmake path_to_boson [options]' there.")
 endif(insource)
 
+set (CMAKE_CXX_STANDARD 11)
 
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
 #set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules" "${CMAKE_SOURCE_DIR}/cmake/modules/boson")
@@ -154,7 +155,7 @@ add_dependencies(messages messages-recreate-boson_pot)
 add_subdirectory( lib3ds )
 add_subdirectory( bomemory )
 add_subdirectory( math )
-add_subdirectory( bobmfconverter )
+#add_subdirectory( bobmfconverter ) # fuckings STL infested crap
 add_subdirectory( bodebug )
 add_subdirectory( bogl )
 add_subdirectory( kgame )
