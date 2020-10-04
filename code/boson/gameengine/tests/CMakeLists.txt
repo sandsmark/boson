@@ -5,7 +5,6 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/boson
 	${CMAKE_SOURCE_DIR}/boson/gameengine
 	${CMAKE_SOURCE_DIR}/boufo
-	${QT_INCLUDE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
 )
 
@@ -20,7 +19,6 @@ set(tests_SRCS
 	unittests/constructiontest.cpp
 	unittests/productiontest.cpp
 )
-kde3_automoc(${tests_SRCS})
 
 boson_add_executable(tests ${tests_SRCS})
 boson_target_link_libraries(tests

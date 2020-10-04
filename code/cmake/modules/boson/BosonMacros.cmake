@@ -304,11 +304,11 @@ ENDMACRO(BOSON_MAKE_MESSAGES_POT)
 
 
 MACRO(BOSON_ADD_LIBRARY target)
-   kde4_add_library(${target} ${ARGN})
+   add_library(${target} ${ARGN})
 ENDMACRO(BOSON_ADD_LIBRARY)
 
 MACRO(BOSON_ADD_EXECUTABLE target)
-   kde4_add_executable(${target} ${ARGN})
+   add_executable(${target} ${ARGN})
 
    BOSON_MAKE_MESSAGES_POT(${target} ${ARGN})
 ENDMACRO(BOSON_ADD_EXECUTABLE)

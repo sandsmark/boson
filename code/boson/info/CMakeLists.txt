@@ -1,7 +1,6 @@
 include_directories(
 	${CMAKE_SOURCE_DIR}/bodebug
 	${CMAKE_SOURCE_DIR}/bogl
-	${QT_INCLUDE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
 )
 
@@ -15,8 +14,6 @@ set(info_SRCS
 	boinfodialog.cpp
 	boglquerystates.cpp
 )
-
-kde3_automoc(${info_SRCS})
 
 boson_add_library(bosoninfo STATIC ${info_SRCS})
 

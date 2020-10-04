@@ -1,6 +1,6 @@
 project(boson)
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.4.2)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.14)
 
 # Disallow in-source build
 STRING(COMPARE EQUAL "${boson_SOURCE_DIR}" "${boson_BINARY_DIR}" insource)
@@ -88,7 +88,7 @@ endif(BOGL_DO_DLOPEN)
 # AB: FindKDE3.cmake adds compiler flags, but we don't want this.
 set(orig_c_flags ${CMAKE_C_FLAGS})
 set(orig_cxx_flags ${CMAKE_CXX_FLAGS})
-find_package(Qt3 REQUIRED)
+find_package(Qt5 REQUIRED Widgets)
 find_package(BosonKDE3 REQUIRED)
 find_package(Perl REQUIRED)
 set(CMAKE_C_FLAGS ${orig_c_flags})
@@ -96,8 +96,8 @@ set(CMAKE_CXX_FLAGS ${orig_cxx_flags})
 
 # cmake <= 2.4.2 sometimes catch moc/uic from qt4. make sure that has not
 # happened to us.
-include(CheckQt3Executables)
-check_qt3_executables()
+#include(CheckQt3Executables)
+#check_qt3_executables()
 
 # packages required by boson
 # note: we may have more deeper in the directory structure (e.g. python in
@@ -125,7 +125,6 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/kgame
   ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
   ${KDE3_INCLUDE_DIR}
-  ${QT_INCLUDE_DIR}
 )
 
 

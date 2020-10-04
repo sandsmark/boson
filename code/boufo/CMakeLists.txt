@@ -8,7 +8,6 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/bodebug
   ${CMAKE_SOURCE_DIR}/bogl
   ${CMAKE_SOURCE_DIR}/ufo/include
-  ${QT_INCLUDE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
 )
 
@@ -64,7 +63,6 @@ set(boufo_SRCS
 	${bosonfont_SRCS}
 )
 
-kde3_automoc(${boufo_SRCS})
 
 boson_add_library(boufo STATIC ${boufo_SRCS})
 

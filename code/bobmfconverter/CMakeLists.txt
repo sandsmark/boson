@@ -3,7 +3,6 @@ project(bobmfconverter)
 add_subdirectory(libgfx)
 
 include_directories(
-	${QT_INCLUDE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/mixkit
 	${CMAKE_CURRENT_SOURCE_DIR}/libgfx
 	${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
@@ -95,10 +94,10 @@ set(bobmfconverter_SRCS
 	${libmixkit_SRCS}
 )
 
-kde3_automoc(${bobmfconverter_SRCS})
 
 boson_add_executable(bobmfconverter ${bobmfconverter_SRCS})
 boson_target_link_libraries(bobmfconverter
+    Qt5::Widgets
 	${QT_AND_KDECORE_LIBS}
 	${LIB3DS_LIBRARY}
 )

@@ -20,7 +20,6 @@ endif (NOT OPENAL_FOUND)
 
 include_directories(
 	${CMAKE_SOURCE_DIR}/bodebug
-	${QT_INCLUDE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
 )
 
@@ -32,8 +31,6 @@ set(bosonsound_sources
 	boaudiothread.cpp
 	bosonaudio.cpp
 )
-kde3_automoc(${bosonsoundcommon_sources})
-kde3_automoc(${bosonsound_sources})
 
 
 boson_add_library(bosonsoundcommon STATIC ${bosonsoundcommon_sources})

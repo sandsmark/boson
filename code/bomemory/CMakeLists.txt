@@ -2,7 +2,6 @@ project(bomemory)
 
 include_directories(
 	${CMAKE_SOURCE_DIR}/bodebug
-	${QT_INCLUDE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
 )
 
@@ -16,6 +15,7 @@ set(bomemory_SRCS
 
 if(BOSON_USE_BOMEMORY)
   boson_add_library(bomemory STATIC ${bomemory_SRCS})
+  target_link_library(bomemory Qt5::Widgets)
   set(LIB_BOMEMORY bomemory)
 else(BOSON_USE_BOMEMORY)
   set(LIB_BOMEMORY "")

@@ -11,7 +11,6 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config-bodebug.h.cmake ${CMAKE_CURREN
 add_subdirectory(bodebugdialog)
 
 include_directories(
-	${QT_INCLUDE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
 )
 
@@ -24,10 +23,9 @@ set(bodebug_sources
 set(bodebug_DCOP_SKEL_SOURCES
 	bodebugdcopiface.h
 )
-kde3_add_dcop_skels(bodebug_sources ${bodebug_DCOP_SKEL_SOURCES})
-
-kde3_automoc( ${bodebug_sources} )
+#kde3_add_dcop_skels(bodebug_sources ${bodebug_DCOP_SKEL_SOURCES})
 
 boson_add_library(bodebug STATIC ${bodebug_sources})
+target_link_libraries(bodebug Qt5::Widgets)
 
 

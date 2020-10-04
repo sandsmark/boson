@@ -10,10 +10,8 @@ set(boglc_SRCS
 	boglc.cpp
 )
 
-find_package(Qt3 REQUIRED)
+find_package(Qt5 REQUIRED COMPONENTS GUI)
 include_directories(${QT_INCLUDE_DIR})
-
-#kde3_automoc(${boglc_SRCS})
 
 add_executable(boglc ${boglc_SRCS})
 target_link_libraries(boglc

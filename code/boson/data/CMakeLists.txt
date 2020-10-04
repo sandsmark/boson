@@ -6,6 +6,6 @@ install_files(${KDE3_CONFIG_INSTALL_DIR} FILES
 	bodebug.areas
 )
 
-kde3_install_icons(hicolor)
+#kde3_install_icons(hicolor)
 #kde3_install_icons(locolor)
 

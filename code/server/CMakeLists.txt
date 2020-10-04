@@ -2,7 +2,6 @@ project(boserver)
 
 include_directories(
 	${CMAKE_SOURCE_DIR}/bodebug
-	${QT_INCLUDE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
 )
 
@@ -14,7 +13,6 @@ set(boserver_SRCS
 	player.cpp
 )
 
-kde3_automoc(${boserver_SRCS})
 
 boson_add_executable(boserver ${boserver_SRCS})
 boson_target_link_libraries(boserver
